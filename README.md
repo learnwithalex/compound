@@ -1,6 +1,6 @@
 # Compound — Revenue OS for indie hackers
 
-One dashboard for every product you've built. Connect all your Stripe and Lemon Squeezy accounts, see total MRR across your whole portfolio, and get an AI briefing that explains exactly why the numbers moved.
+One dashboard for every product you've built. Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack accounts, see total MRR across your whole portfolio, and get an AI briefing that explains exactly why the numbers moved.
 
 **Built for [The Build Games](https://canivibecodeit.com/thebuildgames) — Best Replacement track.**  
 Replacing: Baremetrics ($108/mo), ChartMogul ($100+/mo), MultiMMR ($19/mo, Stripe-only).
@@ -15,9 +15,13 @@ The demo loads with three pre-connected products and 31 days of realistic MRR hi
 ## What it does
 
 - **Portfolio view** — total MRR + ARR across every connected product in one number
-- **Per-product cards** — MRR, active subs, 30-day trend, new vs churned, sparkline
+- **Shareable MRR card** — 4 themes, MRR/ARR/subs toggle, per-product filters, copy-link to share
+- **Churn radar** — automatic red/amber signals: down-streaks, churn outpacing growth, 30d slides
+- **Milestones** — progress bars toward the next MRR target per product ($100 → $1M ladder)
+- **Per-product cards** — MRR, active subs, 30-day trend, smooth sparklines with gridlines
 - **AI analysis** — one button → Claude writes a CFO-style briefing: what's working, what needs attention, one specific action
-- **Multi-source** — Stripe and Lemon Squeezy (more coming)
+- **Agent API** — bearer tokens so Claude/Cursor/scripts can fetch the portfolio over HTTP
+- **5 providers** — Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack
 - **Daily snapshots** — MRR captured every day so you can see exactly when things moved
 - **Free** — no paywalls, no 14-day trials
 
@@ -30,14 +34,14 @@ If you have more than one product, every analytics tool fails you:
 | Baremetrics | $108/mo | ❌ one business | ❌ |
 | ChartMogul | $100+/mo | ❌ one business | ❌ |
 | MultiMMR | $19/mo | ⚠️ Stripe only | ❌ |
-| **Compound** | **Free** | **✅ Stripe + LS** | **✅ Claude** |
+| **Compound** | **Free** | **✅ 5 providers** | **✅ Claude** |
 
 ## Stack
 
 - **Next.js 16** (App Router, React 19)
 - **Drizzle ORM + PostgreSQL** — daily snapshot model
 - **Anthropic Claude Haiku** — AI portfolio analysis
-- **Stripe API + Lemon Squeezy API** — live subscription data
+- **Stripe + Lemon Squeezy + Polar + DodoPayments + Paystack APIs** — live subscription data
 - **Orizon** — hosting + managed DB
 
 ## Self-host in 5 minutes
@@ -72,7 +76,7 @@ DEMO_LOGIN_ENABLED=true   # optional, enables /api/auth/demo shortcut
 ## How it works
 
 ```
-User connects Stripe/LS account (API key, read-only)
+User connects payment account (API key, read-only)
         ↓
 POST /api/connections — validates key, stores it
         ↓
