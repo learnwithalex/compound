@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { userIdFromSession } from "@/lib/auth";
-import { SidebarNav } from "./sidebar-nav";
+import { TopNav } from "./top-nav";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const userId = await userIdFromSession();
   if (!userId) redirect("/login");
 
   return (
-    <div className="app-shell flex h-screen overflow-hidden">
-      <SidebarNav />
-      <main className="flex-1 overflow-y-auto min-w-0">{children}</main>
+    <div className="app-shell flex min-h-screen flex-col">
+      <TopNav />
+      <main className="mx-auto w-full max-w-[1080px] flex-1 px-6">{children}</main>
     </div>
   );
 }

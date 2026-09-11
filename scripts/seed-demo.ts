@@ -1,5 +1,5 @@
 /**
- * Seed demo data: one user + 3 products (TypingMind-scale, DevUtils-scale, X Napper-scale)
+ * Seed demo data: one user + 3 products (Event Organizer-scale, BetterFlow-scale, Obsidian-scale)
  * with 31 days of realistic MRR snapshots.
  *
  * Usage: npx tsx scripts/seed-demo.ts [email]
@@ -41,31 +41,31 @@ const PRODUCTS: {
   apiKey: string;        // fake key for demo
 }[] = [
   {
-    label: "TypingMind",
+    label: "Event Organizer",
     provider: "stripe",
     color: "#5e6ad2",
     baseMrrCents: 12_980_000,  // ~$129.8k
     growthPct: 5.1,
     activeSubs: 2104,
-    apiKey: "sk_demo_typingmind",
+    apiKey: "sk_demo_event_organizer",
   },
   {
-    label: "DevUtils",
+    label: "BetterFlow",
     provider: "stripe",
     color: "#e8a838",
     baseMrrCents: 840_000,  // ~$8.4k
     growthPct: 18.3,
     activeSubs: 680,
-    apiKey: "sk_demo_devutils",
+    apiKey: "sk_demo_betterflow",
   },
   {
-    label: "X Napper",
+    label: "Obsidian Sync Free",
     provider: "lemonsqueezy",
     color: "#e54d2e",
     baseMrrCents: 230_000,  // ~$2.3k
     growthPct: -4.1,
     activeSubs: 63,
-    apiKey: "lsq_demo_xnapper",
+    apiKey: "lsq_demo_obsidian_sync",
   },
 ];
 

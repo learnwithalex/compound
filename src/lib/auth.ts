@@ -1,7 +1,40 @@
 import { db } from "@/db";
-import { users, sessions, magicLinks } from "@/db/schema";
+import { users, sessions, magicLinks, apiTokens } from "@/db/schema";
 import { eq, and, gt, isNull } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { createHash } from "crypto";
+
+export function hashApiToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+export function newApiToken(): { token: string; prefix: string } {
+  const token = "cmp_" + crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+  return { token, prefix: token.slice(0, 10) };
+}
+
+// Resolve a Bearer token (Authorization: Bearer cmp_...) to a user id.
+// Returns null for missing, unknown, or revoked tokens.
+export async function userIdFromApiToken(req: Request): Promise<string | null> {
+  const header = req.headers.get("authorization");
+  if (!header || !header.startsWith("Bearer ")) return null;
+  const token = header.slice(7).trim();
+  if (!token.startsWith("cmp_")) return null;
+  const row = await db.query.apiTokens.findFirst({
+    where: (t, { eq, and, isNull }) => and(eq(t.tokenHash, hashApiToken(token)), isNull(t.revokedAt)),
+  });
+  if (!row) return null;
+  await db.update(apiTokens).set({ lastUsedAt: new Date() }).where(eq(apiTokens.id, row.id));
+  return row.userId;
+}
+
+// Either session cookie (browser) or Bearer token (agent). Browser first.
+export async function userIdFromSessionOrToken(req?: Request): Promise<string | null> {
+  const fromSession = await userIdFromSession();
+  if (fromSession) return fromSession;
+  if (req) return userIdFromApiToken(req);
+  return null;
+}
 
 export function appUrl() {
   const configured = process.env.APP_URL?.trim();

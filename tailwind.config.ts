@@ -5,21 +5,21 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["var(--font-dm-sans)", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       colors: {
         lx: {
-          bg: "#111116",
-          sidebar: "#14141a",
-          surface: "#1c1c22",
-          border: "#2a2a32",
-          text: "#e2e2e9",
-          muted: "#8a8a99",
-          faint: "#4a4a5a",
+          bg: "#f3f1ec",
+          sidebar: "#f7f5f1",
+          surface: "#ffffff",
+          border: "#ddd9d0",
+          text: "#1a1a1a",
+          muted: "#5c5856",
+          faint: "#9c9894",
           purple: "#5e6ad2",
           amber: "#f2b030",
-          green: "#26c16b",
+          green: "#10b981",
           red: "#e3493c",
         },
         ink: "#14171a",

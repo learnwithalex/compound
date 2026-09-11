@@ -47,6 +47,19 @@ export const snapshots = pgTable("snapshots", {
   uniqueIndex("snapshots_conn_date_idx").on(t.connectionId, t.date),
 ]);
 
+// Long-lived API tokens so agents (Claude, Cursor, custom scripts) can
+// query the portfolio programmatically. Only a sha256 hash is stored.
+export const apiTokens = pgTable("api_tokens", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull().default("agent"),
+  tokenHash: text("token_hash").notNull().unique(),
+  tokenPrefix: text("token_prefix").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastUsedAt: timestamp("last_used_at"),
+  revokedAt: timestamp("revoked_at"),
+});
+
 // Individual subscription events for AI analysis context
 export const revenueEvents = pgTable("revenue_events", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),

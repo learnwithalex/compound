@@ -1,28 +1,57 @@
 import { redirect } from "next/navigation";
+import { db } from "@/db";
 import { userIdFromSession } from "@/lib/auth";
-import { portfolioMetrics, fmtMrr, fmtDollars } from "@/lib/metrics";
+import { portfolioMetrics, fmtMrr, type ProductMetrics } from "@/lib/metrics";
+import { productIcon } from "@/lib/format";
 import { AnalyzeButton } from "./analyze-button";
 import { MiniChart } from "./mini-chart";
+import { ShareCard } from "./share-card";
+import { ChurnRadar, Milestones } from "./insights";
+import { radarSignals } from "@/lib/insights";
+
+function greeting(email: string): { hello: string; name: string } {
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const raw = email.split("@")[0].replace(/[._-]+/g, " ").trim();
+  const name = raw
+    ? raw.split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    : "there";
+  return { hello, name };
+}
 
 export default async function AppPage() {
   const userId = await userIdFromSession();
   if (!userId) redirect("/login");
 
+  const user = await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, userId) });
+  const { hello, name } = greeting(user?.email ?? "");
+
   const metrics = await portfolioMetrics(userId);
   const hasData = metrics.products.length > 0;
+  const ranked = [...metrics.products].sort((a, b) => b.mrrCents - a.mrrCents);
 
-  const netNewSign = metrics.netNewMrrCents >= 0 ? "+" : "-";
-  const netNewColor = metrics.netNewMrrCents >= 0 ? "text-lx-green" : "text-lx-red";
+  // Aggregate portfolio history across products by date
+  const byDate = new Map<string, number>();
+  for (const p of metrics.products) {
+    for (const h of p.history) byDate.set(h.date, (byDate.get(h.date) ?? 0) + h.mrrCents);
+  }
+  const portfolioHistory = [...byDate.entries()]
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .map(([, v]) => v);
 
   return (
-    <div className="px-6 py-5">
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <div className="text-[11px] font-medium uppercase tracking-widest text-lx-faint">Overview</div>
-          <h1 className="mt-1 text-[20px] font-semibold tracking-tight text-lx-text">
-            Your portfolio
+    <div className="py-10">
+      {/* Welcome */}
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 text-center sm:text-left">
+        <div className="mx-auto sm:mx-0">
+          <h1 className="text-[26px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+            {hello}, {name}.
           </h1>
+          <p className="mt-1 text-[14px] text-lx-muted">
+            {hasData
+              ? `Here's your portfolio across ${ranked.length} product${ranked.length === 1 ? "" : "s"}.`
+              : "Let's get your first product connected."}
+          </p>
         </div>
         {hasData && <AnalyzeButton />}
       </div>
@@ -31,50 +60,48 @@ export default async function AppPage() {
         <EmptyState />
       ) : (
         <>
-          {/* Top metrics */}
-          <div className="mb-6 grid grid-cols-4 divide-x divide-lx-border overflow-hidden rounded-md border border-lx-border" style={{ background: "#1c1c22" }}>
-            <Metric label="Total MRR" value={fmtMrr(metrics.totalMrrCents)} color="text-lx-text" />
-            <Metric label="ARR" value={fmtMrr(metrics.totalArrCents)} color="text-lx-muted" />
-            <Metric label="Net new MRR (30d)" value={`${netNewSign}${fmtMrr(Math.abs(metrics.netNewMrrCents))}`} color={netNewColor} />
-            <Metric label="Active subs" value={String(metrics.totalActiveSubscriptions)} color="text-lx-text" />
+          {/* Shareable MRR card */}
+          <ShareCard metrics={metrics} />
+
+          {/* Churn radar */}
+          <ChurnRadar signals={radarSignals(ranked)} />
+
+          {/* Portfolio trend */}
+          <section className="mb-10 rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
+            <div className="mb-4 flex items-baseline justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">
+                Portfolio · last 30 days
+              </p>
+              {portfolioHistory.length > 1 && <TrendDelta data={portfolioHistory} />}
+            </div>
+            {portfolioHistory.length > 1 ? (
+              <AreaChart data={portfolioHistory} stroke="#5e6ad2" fill="#5e6ad2" id="portfolio" height={190} />
+            ) : (
+              <div className="flex h-[190px] items-center justify-center rounded-lg text-[13px] text-lx-faint" style={{ background: "#f7f5f1" }}>
+                Sync daily to build your trend
+              </div>
+            )}
+          </section>
+
+          {/* Products */}
+          <div className="mb-4 flex items-baseline justify-between">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">
+              Products · {ranked.length}
+            </p>
+            <a href="/app/connect" className="text-[12px] font-medium text-lx-purple hover:opacity-80">
+              + Add product
+            </a>
           </div>
 
-          {/* Product cards */}
-          <div className="mb-4 text-[11px] font-medium uppercase tracking-widest text-lx-faint">Products</div>
-          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
-            {metrics.products.map((p) => {
-              const change = p.mrrChange30d;
-              const changeColor = change > 0 ? "text-lx-green" : change < 0 ? "text-lx-red" : "text-lx-faint";
-              const changeLabel = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
-              return (
-                <div key={p.connectionId} className="rounded-md border border-lx-border p-4" style={{ background: "#1c1c22" }}>
-                  <div className="mb-3 flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                    <span className="text-[13px] font-semibold text-lx-text">{p.label}</span>
-                    <span className="ml-auto rounded px-1.5 py-0.5 text-[10px] font-medium text-lx-faint" style={{ background: "rgba(255,255,255,0.05)" }}>
-                      {p.provider}
-                    </span>
-                  </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {ranked.map((p, i) => (
+              <ProductCard key={p.connectionId} product={p} rank={i + 1} />
+            ))}
+          </div>
 
-                  <div className="mb-1 text-[22px] font-semibold tabular-nums text-lx-text">
-                    {fmtMrr(p.mrrCents)}
-                    <span className="ml-1 text-[12px] font-normal text-lx-faint">/ mo</span>
-                  </div>
-
-                  <div className={`mb-3 text-[12px] tabular-nums ${changeColor}`}>{changeLabel} 30d</div>
-
-                  {p.history.length > 1 && (
-                    <MiniChart data={p.history.map((h) => h.mrrCents)} color={p.color} />
-                  )}
-
-                  <div className="mt-3 grid grid-cols-3 gap-2 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                    <Stat label="New" value={fmtMrr(p.newMrrCents)} color="text-lx-green" />
-                    <Stat label="Churned" value={fmtMrr(p.churnedMrrCents)} color="text-lx-red" />
-                    <Stat label="Subs" value={String(p.activeSubscriptions)} color="text-lx-muted" />
-                  </div>
-                </div>
-              );
-            })}
+          {/* Milestones */}
+          <div className="mt-4 pb-14">
+            <Milestones products={ranked} />
           </div>
         </>
       )}
@@ -82,35 +109,135 @@ export default async function AppPage() {
   );
 }
 
-function Metric({ label, value, color }: { label: string; value: string; color: string }) {
+/* ============================================================ product card */
+
+function ProductCard({ product: p, rank }: { product: ProductMetrics; rank: number }) {
+  const change = p.mrrChange30d;
+  const up = change > 0;
+  const down = change < 0;
+  const icon = productIcon(p.label, p.provider);
+
   return (
-    <div className="px-5 py-4">
-      <div className="mb-1 text-[10px] font-medium uppercase tracking-widest text-lx-faint">{label}</div>
-      <div className={`text-[17px] font-semibold tabular-nums ${color}`}>{value}</div>
+    <div className="rounded-2xl bg-white px-5 pb-4 pt-4" style={{ border: "1px solid #ddd9d0" }}>
+      <div className="mb-1 flex items-center gap-2.5">
+        <span className="text-[11px] font-semibold tabular-nums text-lx-faint">#{rank}</span>
+        <img
+          src={icon}
+          alt={p.label}
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0 rounded-xl object-cover"
+          style={{ border: "1px solid #ece9e3" }}
+          loading="lazy"
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[14px] font-bold text-lx-text" style={{ letterSpacing: "-0.01em" }}>{p.label}</span>
+          <span className="flex items-center gap-1 text-[10px] text-lx-faint">
+            {p.provider} · {p.activeSubscriptions.toLocaleString()} subs
+          </span>
+        </span>
+        <span className="flex items-center gap-2">
+          <ChangePill change={change} />
+          <span className="text-[18px] font-bold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>{fmtMrr(p.mrrCents)}</span>
+        </span>
+      </div>
+
+      {p.history.length > 1 && (
+        <MiniChart data={p.history.map((h) => h.mrrCents)} color={up ? "#10b981" : down ? "#e3493c" : p.color} />
+      )}
     </div>
   );
 }
 
-function Stat({ label, value, color }: { label: string; value: string; color: string }) {
+function ChangePill({ change }: { change: number }) {
+  const up = change > 0;
+  const down = change < 0;
   return (
-    <div>
-      <div className="text-[10px] text-lx-faint">{label}</div>
-      <div className={`text-[12px] font-semibold tabular-nums ${color}`}>{value}</div>
-    </div>
+    <span
+      className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums ${
+        up ? "text-lx-green" : down ? "text-lx-red" : "text-lx-faint"
+      }`}
+      style={{ background: up ? "rgba(16,185,129,0.1)" : down ? "rgba(227,73,60,0.1)" : "rgba(0,0,0,0.05)" }}
+    >
+      {up ? "▲" : down ? "▼" : "•"} {up ? "+" : ""}{change.toFixed(1)}% last 30d
+    </span>
   );
 }
+
+function TrendDelta({ data }: { data: number[] }) {
+  const first = data[0];
+  const latest = data[data.length - 1];
+  const pct = first > 0 ? ((latest - first) / first) * 100 : 0;
+  const up = pct >= 0;
+  return (
+    <span className={`text-[12px] font-semibold tabular-nums ${up ? "text-lx-green" : "text-lx-red"}`}>
+      {up ? "+" : ""}{pct.toFixed(1)}% this period
+    </span>
+  );
+}
+
+/* ============================================================ area chart (server-rendered SVG) */
+
+function AreaChart({ data, stroke, fill, id, height = 140 }: {
+  data: number[];
+  stroke: string;
+  fill: string;
+  id: string;
+  height?: number;
+}) {
+  const w = 600;
+  const h = 200;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const pad = 8;
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - pad * 2);
+    const y = pad + (1 - (v - min) / range) * (h - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const line = pts.join(" ");
+  const area = `${pad},${h} ${line} ${w - pad},${h}`;
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ height, display: "block" }} aria-hidden>
+      <defs>
+        <linearGradient id={`ag-${id}`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor={fill} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={fill} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill={`url(#ag-${id})`} />
+      <polyline points={line} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <circle
+        cx={pts[pts.length - 1].split(",")[0]}
+        cy={pts[pts.length - 1].split(",")[1]}
+        r="4.5"
+        fill={stroke}
+        stroke="#ffffff"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+/* ============================================================ empty state */
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-3 text-[32px]">📊</div>
-      <h2 className="mb-2 text-[16px] font-semibold text-lx-text">Connect your first product</h2>
-      <p className="mb-5 max-w-sm text-[13px] text-lx-muted">
-        Add a Stripe or Lemon Squeezy API key to see your MRR, churn, and growth across all your products in one place.
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9c9894" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 3v18h18" /><path d="M7 16l4-4 4 4 4-6" />
+        </svg>
+      </div>
+      <h2 className="mb-2 text-[16px] font-bold text-lx-text">Connect your first product</h2>
+      <p className="mb-6 max-w-sm text-[13px] leading-relaxed text-lx-muted">
+        Add a Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack API key to see your MRR in one place.
       </p>
       <a
         href="/app/connect"
-        className="rounded px-4 py-2 text-[13px] font-medium text-white transition-opacity hover:opacity-80"
+        className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
         style={{ background: "#5e6ad2" }}
       >
         Connect a product →

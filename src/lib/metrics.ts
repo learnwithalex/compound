@@ -99,13 +99,4 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
   };
 }
 
-export function fmtMrr(cents: number): string {
-  const dollars = Math.abs(cents) / 100;
-  if (dollars >= 1000) return `$${(dollars / 1000).toFixed(1)}k`;
-  return `$${dollars.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
-export function fmtDollars(cents: number): string {
-  const dollars = Math.abs(cents) / 100;
-  return `$${dollars.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
+export { fmtMrr, fmtDollars } from "./format";

@@ -5,6 +5,11 @@ import { connections } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { fetchStripeOverview } from "@/lib/stripe";
 import { fetchLemonSqueezyOverview } from "@/lib/lemonsqueezy";
+import { fetchPolarOverview } from "@/lib/polar";
+import { fetchDodoOverview } from "@/lib/dodopayments";
+import { fetchPaystackOverview } from "@/lib/paystack";
+
+export const PROVIDERS = ["stripe", "lemonsqueezy", "polar", "dodopayments", "paystack"] as const;
 
 const COLORS = ["#5e6ad2", "#26c16b", "#f2b030", "#e3493c", "#06b6d4", "#a855f7", "#f97316"];
 
@@ -24,12 +29,15 @@ export async function POST(req: Request) {
 
   const { provider, label, apiKey } = await req.json();
   if (!provider || !label || !apiKey) return NextResponse.json({ error: "missing fields" }, { status: 400 });
-  if (!["stripe", "lemonsqueezy"].includes(provider)) return NextResponse.json({ error: "invalid provider" }, { status: 400 });
+  if (!(PROVIDERS as readonly string[]).includes(provider)) return NextResponse.json({ error: "invalid provider" }, { status: 400 });
 
   // Test the key works before saving
   try {
     if (provider === "stripe") await fetchStripeOverview(apiKey);
     if (provider === "lemonsqueezy") await fetchLemonSqueezyOverview(apiKey);
+    if (provider === "polar") await fetchPolarOverview(apiKey);
+    if (provider === "dodopayments") await fetchDodoOverview(apiKey);
+    if (provider === "paystack") await fetchPaystackOverview(apiKey);
   } catch {
     return NextResponse.json({ error: "API key is invalid or has insufficient permissions" }, { status: 400 });
   }

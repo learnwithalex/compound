@@ -20,10 +20,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* App shell: full dark Linear-style theme */
 .app-shell {
-  background: #111116;
-  color: #e2e2e9;
+  background: #f3f1ec;
+  color: #1a1a1a;
   font-feature-settings: "cv01", "cv02", "cv03", "cv04";
 }
 

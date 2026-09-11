@@ -12,7 +12,7 @@ export async function POST() {
   const metrics = await portfolioMetrics(userId);
 
   if (metrics.products.length === 0) {
-    return NextResponse.json({ analysis: "No products connected yet. Add a Stripe or Lemon Squeezy connection to see your analysis." });
+    return NextResponse.json({ analysis: "No products connected yet. Add any provider connection to see your analysis." });
   }
 
   const productSummaries = metrics.products.map((p) => {
