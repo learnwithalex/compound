@@ -1,98 +1,96 @@
-# Booked
+# Compound — Revenue OS for indie hackers
 
-Autonomous bookkeeping for solo founders. Connect your bank and Stripe; Booked
-categorises every transaction, reconciles Stripe payouts, and produces monthly
-financial statements you'd otherwise pay a bookkeeper $300–1,000/mo to prepare.
+One dashboard for every product you've built. Connect all your Stripe and Lemon Squeezy accounts, see total MRR across your whole portfolio, and get an AI briefing that explains exactly why the numbers moved.
 
-Built during **The Build Games** (Sep 6 – Sep 30, 2026) as a working
-replacement for Bench (recently sunset) and the entry tier of Pilot.
+**Built for [The Build Games](https://canivibecodeit.com/thebuildgames) — Best Replacement track.**  
+Replacing: Baremetrics ($108/mo), ChartMogul ($100+/mo), MultiMMR ($19/mo, Stripe-only).
 
-Live at **https://booked.apps.orizon.ng**
+## Live demo
 
-## What makes it a ledger, not a categoriser
+→ **[compound.apps.orizon.ng](https://compound.apps.orizon.ng)**  
+→ Click **"Open demo"** on the login page — no account needed.
 
-Most "AI bookkeeping" tools label transactions and stop. Booked posts
-double-entry journal entries against a real chart of accounts, so the books
-balance and every number on a statement drills back to the entry that produced
-it.
+The demo loads with three pre-connected products and 31 days of realistic MRR history.
 
-The categorisation agent is deliberately three-tiered, cheapest first:
+## What it does
 
-1. **Deterministic rules** — ordered by priority, first match wins at
-   confidence 100. Free, instant, explainable.
-2. **Claude** — only for what rules can't place, with the chart of accounts and
-   prior confirmed categorisations passed as calibration. Structured tool use
-   pins the answer to a real account code.
-3. **Learning** — a correction in the review UI writes a rule, so that merchant
-   never reaches the LLM again.
+- **Portfolio view** — total MRR + ARR across every connected product in one number
+- **Per-product cards** — MRR, active subs, 30-day trend, new vs churned, sparkline
+- **AI analysis** — one button → Claude writes a CFO-style briefing: what's working, what needs attention, one specific action
+- **Multi-source** — Stripe and Lemon Squeezy (more coming)
+- **Daily snapshots** — MRR captured every day so you can see exactly when things moved
+- **Free** — no paywalls, no 14-day trials
 
-Stripe payout arrivals (`po_`) are pinned to Stripe Clearing before either tier
-runs, so a broad `STRIPE → revenue` rule can't misfile them as income.
+## Why it exists
 
-## Scope, v1
+If you have more than one product, every analytics tool fails you:
 
-Persona: US solo founder or small SaaS. Inputs: one USD bank account (Plaid) +
-Stripe.
-
-Built and working:
-
-- Magic-link auth, bank + Stripe connection, transaction sync
-- Rules/LLM categorisation with a review inbox
-- Double-entry posting against a fixed chart of accounts
-- Stripe payout reconciliation
-- Profit & loss and balance sheet, any period
-
-Not built yet: cash-flow statement, close-packet PDF, weekly anomaly digest.
-
-Explicitly out of scope for v1: payroll, multi-entity, multi-currency,
-receipts OCR, invoicing, 1099s, tax filing.
+| Tool | Price | Multi-product | AI insights |
+|---|---|---|---|
+| Baremetrics | $108/mo | ❌ one business | ❌ |
+| ChartMogul | $100+/mo | ❌ one business | ❌ |
+| MultiMMR | $19/mo | ⚠️ Stripe only | ❌ |
+| **Compound** | **Free** | **✅ Stripe + LS** | **✅ Claude** |
 
 ## Stack
 
-- Next.js 16 (App Router) · React 19 · TypeScript · Tailwind
-- Postgres (Orizon managed) · Drizzle ORM
-- Anthropic Claude (structured tool use) for the categorisation agent
-- Plaid for bank feeds · Stripe SDK for revenue
-- Orizon transactional email for magic-link auth
+- **Next.js 16** (App Router, React 19)
+- **Drizzle ORM + PostgreSQL** — daily snapshot model
+- **Anthropic Claude Haiku** — AI portfolio analysis
+- **Stripe API + Lemon Squeezy API** — live subscription data
+- **Orizon** — hosting + managed DB
 
-## Local dev
+## Self-host in 5 minutes
 
-```sh
-cp .env.example .env       # fill in values
+```bash
+git clone https://github.com/learnwithalex/compound
+cd compound
 npm install
-npm run db:push
+
+# copy and fill in your keys
+cp .env.example .env
+
+# push schema
+npx drizzle-kit push
+
+# seed demo data (optional)
+npx tsx scripts/seed-demo.ts
+
 npm run dev
 ```
 
-Other scripts: `npm run typecheck`, `npm run db:studio`, `npm run db:reset`.
+**Required env vars:**
 
-### Environment
-
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Postgres connection string |
-| `SESSION_SECRET` | Signs session cookies |
-| `APP_URL` | Origin used to build magic-link URLs |
-| `ORIZON_EMAIL_API_KEY` | Sends login emails via Orizon (`orz_…`, scope `send`). Unset in dev → the link is returned to the browser instead |
-| `EMAIL_FROM` | Sender for login emails. Its domain must be verified for your team |
-| `PLAID_CLIENT_ID` / `PLAID_SECRET` / `PLAID_ENV` | Bank feeds |
-| `STRIPE_CLIENT_ID` / `STRIPE_SECRET_KEY` | Revenue sync |
-| `ANTHROPIC_API_KEY` | Categorisation agent |
-| `ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN` | Optional. Routes the agent through a gateway; when set, `ANTHROPIC_API_KEY` is ignored |
-
-## Deploy
-
-Deployed on Orizon (dogfood):
-
-```sh
-orizon deploy
+```env
+DATABASE_URL=postgresql://...
+ANTHROPIC_API_KEY=sk-ant-...
+APP_URL=http://localhost:3000
+SESSION_SECRET=<32+ random chars>
+DEMO_LOGIN_ENABLED=true   # optional, enables /api/auth/demo shortcut
 ```
 
-`orizon env push <file>` merges variables into the project — it updates only the
-keys present in the file and leaves the rest untouched. Note that
-`orizon env pull` prints key names with **masked values**, so it can't be used
-to round-trip a config.
+## How it works
+
+```
+User connects Stripe/LS account (API key, read-only)
+        ↓
+POST /api/connections — validates key, stores it
+        ↓
+POST /api/sync — fetches all active subscriptions,
+                 normalises billing intervals → monthly cents,
+                 upserts daily snapshot per connection
+        ↓
+GET  /app — reads snapshots, computes portfolio metrics,
+            renders product cards + sparklines
+        ↓
+POST /api/analyze — feeds metrics into Claude Haiku,
+                    returns CFO-style briefing
+```
 
 ## License
 
-MIT
+MIT — use it, fork it, ship it.
+
+---
+
+*Built in public, Sep 2026 · [@learnwithalex](https://github.com/learnwithalex)*
