@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Booked — autonomous bookkeeping",
+  title: "Compound — Revenue OS for indie hackers",
   description:
-    "Connect your bank and Stripe. Booked categorises every transaction, reconciles Stripe payouts, and produces monthly financial statements.",
+    "Connect all your Stripe and Lemon Squeezy accounts. Compound shows your total MRR across every product, with AI that explains why your numbers moved.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

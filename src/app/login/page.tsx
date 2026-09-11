@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -15,72 +14,61 @@ export default function LoginPage() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    if (!res.ok) {
-      setState("error");
-      return;
-    }
     const data = await res.json();
-    setDevUrl(data.devUrl ?? null);
+    if (!res.ok) { setState("error"); return; }
+    if (data.devUrl) { setDevUrl(data.devUrl); window.location.href = data.devUrl; return; }
     setState("sent");
   }
 
   return (
-    <main className="mx-auto max-w-md px-6 py-24">
-      <h1 className="mb-2 text-2xl font-semibold tracking-tight">Sign in to Booked</h1>
-      <p className="mb-8 text-sm text-neutral-600">
-        No password. We email you a link that expires in 15 minutes.
-      </p>
-
-      <div className="mb-8 rounded border border-neutral-200 bg-neutral-50 p-4 text-sm">
-        <p className="mb-2 font-medium text-neutral-800">Just here to explore?</p>
-        <p className="mb-3 text-neutral-600">
-          The demo account has 14 pre-loaded transactions already categorised.
-        </p>
-        <a
-          href="/api/auth/demo"
-          className="inline-block rounded bg-neutral-900 px-4 py-2 text-xs font-medium text-white"
-        >
-          Open demo →
-        </a>
-      </div>
-
-      {state === "sent" ? (
-        <div className="rounded border border-neutral-200 bg-white p-6 text-sm">
-          <p className="mb-2 font-medium">Check your inbox.</p>
-          <p className="text-neutral-600">
-            A sign-in link is on its way to <span className="font-mono">{email}</span>.
-          </p>
-          {devUrl && (
-            <p className="mt-4 rounded bg-neutral-100 p-3">
-              Dev mode — no email configured.{" "}
-              <a href={devUrl} className="underline underline-offset-2">
-                Click here to sign in
-              </a>
-            </p>
-          )}
+    <div className="app-shell flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-sm px-6">
+        <div className="mb-8 text-center">
+          <div className="mb-3 flex justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#5e6ad2" }}>
+              <svg width="20" height="20" viewBox="0 0 14 14" fill="none">
+                <path d="M2 10V7a5 5 0 0 1 10 0v3" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="7" cy="7" r="2" fill="white"/>
+              </svg>
+            </div>
+          </div>
+          <h1 className="text-[20px] font-semibold text-lx-text">Compound</h1>
+          <p className="mt-1 text-[13px] text-lx-muted">Revenue OS for indie hackers</p>
         </div>
-      ) : (
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@company.com"
-            className="rounded border border-neutral-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-neutral-900"
-          />
-          <button
-            type="submit"
-            disabled={state === "sending"}
-            className="rounded bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {state === "sending" ? "Sending…" : "Email me a sign-in link"}
-          </button>
-          {state === "error" && (
-            <p className="text-sm text-red-700">That email didn&apos;t look right. Try again.</p>
-          )}
-        </form>
-      )}
-    </main>
+
+        {state === "sent" ? (
+          <div className="rounded-md p-4 text-center text-[13px] text-lx-muted" style={{ border: "1px solid #2a2a32", background: "#1c1c22" }}>
+            Check your email — magic link sent to <strong className="text-lx-text">{email}</strong>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="flex flex-col gap-3">
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded px-3 py-2.5 text-[13px] text-lx-text placeholder:text-lx-faint focus:outline-none focus:ring-1 focus:ring-lx-purple"
+              style={{ background: "#1c1c22", border: "1px solid #2a2a32" }}
+            />
+            <button
+              type="submit"
+              disabled={state === "sending"}
+              className="rounded py-2.5 text-[13px] font-medium text-white transition-opacity disabled:opacity-50"
+              style={{ background: "#5e6ad2" }}
+            >
+              {state === "sending" ? "Sending…" : "Continue with email"}
+            </button>
+            {state === "error" && <p className="text-center text-[12px] text-lx-red">Something went wrong. Try again.</p>}
+          </form>
+        )}
+
+        <div className="mt-6 text-center">
+          <a href="/api/auth/demo" className="text-[12px] text-lx-purple hover:opacity-80">
+            Open demo →
+          </a>
+        </div>
+      </div>
+    </div>
   );
 }
