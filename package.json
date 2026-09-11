@@ -1,0 +1,47 @@
+{
+  "name": "compound",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Multi-product revenue command center for indie hackers. Built for The Build Games Sep 2026.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit generate && drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:reset": "tsx scripts/reset-db.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "autoprefixer": "^10.4.20",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.38.4",
+    "next": "^16.3.4",
+    "plaid": "^28.0.0",
+    "postcss": "^8.4.49",
+    "postgres": "^3.4.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^17.4.0",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.9.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.30.4",
+    "eslint": "^9.15.0",
+    "eslint-config-next": "^16.3.4",
+    "tsx": "^4.20.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
