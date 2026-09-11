@@ -36,3 +36,4 @@ coverage/
 .vercel/
 next-env.d.ts
 tsconfig.tsbuildinfo
+*.bak
