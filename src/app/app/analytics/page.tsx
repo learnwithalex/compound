@@ -4,8 +4,10 @@ import { fmtMrr } from "@/lib/metrics";
 import {
   loadSubs, cohortRetention, coreMetrics, lifecycleFunnel,
   segmentByPlan, segmentByCountry, segmentBySource, segmentByProduct,
-  type CohortRow, type Segment,
 } from "@/lib/analytics";
+import { CohortGrid } from "../cohort-grid";
+import { SegmentCard, FunnelCard } from "../report-cards";
+import { IconArpa, IconLtv, IconChurn, IconQuick } from "../stat-icons";
 
 export default async function AnalyticsPage() {
   const userId = await userIdFromSession();
@@ -45,13 +47,13 @@ export default async function AnalyticsPage() {
 
       {/* Unit economics */}
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Tile label="ARPA" value={fmtMrr(m.arpaCents)} sub="avg revenue per account" />
-        <Tile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo average lifetime`} />
+        <Tile label="ARPA" value={fmtMrr(m.arpaCents)} sub="avg revenue per account" icon={IconArpa} />
+        <Tile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo average lifetime`} icon={IconLtv} />
         <Tile label="Monthly churn" value={`${m.monthlyChurnPct.toFixed(1)}%`} sub="customers lost, last 30d"
-              valueColor={m.monthlyChurnPct > 5 ? "#e3493c" : undefined} />
+              valueColor={m.monthlyChurnPct > 5 ? "#e3493c" : undefined} icon={IconChurn} />
         <Tile label="Quick ratio" value={m.quickRatio === null ? "∞" : m.quickRatio.toFixed(1)}
               sub="new MRR per $1 churned"
-              valueColor={m.quickRatio !== null && m.quickRatio < 1 ? "#e3493c" : "#10b981"} />
+              valueColor={m.quickRatio !== null && m.quickRatio < 1 ? "#e3493c" : "#10b981"} icon={IconQuick} />
       </div>
 
       {/* Cohort retention */}
@@ -65,129 +67,38 @@ export default async function AnalyticsPage() {
 
       {/* Funnel + acquisition */}
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
-          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Subscription lifecycle</p>
-          <div className="space-y-3">
-            {funnel.map((f) => (
-              <div key={f.label}>
-                <div className="mb-1.5 flex items-baseline justify-between">
-                  <span className="text-[13px] font-medium text-lx-text">{f.label}</span>
-                  <span className="text-[12px] tabular-nums text-lx-muted">
-                    {f.count.toLocaleString()} · {f.pct.toFixed(0)}%
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full" style={{ background: "#f0ede8" }}>
-                  <div className="h-full rounded-full" style={{ width: `${f.pct}%`, background: "#5e6ad2" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <FunnelCard steps={funnel} />
 
         <SegmentCard
           title="Acquisition source"
           note="Only present when stamped onto the provider record"
           segments={segmentBySource(subs)}
+          kind="source"
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <SegmentCard title="By plan" segments={segmentByPlan(subs)} />
-        <SegmentCard title="By country" segments={segmentByCountry(subs).slice(0, 8)} />
-        <SegmentCard title="By product" segments={segmentByProduct(subs)} />
+        <SegmentCard title="By plan" segments={segmentByPlan(subs)} kind="plan" />
+        <SegmentCard title="By country" segments={segmentByCountry(subs).slice(0, 8)} kind="country" />
+        <SegmentCard title="By product" segments={segmentByProduct(subs)} kind="product" />
       </div>
-    </div>
-  );
-}
-
-/* ============================================================ cohort grid */
-
-function heat(pct: number): string {
-  // Single-hue ramp: stronger purple = more MRR retained.
-  const a = 0.06 + (Math.min(100, pct) / 100) * 0.62;
-  return `rgba(94,106,210,${a.toFixed(3)})`;
-}
-
-function CohortGrid({ rows }: { rows: CohortRow[] }) {
-  if (rows.length === 0) {
-    return <div className="px-7 pb-7 text-[13px] text-lx-faint">Not enough history yet.</div>;
-  }
-  const cols = Math.max(...rows.map((r) => r.retention.length));
-
-  return (
-    <div className="overflow-x-auto px-7 pb-7">
-      <table className="w-full border-separate" style={{ borderSpacing: "3px" }}>
-        <thead>
-          <tr>
-            <th className="pb-1 pr-3 text-left text-[10px] font-semibold uppercase tracking-wider text-lx-faint">Cohort</th>
-            <th className="pb-1 pr-3 text-right text-[10px] font-semibold uppercase tracking-wider text-lx-faint">Subs</th>
-            {Array.from({ length: cols }, (_, i) => (
-              <th key={i} className="pb-1 text-center text-[10px] font-semibold tabular-nums text-lx-faint" style={{ minWidth: 42 }}>
-                m{i}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.cohort}>
-              <td className="whitespace-nowrap pr-3 text-[12px] font-semibold text-lx-text">{r.label}</td>
-              <td className="pr-3 text-right text-[12px] tabular-nums text-lx-muted">{r.customers.toLocaleString()}</td>
-              {Array.from({ length: cols }, (_, i) => {
-                const v = r.retention[i];
-                if (v === null || v === undefined) {
-                  return <td key={i} className="rounded-md" style={{ background: "#faf9f7" }} />;
-                }
-                return (
-                  <td
-                    key={i}
-                    className="rounded-md py-1.5 text-center text-[11px] font-semibold tabular-nums"
-                    style={{ background: heat(v), color: v > 55 ? "#ffffff" : "#4a4744" }}
-                  >
-                    {v.toFixed(0)}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
 
 /* ============================================================ pieces */
 
-function Tile({ label, value, sub, valueColor }: { label: string; value: string; sub: string; valueColor?: string }) {
+function Tile({
+  label, value, sub, valueColor, icon: Icon,
+}: { label: string; value: string; sub: string; valueColor?: string; icon?: () => React.ReactElement }) {
   return (
     <div className="rounded-2xl bg-white px-5 py-4" style={{ border: "1px solid #ddd9d0" }}>
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-lx-faint">{label}</p>
+      <div className="mb-1 flex items-center gap-1.5 text-lx-faint">
+        {Icon && <Icon />}
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</p>
+      </div>
       <p className="text-[22px] font-bold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em", color: valueColor }}>{value}</p>
       <p className="mt-0.5 text-[11px] text-lx-faint">{sub}</p>
     </div>
-  );
-}
-
-function SegmentCard({ title, segments, note }: { title: string; segments: Segment[]; note?: string }) {
-  return (
-    <section className="rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">{title}</p>
-      {note && <p className="mt-1 text-[11px] text-lx-faint">{note}</p>}
-      <div className="mt-5 space-y-3">
-        {segments.map((s) => (
-          <div key={s.key}>
-            <div className="mb-1.5 flex items-baseline justify-between gap-3">
-              <span className="truncate text-[13px] font-medium capitalize text-lx-text">{s.key}</span>
-              <span className="shrink-0 text-[12px] tabular-nums text-lx-muted">
-                {fmtMrr(s.mrrCents)} · {s.pct.toFixed(0)}%
-              </span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "#f0ede8" }}>
-              <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.key === "Unattributed" ? "#c9c4bb" : "#5e6ad2" }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }

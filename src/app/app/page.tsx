@@ -5,7 +5,7 @@ import { portfolioMetrics, fmtMrr, type ProductMetrics } from "@/lib/metrics";
 import { productIcon } from "@/lib/format";
 import { AnalyzeButton } from "./analyze-button";
 import { MiniChart } from "./mini-chart";
-import { TrendChart } from "./trend-chart";
+import { ChartCard } from "./trend-chart";
 import { ShareCard } from "./share-card";
 import { ChurnRadar, Milestones } from "./insights";
 import { radarSignals } from "@/lib/insights";
@@ -39,7 +39,6 @@ export default async function AppPage() {
   const portfolioSeries = [...byDate.entries()]
     .sort((a, b) => (a[0] < b[0] ? -1 : 1))
     .map(([date, value]) => ({ date, value }));
-  const portfolioValues = portfolioSeries.map((s) => s.value);
 
   return (
     <div className="py-10">
@@ -69,21 +68,13 @@ export default async function AppPage() {
           <ChurnRadar signals={radarSignals(ranked)} />
 
           {/* Portfolio trend */}
-          <section className="mb-10 rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
-            <div className="mb-4 flex items-baseline justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">
-                Monthly recurring revenue
-              </p>
-              {portfolioValues.length > 1 && <TrendDelta data={portfolioValues} />}
-            </div>
-            {portfolioSeries.length > 1 ? (
-              <TrendChart series={portfolioSeries} height={320} />
-            ) : (
-              <div className="flex h-[190px] items-center justify-center rounded-lg text-[13px] text-lx-faint" style={{ background: "#f7f5f1" }}>
-                Sync daily to build your trend
-              </div>
-            )}
-          </section>
+          <ChartCard
+            className="mb-10"
+            label="Monthly recurring revenue"
+            caption="Last 90 days · all products"
+            series={portfolioSeries}
+            height={300}
+          />
 
           {/* Products */}
           <div className="mb-4 flex items-baseline justify-between">
@@ -162,18 +153,6 @@ function ChangePill({ change }: { change: number }) {
       style={{ background: up ? "rgba(16,185,129,0.1)" : down ? "rgba(227,73,60,0.1)" : "rgba(0,0,0,0.05)" }}
     >
       {up ? "▲" : down ? "▼" : "•"} {up ? "+" : ""}{change.toFixed(1)}% last 30d
-    </span>
-  );
-}
-
-function TrendDelta({ data }: { data: number[] }) {
-  const first = data[0];
-  const latest = data[data.length - 1];
-  const pct = first > 0 ? ((latest - first) / first) * 100 : 0;
-  const up = pct >= 0;
-  return (
-    <span className={`text-[12px] font-semibold tabular-nums ${up ? "text-lx-green" : "text-lx-red"}`}>
-      {up ? "+" : ""}{pct.toFixed(1)}% this period
     </span>
   );
 }

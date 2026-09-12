@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { productIcon } from "@/lib/format";
 
 /* ============================================================ shared load */
 
@@ -6,6 +7,9 @@ const PAYING = new Set(["active", "past_due"]);
 
 export interface LoadedSub {
   connectionId: string;
+  customerId: string | null;
+  customerName: string | null;
+  customerEmail: string | null;
   planName: string | null;
   status: string;
   mrrCents: number;
@@ -41,6 +45,9 @@ export async function loadSubs(userId: string, connectionId?: string): Promise<L
     const conn = byId.get(s.connectionId)!;
     return {
       connectionId: s.connectionId,
+      customerId: s.customerId,
+      customerName: c?.name ?? null,
+      customerEmail: c?.email ?? null,
       planName: s.planName,
       status: s.status,
       mrrCents: s.mrrCents,
@@ -192,6 +199,8 @@ export interface Segment {
   customers: number;
   mrrCents: number;
   pct: number;
+  /** Product segments only — the others are drawn from a glyph set instead. */
+  icon?: string;
 }
 
 function segmentBy(subs: LoadedSub[], keyOf: (s: LoadedSub) => string): Segment[] {
@@ -211,10 +220,96 @@ function segmentBy(subs: LoadedSub[], keyOf: (s: LoadedSub) => string): Segment[
 
 export const segmentByPlan = (s: LoadedSub[]) => segmentBy(s, (x) => x.planName ?? "Unknown");
 export const segmentByCountry = (s: LoadedSub[]) => segmentBy(s, (x) => x.country ?? "Unknown");
-export const segmentByProduct = (s: LoadedSub[]) => segmentBy(s, (x) => x.productLabel);
+export const segmentByProduct = (s: LoadedSub[]) =>
+  segmentBy(s, (x) => x.productLabel).map((seg) => ({
+    ...seg,
+    icon: productIcon(seg.key, s.find((x) => x.productLabel === seg.key)?.provider ?? ""),
+  }));
 // Null source means the merchant never stamped attribution onto the record —
 // reported as Unattributed rather than being inferred.
 export const segmentBySource = (s: LoadedSub[]) => segmentBy(s, (x) => x.utmSource ?? "Unattributed");
+
+/* ============================================================ customers */
+
+export interface TopCustomer {
+  name: string;
+  email: string | null;
+  planName: string | null;
+  country: string | null;
+  source: string | null;
+  mrrCents: number;
+  tenureMonths: number;
+  /** Revenue billed to date, at the current rate. */
+  ltdCents: number;
+}
+
+export function topCustomers(subs: LoadedSub[], limit = 10): TopCustomer[] {
+  const now = Date.now();
+  return subs
+    .filter((s) => PAYING.has(s.status))
+    .sort((a, b) => b.mrrCents - a.mrrCents)
+    .slice(0, limit)
+    .map((s) => {
+      const months = s.startedAt ? (now - s.startedAt.getTime()) / (30.44 * 864e5) : 0;
+      return {
+        name: s.customerName ?? s.customerEmail ?? "Unknown",
+        email: s.customerEmail,
+        planName: s.planName,
+        country: s.country,
+        source: s.utmSource,
+        mrrCents: s.mrrCents,
+        tenureMonths: months,
+        ltdCents: Math.round(s.mrrCents * months),
+      };
+    });
+}
+
+/* ============================================================ activity feed */
+
+export interface ActivityItem {
+  eventType: string;
+  amountCents: number;
+  occurredAt: Date;
+  customerName: string;
+  planName: string | null;
+}
+
+/** Most recent revenue movements, named. Drives the product activity feed. */
+export async function recentActivity(connectionId: string, limit = 12): Promise<ActivityItem[]> {
+  const events = await db.query.revenueEvents.findMany({
+    where: (e, { eq }) => eq(e.connectionId, connectionId),
+    orderBy: (e, { desc }) => [desc(e.occurredAt)],
+    limit,
+  });
+  if (events.length === 0) return [];
+
+  const extIds = [...new Set(events.map((e) => e.externalId).filter((x): x is string => !!x))];
+  const subs = extIds.length
+    ? await db.query.subscriptions.findMany({
+        where: (s, { and, eq, inArray }) =>
+          and(eq(s.connectionId, connectionId), inArray(s.externalId, extIds)),
+      })
+    : [];
+  const subByExt = new Map(subs.map((s) => [s.externalId, s]));
+
+  const custIds = [...new Set(subs.map((s) => s.customerId).filter((x): x is string => !!x))];
+  const custs = custIds.length
+    ? await db.query.customers.findMany({ where: (c, { inArray }) => inArray(c.id, custIds) })
+    : [];
+  const custById = new Map(custs.map((c) => [c.id, c]));
+
+  return events.map((e) => {
+    const sub = e.externalId ? subByExt.get(e.externalId) : undefined;
+    const cust = sub?.customerId ? custById.get(sub.customerId) : undefined;
+    return {
+      eventType: e.eventType,
+      amountCents: e.amountCents,
+      occurredAt: e.occurredAt,
+      customerName: cust?.name ?? cust?.email ?? "Unknown customer",
+      planName: sub?.planName ?? null,
+    };
+  });
+}
 
 /* ============================================================ lifecycle funnel */
 

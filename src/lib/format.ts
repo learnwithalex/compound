@@ -1,5 +1,6 @@
 export function fmtMrr(cents: number): string {
   const dollars = Math.abs(cents) / 100;
+  if (dollars >= 1e6) return `$${(dollars / 1e6).toFixed(2)}M`;
   if (dollars >= 1000) return `$${(dollars / 1000).toFixed(1)}k`;
   return `$${dollars.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
