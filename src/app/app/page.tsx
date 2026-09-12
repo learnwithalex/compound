@@ -76,7 +76,7 @@ export default async function AppPage() {
               {portfolioValues.length > 1 && <TrendDelta data={portfolioValues} />}
             </div>
             {portfolioSeries.length > 1 ? (
-              <TrendChart series={portfolioSeries} height={220} />
+              <TrendChart series={portfolioSeries} height={320} />
             ) : (
               <div className="flex h-[190px] items-center justify-center rounded-lg text-[13px] text-lx-faint" style={{ background: "#f7f5f1" }}>
                 Sync daily to build your trend
