@@ -76,7 +76,7 @@ export default async function AppPage() {
               {portfolioValues.length > 1 && <TrendDelta data={portfolioValues} />}
             </div>
             {portfolioSeries.length > 1 ? (
-              <StepChart series={portfolioSeries} height={230} />
+              <TrendChart series={portfolioSeries} height={220} />
             ) : (
               <div className="flex h-[190px] items-center justify-center rounded-lg text-[13px] text-lx-faint" style={{ background: "#f7f5f1" }}>
                 Sync daily to build your trend
@@ -177,100 +177,77 @@ function TrendDelta({ data }: { data: number[] }) {
   );
 }
 
-/* ============================================================ step chart (server-rendered SVG) */
+/* ============================================================ trend chart (server-rendered SVG) */
 
-function StepChart({ series, height = 230 }: {
+function TrendChart({ series, height = 220 }: {
   series: { date: string; value: number }[];
   height?: number;
 }) {
   const data = series.map((s) => s.value);
   const w = 640;
-  const h = 240;
-  const padLeft = 52;
-  const padRight = 12;
-  const padTop = 14;
-  const padBottom = 30;
-  const max = Math.max(...data);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
+  const h = 220;
+  const padLeft = 54;
+  const padRight = 14;
+  const padTop = 16;
+  const padBottom = 26;
+  const lo = Math.min(...data);
+  const hi = Math.max(...data);
+  // Scale to the data range with headroom, not to zero — otherwise a 5% move looks flat.
+  const span = hi - lo || hi * 0.1 || 1;
+  const min = lo - span * 0.35;
+  const max = hi + span * 0.25;
+  const range = max - min;
   const innerW = w - padLeft - padRight;
   const innerH = h - padTop - padBottom;
-  const x = (i: number) => padLeft + (i / (data.length - 1)) * innerW;
-  const y = (v: number) => padTop + (1 - (v - min) / range) * innerH;
+  const px = (i: number) => padLeft + (i / (data.length - 1)) * innerW;
+  const py = (v: number) => padTop + (1 - (v - min) / range) * innerH;
+  const pts = data.map((v, i) => [px(i), py(v)] as [number, number]);
 
-  // Step path: horizontal, then vertical jump at each change
-  let d = `M ${x(0).toFixed(1)},${y(data[0]).toFixed(1)}`;
-  for (let i = 1; i < data.length; i++) {
-    d += ` H ${x(i).toFixed(1)}`;
-    if (data[i] !== data[i - 1]) d += ` V ${y(data[i]).toFixed(1)}`;
+  let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C ${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
   }
-  const area = `${d} V ${padTop + innerH} H ${x(0).toFixed(1)} Z`;
+  const area = `${d} L ${pts[pts.length - 1][0].toFixed(1)},${padTop + innerH} L ${pts[0][0].toFixed(1)},${padTop + innerH} Z`;
+  const last = pts[pts.length - 1];
 
-  // Movement points: where the value actually changed
-  const moves: { i: number; date: string; from: number; to: number }[] = [];
-  for (let i = 1; i < data.length; i++) {
-    if (data[i] !== data[i - 1]) moves.push({ i, date: series[i].date, from: data[i - 1], to: data[i] });
-  }
-
-  // Y-axis ticks
-  const ticks = [0, 1, 2, 3, 4].map((f) => min + (range * f) / 4);
-
-  const stepColor = "#16a34a";
-  const flatColor = "#5e6ad2";
+  const ticks = [0, 1, 2, 3].map((f) => min + (range * (f + 0.35)) / 4);
+  const labelAt = [0, Math.floor((data.length - 1) / 2), data.length - 1];
+  const fmtDay = (iso: string) =>
+    new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   return (
-    <div>
-      <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ height, display: "block" }} aria-hidden>
-        <defs>
-          <linearGradient id="ag-step" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#16a34a" stopOpacity="0.14" />
-            <stop offset="100%" stopColor="#16a34a" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-        {ticks.map((t, i) => (
-          <g key={i}>
-            <line x1={padLeft} x2={w - padRight} y1={y(t)} y2={y(t)} stroke="#ece9e3" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-            <text x={padLeft - 8} y={y(t) + 3.5} textAnchor="end" fontSize="10" fill="#9c9894" fontWeight="500">
-              {fmtMrr(Math.round(t))}
-            </text>
-          </g>
-        ))}
-        <path d={area} fill="url(#ag-step)" />
-        <path d={d} fill="none" stroke={moves.length > 0 ? stepColor : flatColor} strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        {moves.map((m, k) => (
-          <g key={k}>
-            <line
-              x1={x(m.i)} x2={x(m.i)} y1={y(m.to)} y2={padTop + innerH}
-              stroke="#c8c4bc" strokeWidth="1" strokeDasharray="3 3" vectorEffect="non-scaling-stroke"
-            />
-            <circle cx={x(m.i)} cy={y(m.to)} r="4.5" fill={m.to >= m.from ? stepColor : "#e3493c"} stroke="#ffffff" strokeWidth="2" />
-          </g>
-        ))}
-        <circle cx={x(0)} cy={y(data[0])} r="4.5" fill={flatColor} stroke="#ffffff" strokeWidth="2" />
-      </svg>
-      {moves.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2.5">
-          {moves.slice(-3).map((m, k) => {
-            const up = m.to >= m.from;
-            return (
-              <span
-                key={k}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-lx-muted"
-                style={{ background: "#f7f5f1", border: "1px dashed #c8c4bc" }}
-              >
-                <span
-                  className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white"
-                  style={{ background: up ? stepColor : "#5e6ad2" }}
-                >
-                  {up ? "▲" : "●"}
-                </span>
-                {up ? "+" : ""}{fmtMrr(m.to - m.from)} · {new Date(m.date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-              </span>
-            );
-          })}
-        </div>
-      )}
-    </div>
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{ height, display: "block" }} aria-hidden>
+      <defs>
+        <linearGradient id="ag-trend" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#5e6ad2" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#5e6ad2" stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      {ticks.map((t, i) => (
+        <g key={i}>
+          <line x1={padLeft} x2={w - padRight} y1={py(t)} y2={py(t)} stroke="#ece9e3" strokeWidth="1" />
+          <text x={padLeft - 10} y={py(t) + 3.5} textAnchor="end" fontSize="10" fill="#9c9894" fontWeight="500">
+            {fmtMrr(Math.round(t))}
+          </text>
+        </g>
+      ))}
+      <path d={area} fill="url(#ag-trend)" />
+      <path d={d} fill="none" stroke="#5e6ad2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={last[0]} cy={last[1]} r="4.5" fill="#5e6ad2" stroke="#ffffff" strokeWidth="2" />
+      {labelAt.map((i) => (
+        <text key={i} x={px(i)} y={h - 8} textAnchor={i === 0 ? "start" : i === data.length - 1 ? "end" : "middle"} fontSize="10" fill="#9c9894" fontWeight="500">
+          {fmtDay(series[i].date)}
+        </text>
+      ))}
+    </svg>
   );
 }
 
