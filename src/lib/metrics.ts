@@ -99,4 +99,69 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
   };
 }
 
+export async function singleProductMetrics(
+  userId: string,
+  connectionId: string,
+): Promise<{ product: ProductMetrics; lastSyncedAt: Date | null; currency: string } | null> {
+  const conn = await db.query.connections.findFirst({
+    where: (c, { eq, and }) => and(eq(c.userId, userId), eq(c.id, connectionId)),
+  });
+  if (!conn) return null;
+
+  const since = new Date();
+  since.setDate(since.getDate() - 90);
+  const sinceStr = since.toISOString().slice(0, 10);
+
+  const snaps = await db.query.snapshots.findMany({
+    where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
+    orderBy: (s, { asc }) => [asc(s.date)],
+  });
+
+  if (snaps.length === 0) {
+    return {
+      product: {
+        connectionId: conn.id,
+        label: conn.label,
+        color: conn.color,
+        provider: conn.provider,
+        mrrCents: 0,
+        arrCents: 0,
+        churnedMrrCents: 0,
+        newMrrCents: 0,
+        expansionMrrCents: 0,
+        activeSubscriptions: 0,
+        mrrChange30d: 0,
+        history: [],
+      },
+      lastSyncedAt: conn.lastSyncedAt,
+      currency: conn.currency,
+    };
+  }
+
+  const latest = snaps[snaps.length - 1];
+  const oldest = snaps[0];
+  const mrrChange30d = oldest.mrrCents > 0
+    ? ((latest.mrrCents - oldest.mrrCents) / oldest.mrrCents) * 100
+    : 0;
+
+  return {
+    product: {
+      connectionId: conn.id,
+      label: conn.label,
+      color: conn.color,
+      provider: conn.provider,
+      mrrCents: latest.mrrCents,
+      arrCents: latest.mrrCents * 12,
+      churnedMrrCents: snaps.reduce((s, r) => s + r.churnedMrrCents, 0),
+      newMrrCents: snaps.reduce((s, r) => s + r.newMrrCents, 0),
+      expansionMrrCents: snaps.reduce((s, r) => s + r.expansionMrrCents, 0),
+      activeSubscriptions: latest.activeSubscriptions,
+      mrrChange30d,
+      history: snaps.map((s) => ({ date: s.date, mrrCents: s.mrrCents })),
+    },
+    lastSyncedAt: conn.lastSyncedAt,
+    currency: conn.currency,
+  };
+}
+
 export { fmtMrr, fmtDollars } from "./format";
