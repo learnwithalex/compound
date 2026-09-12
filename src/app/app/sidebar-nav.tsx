@@ -4,10 +4,19 @@ import { usePathname } from "next/navigation";
 import { CompoundMark } from "../compound-logo";
 
 const NAV = [
-  { href: "/app",         label: "Overview",  icon: HomeIcon },
-  { href: "/app/connect", label: "Connect",   icon: LinkIcon },
-  { href: "/app/agents",  label: "Agents",    icon: AgentIcon },
+  { href: "/app",           label: "Overview",  icon: HomeIcon },
+  { href: "/app/analytics", label: "Analytics", icon: ChartIcon },
+  { href: "/app/connect",   label: "Connect",   icon: LinkIcon },
+  { href: "/app/agents",    label: "Agents",    icon: AgentIcon },
 ];
+
+function ChartIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" /><rect x="7" y="11" width="3" height="7" /><rect x="12.5" y="7" width="3" height="11" /><rect x="18" y="4" width="3" height="14" />
+    </svg>
+  );
+}
 
 export function SidebarNav() {
   const pathname = usePathname();

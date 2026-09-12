@@ -1,6 +1,5 @@
 import { db } from "@/db";
-import { connections, snapshots } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { persistPull, type ProviderPull } from "./sync-core";
 
 const BASE = "https://api.polar.sh/v1";
 
@@ -13,6 +12,12 @@ interface PolarSubscription {
   recurring_interval: "day" | "week" | "month" | "year";
   recurring_interval_count: number;
   status: string; // active | trialing | past_due | canceled | ...
+  customer_id?: string | null;
+  customer?: { id: string; email?: string | null; name?: string | null; created_at?: string | null } | null;
+  product?: { name?: string | null } | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 interface PolarListResponse {
@@ -65,46 +70,43 @@ export async function fetchPolarOverview(apiKey: string): Promise<{ mrrCents: nu
   };
 }
 
+const dt = (s: string | null | undefined) => (s ? new Date(s) : null);
+
 export async function syncPolarConnection(connectionId: string) {
   const conn = await db.query.connections.findFirst({
     where: (c, { eq }) => eq(c.id, connectionId),
   });
   if (!conn || conn.provider !== "polar") return;
 
-  const today = new Date().toISOString().slice(0, 10);
   const subs = await fetchAllActiveSubs(conn.apiKey);
 
-  const mrrCents = subs.reduce((s, sub) => s + subscriptionMrr(sub), 0);
-  const activeSubscriptions = subs.length;
+  const custById = new Map<string, ProviderPull["customers"][number]>();
+  const normalized: ProviderPull["subscriptions"] = [];
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const prevDate = yesterday.toISOString().slice(0, 10);
+  for (const sub of subs) {
+    const custExt = sub.customer?.id ?? sub.customer_id ?? null;
+    if (custExt && !custById.has(custExt)) {
+      custById.set(custExt, {
+        externalId: custExt,
+        email: sub.customer?.email ?? null,
+        name: sub.customer?.name ?? null,
+        signedUpAt: dt(sub.customer?.created_at) ?? dt(sub.started_at),
+        metadata: sub.metadata ?? null,
+      });
+    }
+    normalized.push({
+      externalId: sub.id,
+      customerExternalId: custExt,
+      planName: sub.product?.name ?? null,
+      status: sub.status === "canceled" ? "canceled" : sub.status,
+      mrrCents: sub.status === "canceled" ? 0 : subscriptionMrr(sub),
+      currency: sub.currency ?? "usd",
+      interval: sub.recurring_interval,
+      startedAt: dt(sub.started_at),
+      canceledAt: dt(sub.ended_at),
+      metadata: sub.metadata ?? null,
+    });
+  }
 
-  const prevSnap = await db.query.snapshots.findFirst({
-    where: (s, { eq, and }) => and(eq(s.connectionId, connectionId), eq(s.date, prevDate)),
-  });
-
-  const prevMrr = prevSnap?.mrrCents ?? 0;
-  const diff = mrrCents - prevMrr;
-
-  await db.insert(snapshots).values({
-    connectionId,
-    date: today,
-    mrrCents,
-    newMrrCents: diff > 0 ? diff : 0,
-    churnedMrrCents: diff < 0 ? Math.abs(diff) : 0,
-    expansionMrrCents: 0,
-    contractionMrrCents: 0,
-    activeSubscriptions,
-  }).onConflictDoUpdate({
-    target: [snapshots.connectionId, snapshots.date],
-    set: { mrrCents, newMrrCents: diff > 0 ? diff : 0, churnedMrrCents: diff < 0 ? Math.abs(diff) : 0, activeSubscriptions },
-  });
-
-  await db.update(connections)
-    .set({ lastSyncedAt: new Date() })
-    .where(eq(connections.id, connectionId));
-
-  return { mrrCents, activeSubscriptions };
+  return persistPull(connectionId, { customers: [...custById.values()], subscriptions: normalized });
 }

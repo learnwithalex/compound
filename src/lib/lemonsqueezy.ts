@@ -1,6 +1,5 @@
 import { db } from "@/db";
-import { connections, snapshots } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { persistPull, type ProviderPull } from "./sync-core";
 
 const BASE = "https://api.lemonsqueezy.com/v1";
 
@@ -16,6 +15,10 @@ interface LSSubscription {
     ends_at: string | null;
     created_at: string;
     updated_at: string;
+    customer_id: number;
+    user_email: string | null;
+    user_name: string | null;
+    trial_ends_at: string | null;
   };
 }
 
@@ -88,46 +91,44 @@ async function fetchAllActiveSubs(apiKey: string): Promise<LSSubscription[]> {
   return result;
 }
 
+const dt = (s: string | null | undefined) => (s ? new Date(s) : null);
+
 export async function syncLemonSqueezyConnection(connectionId: string) {
   const conn = await db.query.connections.findFirst({
     where: (c, { eq }) => eq(c.id, connectionId),
   });
   if (!conn || conn.provider !== "lemonsqueezy") return;
 
-  const today = new Date().toISOString().slice(0, 10);
   const subs = await fetchAllActiveSubs(conn.apiKey);
 
-  const mrrCents = subs.reduce((s, sub) => s + subscriptionMrr(sub), 0);
-  const activeSubscriptions = subs.length;
+  const custById = new Map<string, ProviderPull["customers"][number]>();
+  const normalized: ProviderPull["subscriptions"] = [];
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const prevDate = yesterday.toISOString().slice(0, 10);
+  for (const sub of subs) {
+    const a = sub.attributes;
+    const custExt = a.customer_id != null ? String(a.customer_id) : null;
+    if (custExt && !custById.has(custExt)) {
+      custById.set(custExt, {
+        externalId: custExt,
+        email: a.user_email ?? null,
+        name: a.user_name ?? null,
+        signedUpAt: dt(a.created_at),
+      });
+    }
+    const isAnnual = `${a.variant_name} ${a.product_name}`.toLowerCase().match(/year|annual/);
+    normalized.push({
+      externalId: sub.id,
+      customerExternalId: custExt,
+      planName: a.variant_name ?? a.product_name ?? null,
+      status: a.status === "cancelled" || a.status === "expired" ? "canceled" : a.status,
+      mrrCents: subscriptionMrr(sub),
+      currency: "usd",
+      interval: isAnnual ? "year" : "month",
+      startedAt: dt(a.created_at),
+      trialEndAt: dt(a.trial_ends_at),
+      canceledAt: dt(a.ends_at),
+    });
+  }
 
-  const prevSnap = await db.query.snapshots.findFirst({
-    where: (s, { eq, and }) => and(eq(s.connectionId, connectionId), eq(s.date, prevDate)),
-  });
-
-  const prevMrr = prevSnap?.mrrCents ?? 0;
-  const diff = mrrCents - prevMrr;
-
-  await db.insert(snapshots).values({
-    connectionId,
-    date: today,
-    mrrCents,
-    newMrrCents: diff > 0 ? diff : 0,
-    churnedMrrCents: diff < 0 ? Math.abs(diff) : 0,
-    expansionMrrCents: 0,
-    contractionMrrCents: 0,
-    activeSubscriptions,
-  }).onConflictDoUpdate({
-    target: [snapshots.connectionId, snapshots.date],
-    set: { mrrCents, newMrrCents: diff > 0 ? diff : 0, churnedMrrCents: diff < 0 ? Math.abs(diff) : 0, activeSubscriptions },
-  });
-
-  await db.update(connections)
-    .set({ lastSyncedAt: new Date() })
-    .where(eq(connections.id, connectionId));
-
-  return { mrrCents, activeSubscriptions };
+  return persistPull(connectionId, { customers: [...custById.values()], subscriptions: normalized });
 }

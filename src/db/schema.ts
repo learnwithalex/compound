@@ -32,6 +32,51 @@ export const connections = pgTable("connections", {
   lastSyncedAt: timestamp("last_synced_at"),
 });
 
+// A customer at the provider. One row per (connection, provider customer id).
+export const customers = pgTable("customers", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  connectionId: text("connection_id").notNull().references(() => connections.id, { onDelete: "cascade" }),
+  externalId: text("external_id").notNull(),
+  email: text("email"),
+  name: text("name"),
+  country: text("country"),
+  // When they became a customer at the provider — this is the cohort anchor.
+  signedUpAt: timestamp("signed_up_at"),
+  // Only ever populated if the merchant stamped these onto the provider record
+  // themselves; most accounts have none, so treat null as "unattributed".
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+  referrer: text("referrer"),
+  metadata: text("metadata"),
+  firstSeenAt: timestamp("first_seen_at").notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("customers_conn_external_idx").on(t.connectionId, t.externalId),
+]);
+
+// Current state of one subscription. Lifecycle dates here are what cohort
+// retention and LTV are derived from, so they matter more than the MRR total.
+export const subscriptions = pgTable("subscriptions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  connectionId: text("connection_id").notNull().references(() => connections.id, { onDelete: "cascade" }),
+  customerId: text("customer_id").references(() => customers.id, { onDelete: "cascade" }),
+  externalId: text("external_id").notNull(),
+  planName: text("plan_name"),
+  status: text("status").notNull(), // active | trialing | past_due | canceled
+  mrrCents: bigint("mrr_cents", { mode: "number" }).notNull().default(0),
+  currency: text("currency").notNull().default("usd"),
+  interval: text("interval"), // month | year | week | day
+  quantity: integer("quantity").notNull().default(1),
+  startedAt: timestamp("started_at"),
+  trialStartAt: timestamp("trial_start_at"),
+  trialEndAt: timestamp("trial_end_at"),
+  canceledAt: timestamp("canceled_at"),
+  metadata: text("metadata"),
+  lastSeenAt: timestamp("last_seen_at").notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("subscriptions_conn_external_idx").on(t.connectionId, t.externalId),
+]);
+
 // Daily MRR snapshot per connection
 export const snapshots = pgTable("snapshots", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
