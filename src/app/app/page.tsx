@@ -3,11 +3,12 @@ import { db } from "@/db";
 import { userIdFromSession } from "@/lib/auth";
 import { portfolioMetrics, fmtMrr, type ProductMetrics } from "@/lib/metrics";
 import { productIcon } from "@/lib/format";
-import { AnalyzeButton } from "./analyze-button";
+import { DashboardShell } from "./dashboard-shell";
 import { MiniChart } from "./mini-chart";
-import { ChartCard } from "./trend-chart";
+import { PortfolioHero } from "./portfolio-hero";
+import { MomentumStrip } from "./momentum";
 import { ShareCard } from "./share-card";
-import { ChurnRadar, Milestones } from "./insights";
+import { ChurnRadar } from "./insights";
 import { radarSignals } from "@/lib/insights";
 
 function greeting(email: string): { hello: string; name: string } {
@@ -40,43 +41,44 @@ export default async function AppPage() {
     .sort((a, b) => (a[0] < b[0] ? -1 : 1))
     .map(([date, value]) => ({ date, value }));
 
-  return (
-    <div className="py-10">
-      {/* Welcome */}
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 text-center sm:text-left">
-        <div className="mx-auto sm:mx-0">
+
+  if (!hasData) {
+    return (
+      <div>
+        <div className="mb-8 text-center sm:text-left">
           <h1 className="text-[26px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
             {hello}, {name}.
           </h1>
-          <p className="mt-1 text-[14px] text-lx-muted">
-            {hasData
-              ? `Here's your portfolio across ${ranked.length} product${ranked.length === 1 ? "" : "s"}.`
-              : "Let's get your first product connected."}
-          </p>
+          <p className="mt-1 text-[14px] text-lx-muted">Let&apos;s get your first product connected.</p>
         </div>
-        {hasData && <AnalyzeButton />}
-      </div>
-
-      {!hasData ? (
         <EmptyState />
-      ) : (
-        <>
-          {/* Shareable MRR card */}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <DashboardShell
+        metrics={metrics}
+        series={portfolioSeries}
+        hello={hello}
+        name={name}
+        subtitle={`Here's your portfolio across ${ranked.length} product${ranked.length === 1 ? "" : "s"}.`}
+      >
+        <div className="stagger min-w-0 pb-14">
+          <UpgradeBanner />
+          <StreakCard />
+
+          <PortfolioHero metrics={metrics} series={portfolioSeries} />
+
+          <MomentumStrip series={portfolioSeries} totalMrrCents={metrics.totalMrrCents} />
+
           <ShareCard metrics={metrics} />
 
-          {/* Churn radar */}
-          <ChurnRadar signals={radarSignals(ranked)} />
+          <div className="mb-8">
+            <ChurnRadar signals={radarSignals(ranked)} />
+          </div>
 
-          {/* Portfolio trend */}
-          <ChartCard
-            className="mb-10"
-            label="Monthly recurring revenue"
-            caption="Last 90 days · all products"
-            series={portfolioSeries}
-            height={300}
-          />
-
-          {/* Products */}
           <div className="mb-4 flex items-baseline justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">
               Products · {ranked.length}
@@ -86,18 +88,13 @@ export default async function AppPage() {
             </a>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {ranked.map((p, i) => (
               <ProductCard key={p.connectionId} product={p} rank={i + 1} />
             ))}
           </div>
-
-          {/* Milestones */}
-          <div className="mt-4 pb-14">
-            <Milestones products={ranked} />
-          </div>
-        </>
-      )}
+        </div>
+      </DashboardShell>
     </div>
   );
 }
@@ -111,49 +108,108 @@ function ProductCard({ product: p, rank }: { product: ProductMetrics; rank: numb
   const icon = productIcon(p.label, p.provider);
 
   return (
-    <a href={`/app/products/${p.connectionId}`} className="block rounded-2xl bg-white px-5 pb-4 pt-4 transition-shadow hover:shadow-md" style={{ border: "1px solid #ddd9d0" }}>
-      <div className="mb-1 flex items-center gap-2.5">
-        <span className="text-[11px] font-semibold tabular-nums text-lx-faint">#{rank}</span>
+    <a
+      href={`/app/products/${p.connectionId}?name=${encodeURIComponent(p.label)}`}
+      className="group block overflow-hidden rounded-sm bg-white pb-4 transition-colors hover:border-[#dcdcdc]"
+      style={{ border: "1px solid #ebebeb" }}
+    >
+      <div className="mb-1 flex items-center gap-2.5 px-5 pt-4">
+        <span className="w-3 shrink-0 text-[11px] font-medium tabular-nums text-lx-faint">{rank}</span>
         <img
           src={icon}
           alt={p.label}
-          width={40}
-          height={40}
-          className="h-10 w-10 shrink-0 rounded-xl object-cover"
-          style={{ border: "1px solid #ece9e3" }}
+          width={36}
+          height={36}
+          className="h-9 w-9 shrink-0 rounded-sm object-cover"
+          style={{ border: "1px solid #ebebeb" }}
           loading="lazy"
         />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[14px] font-bold text-lx-text" style={{ letterSpacing: "-0.01em" }}>{p.label}</span>
-          <span className="flex items-center gap-1 text-[10px] text-lx-faint">
+          <span className="block truncate text-[13.5px] font-semibold text-lx-text">{p.label}</span>
+          <span className="flex items-center gap-1 text-[10.5px] text-lx-faint">
             {p.provider} · {p.activeSubscriptions.toLocaleString()} subs
           </span>
         </span>
-        <span className="flex items-center gap-2">
-          <ChangePill change={change} />
-          <span className="text-[18px] font-bold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>{fmtMrr(p.mrrCents)}</span>
+        <span className="shrink-0 text-right">
+          <span className="block text-[17px] font-semibold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>
+            {fmtMrr(p.mrrCents)}
+          </span>
+          <span
+            className="block whitespace-nowrap text-[10.5px] font-medium tabular-nums"
+            style={{ color: up ? "#0f9b6c" : down ? "#c8392c" : "#9a9a9a" }}
+          >
+            {up ? "+" : ""}{change.toFixed(1)}% · 30d
+          </span>
         </span>
       </div>
 
       {p.history.length > 1 && (
-        <MiniChart data={p.history.map((h) => h.mrrCents)} color={up ? "#10b981" : down ? "#e3493c" : p.color} />
+        <div className="px-5">
+          <MiniChart data={p.history.map((h) => h.mrrCents)} color={up ? "#10b981" : down ? "#e3493c" : "#b4b4b4"} />
+        </div>
       )}
     </a>
   );
 }
 
-function ChangePill({ change }: { change: number }) {
-  const up = change > 0;
-  const down = change < 0;
+/* ============================================================ upgrade banner */
+
+function UpgradeBanner() {
   return (
-    <span
-      className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums ${
-        up ? "text-lx-green" : down ? "text-lx-red" : "text-lx-faint"
-      }`}
-      style={{ background: up ? "rgba(16,185,129,0.1)" : down ? "rgba(227,73,60,0.1)" : "rgba(0,0,0,0.05)" }}
-    >
-      {up ? "▲" : down ? "▼" : "•"} {up ? "+" : ""}{change.toFixed(1)}% last 30d
-    </span>
+    <div className="mb-4 flex items-center gap-4 rounded-sm bg-white px-5 py-4" style={{ border: "1px solid #ebebeb" }}>
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm"
+        style={{ background: "#f0f0f0" }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-semibold text-lx-text">Try compound Pro free for 14 days</p>
+        <p className="mt-0.5 text-[12px]" style={{ color: "#5e6ad2" }}>
+          Unlock unlimited products, AI briefings, team collaboration, and more — free for 14 days, no charge.
+        </p>
+      </div>
+      <a
+        href="#"
+        className="shrink-0 rounded-sm px-3.5 py-1.5 text-[12px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f5]"
+        style={{ border: "1px solid #d0d0d0" }}
+      >
+        Start free trial
+      </a>
+    </div>
+  );
+}
+
+/* ============================================================ streak card */
+
+function StreakCard() {
+  const days = Array.from({ length: 14 }, () => false);
+  return (
+    <div className="mb-6 rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+      <div className="flex items-center gap-1.5 px-5 py-2.5" style={{ borderBottom: "1px solid #ebebeb" }}>
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="2,4 6,8 10,4" />
+        </svg>
+        <span className="text-[12px] font-semibold text-lx-muted">Your streak</span>
+      </div>
+      <div className="flex items-center gap-4 px-5 py-4">
+        <span className="text-[22px] leading-none">🔥</span>
+        <div className="flex-1">
+          <p className="text-[16px] font-bold text-lx-text">0-day streak</p>
+          <p className="text-[12px] text-lx-muted">7 days to your 7-day milestone</p>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex gap-[3px]">
+            {days.map((active, i) => (
+              <div key={i} className="h-[13px] w-[13px] rounded-sm" style={{ background: active ? "#10b981" : "#efefef" }} />
+            ))}
+          </div>
+          <a href="#" className="text-[12px] font-medium text-lx-muted hover:text-lx-text">View history →</a>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -162,8 +218,8 @@ function ChangePill({ change }: { change: number }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9c9894" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 3v18h18" /><path d="M7 16l4-4 4 4 4-6" />
         </svg>
       </div>
@@ -173,7 +229,7 @@ function EmptyState() {
       </p>
       <a
         href="/app/connect"
-        className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+        className="inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
         style={{ background: "#5e6ad2" }}
       >
         Connect a product →

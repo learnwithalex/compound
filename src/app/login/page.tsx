@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { CompoundMark } from "../compound-logo";
+import { CompoundWordmark } from "../compound-logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,56 +21,82 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f3f1ec] px-4">
-      <div className="w-full max-w-[360px]">
-        {/* Logo */}
-        <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <CompoundMark size={44} theme="light" />
-          <div>
-            <div className="text-[18px] font-bold tracking-tight text-[#1a1a1a]" style={{ letterSpacing: "-0.025em" }}>compound</div>
-            <div className="text-[13px] text-[#9c9894]">Revenue OS for indie hackers</div>
-          </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 py-8">
+      <div className="w-full max-w-[380px]">
+
+        {/* Logo row */}
+        <div className="mb-10 flex items-center justify-between">
+          <CompoundWordmark theme="light" height={20} />
+          <a
+            href="/api/auth/demo"
+            className="rounded-full px-4 py-1.5 text-[13px] font-medium text-[#3d3d3d] hover:bg-[#f5f5f4]"
+            style={{ border: "1px solid #dddad5" }}
+          >
+            Try demo
+          </a>
         </div>
 
-        {/* Card */}
-        <div className="rounded-xl bg-white px-6 py-6" style={{ border: "1px solid #ddd9d0", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-          {state === "sent" ? (
-            <div className="text-center">
-              <div className="mb-2 text-[15px] font-semibold text-[#1a1a1a]">Check your email</div>
-              <p className="text-[13px] text-[#5c5856]">Magic link sent to <strong className="text-[#1a1a1a]">{email}</strong></p>
-            </div>
-          ) : (
-            <form onSubmit={submit} className="flex flex-col gap-3">
+        {state === "sent" ? (
+          <div>
+            <h1 className="text-[26px] font-bold leading-[1.2] text-[#1a1a1a]" style={{ letterSpacing: "-0.025em" }}>
+              Check your inbox.
+            </h1>
+            <p className="mt-3 text-[14px] leading-relaxed text-[#6b6b6b]">
+              Magic link sent to <span className="font-semibold text-[#1a1a1a]">{email}</span>. Click it to sign in.
+            </p>
+            <button onClick={() => setState("idle")} className="mt-5 text-[13px] font-medium text-[#5e6ad2] hover:opacity-80">
+              ← Use a different email
+            </button>
+          </div>
+        ) : (
+          <div>
+            <h1 className="text-[26px] font-bold leading-[1.2] text-[#1a1a1a]" style={{ letterSpacing: "-0.025em" }}>
+              Welcome back.<br />Sign in to compound.
+            </h1>
+            <p className="mt-3 text-[14px] leading-relaxed text-[#6b6b6b]">
+              Track your MRR, view AI briefings, and keep your whole portfolio in one place.
+            </p>
+
+            <form onSubmit={submit} className="mt-8 flex flex-col gap-3">
               <div>
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9c9894]">Email address</label>
+                <label className="mb-1.5 block text-[13px] font-medium text-[#1a1a1a]">
+                  Email address
+                </label>
                 <input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg px-3 py-2.5 text-[14px] text-[#1a1a1a] placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-                  style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}
+                  className="w-full rounded-lg bg-white px-4 py-2.5 text-[14px] text-[#1a1a1a] placeholder:text-[#c0bdb8] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/25"
+                  style={{ border: "1px solid #dddad5" }}
                 />
               </div>
+
               <button
                 type="submit"
                 disabled={state === "sending"}
-                className="rounded-lg py-2.5 text-[14px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+                className="w-full rounded-lg py-2.5 text-[14px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
                 style={{ background: "#5e6ad2" }}
               >
                 {state === "sending" ? "Sending…" : "Continue with email"}
               </button>
-              {state === "error" && <p className="text-center text-[12px] text-[#e3493c]">Something went wrong. Try again.</p>}
-            </form>
-          )}
-        </div>
 
-        <div className="mt-4 text-center">
-          <a href="/api/auth/demo" className="text-[12px] text-[#5e6ad2] hover:opacity-80">
-            Open demo →
-          </a>
-        </div>
+              {state === "error" && (
+                <p className="text-[12px] text-[#e3493c]">Something went wrong. Try again.</p>
+              )}
+            </form>
+
+            <div className="mt-6 pt-5" style={{ borderTop: "1px solid #f0ede8" }}>
+              <p className="text-[12px] leading-relaxed text-[#b0aba3]">
+                By signing in, you agree to compound&apos;s{" "}
+                <a href="#" className="underline underline-offset-2 hover:text-[#6b6b6b]">Terms</a>{" "}
+                and{" "}
+                <a href="#" className="underline underline-offset-2 hover:text-[#6b6b6b]">Privacy Policy</a>.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

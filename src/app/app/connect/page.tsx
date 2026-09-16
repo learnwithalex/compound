@@ -76,7 +76,7 @@ export default function ConnectPage() {
   }
 
   return (
-    <div className="px-7 py-6">
+    <div>
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect</p>
@@ -93,9 +93,9 @@ export default function ConnectPage() {
               key={p.id}
               type="button"
               onClick={() => setForm((f) => ({ ...f, provider: p.id }))}
-              className="rounded-xl bg-white p-4 text-left transition-shadow hover:shadow-sm"
+              className="rounded-sm bg-white p-4 text-left transition-shadow hover:shadow-sm"
               style={{
-                border: form.provider === p.id ? "1.5px solid #5e6ad2" : "1px solid #ddd9d0",
+                border: form.provider === p.id ? "1.5px solid #5e6ad2" : "1px solid #ebebeb",
               }}
             >
               <img
@@ -103,7 +103,7 @@ export default function ConnectPage() {
                 alt={p.label}
                 width={28}
                 height={28}
-                className="h-7 w-7 rounded-md object-contain"
+                className="h-7 w-7 rounded-sm object-contain"
                 loading="lazy"
               />
               <p className="mt-2.5 text-[13px] font-bold text-lx-text">{p.label}</p>
@@ -119,14 +119,14 @@ export default function ConnectPage() {
 
       <div className="max-w-md">
         {/* Form card */}
-        <form onSubmit={addConnection} className="rounded-xl bg-white p-6" style={{ border: "1px solid #ddd9d0" }}>
+        <form onSubmit={addConnection} className="rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
           <div className="mb-4">
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Provider</label>
             <select
               value={form.provider}
               onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value }))}
-              className="w-full rounded-lg px-3 py-2.5 text-[13px] text-lx-text focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}
+              className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
             >
               <option value="stripe">Stripe</option>
               <option value="lemonsqueezy">Lemon Squeezy</option>
@@ -144,8 +144,8 @@ export default function ConnectPage() {
               value={form.label}
               onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
               required
-              className="w-full rounded-lg px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}
+              className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
             />
           </div>
 
@@ -159,8 +159,8 @@ export default function ConnectPage() {
               value={form.apiKey}
               onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
               required
-              className="w-full rounded-lg px-3 py-2.5 font-mono text-[12px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}
+              className="w-full rounded-sm px-3 py-2.5 font-mono text-[12px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
             />
             <p className="mt-1.5 text-[11px] text-lx-faint">Read-only restricted key recommended. We never write to your account.</p>
           </div>
@@ -170,7 +170,7 @@ export default function ConnectPage() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-lg py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+            className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
             style={{ background: "#5e6ad2" }}
           >
             {busy ? "Verifying…" : "Add product"}
@@ -179,8 +179,8 @@ export default function ConnectPage() {
 
         {/* Connected list */}
         {connections.length > 0 && (
-          <div className="mt-4 rounded-xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
-            <div className="divide-y divide-[#ddd9d0]">
+          <div className="mt-4 rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+            <div className="divide-y divide-[#ebebeb]">
               {connections.map((c) => (
                 <div key={c.id} className="flex items-center gap-2.5 px-5 py-3">
                   <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
@@ -190,11 +190,11 @@ export default function ConnectPage() {
                 </div>
               ))}
             </div>
-            <div className="px-5 py-4" style={{ borderTop: "1px solid #ddd9d0" }}>
+            <div className="px-5 py-4" style={{ borderTop: "1px solid #ebebeb" }}>
               <button
                 onClick={syncAll}
                 disabled={syncing}
-                className="w-full rounded-lg py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+                className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
                 style={{ background: "#5e6ad2" }}
               >
                 {syncing ? "Syncing…" : "Sync & go to dashboard →"}

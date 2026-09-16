@@ -34,12 +34,12 @@ export function CohortGrid({ rows, color = "#5e6ad2" }: { rows: CohortRow[]; col
               {Array.from({ length: cols }, (_, i) => {
                 const v = r.retention[i];
                 if (v === null || v === undefined) {
-                  return <td key={i} className="rounded-md" style={{ background: "#faf9f7" }} />;
+                  return <td key={i} className="rounded-sm" style={{ background: "#faf9f7" }} />;
                 }
                 return (
                   <td
                     key={i}
-                    className="rounded-md py-1.5 text-center text-[11px] font-semibold tabular-nums"
+                    className="rounded-sm py-1.5 text-center text-[11px] font-semibold tabular-nums"
                     style={{ background: heat(v, color), color: v > 55 ? "#ffffff" : "#4a4744" }}
                   >
                     {v.toFixed(0)}

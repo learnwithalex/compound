@@ -136,7 +136,7 @@ function AnnouncementBar() {
 
 function SiteNav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-[#ddd9d0] bg-[#f3f1ec]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[#e7e3db] bg-[#f3f1ec]/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3.5">
         <Link href="/" className="flex items-center gap-2" aria-label="Compound home">
           <CompoundWordmark height={24} />
@@ -203,8 +203,8 @@ function Hero() {
             </div>
 
             {/* connect bar */}
-            <div className="mb-5 flex items-center overflow-hidden rounded-lg border border-[#ddd9d0] bg-white">
-              <div className="flex shrink-0 items-center gap-1.5 border-r border-[#ddd9d0] px-3 py-3">
+            <div className="mb-5 flex items-center overflow-hidden rounded-lg border border-[#e7e3db] bg-white">
+              <div className="flex shrink-0 items-center gap-1.5 border-r border-[#e7e3db] px-3 py-3">
                 <img src="https://cdn.simpleicons.org/stripe/635bff" alt="Stripe" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
                 <img src="https://cdn.simpleicons.org/lemonsqueezy/e5a00d" alt="Lemon Squeezy" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
                 <img src="/polar-icon.svg" alt="Polar" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
@@ -216,7 +216,7 @@ function Hero() {
                 <span className="font-mono text-[11px] text-[#9c9894]">$</span>
                 <span className="font-mono text-[12px] text-[#5c5856]">compound connect --all</span>
               </div>
-              <button className="shrink-0 border-l border-[#ddd9d0] px-3 py-3 text-[#c8c4bc] hover:text-[#5c5856]">
+              <button className="shrink-0 border-l border-[#e7e3db] px-3 py-3 text-[#c8c4bc] hover:text-[#5c5856]">
                 <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <rect x="4" y="4" width="9" height="9" rx="1.5" />
                   <path d="M3 10H2.5A1.5 1.5 0 0 1 1 8.5v-6A1.5 1.5 0 0 1 2.5 1h6A1.5 1.5 0 0 1 10 2.5V3" />
@@ -355,7 +355,7 @@ function AbstractionSection() {
   const dotColors = ["bg-[#5e6ad2]", "bg-[#f97316]", "bg-emerald-400"];
 
   return (
-    <section id="abstraction" className="scroll-mt-20 border-t border-[#ddd9d0] px-6 py-24">
+    <section id="abstraction" className="scroll-mt-20 border-t border-[#e7e3db] px-6 py-24">
       <div className="mx-auto max-w-6xl">
         {/* header */}
         <div className="mb-12">
@@ -408,7 +408,7 @@ function AbstractionSection() {
             </div>
 
             {/* total bar */}
-            <div className="border-t border-[#ddd9d0] bg-[#1a1a2e] px-5 py-4">
+            <div className="border-t border-[#e7e3db] bg-[#1a1a2e] px-5 py-4">
               <div className="mb-3 flex items-baseline justify-between">
                 <span className="text-[12px] font-medium text-white/60">Total Portfolio MRR</span>
                 <span className="text-[26px] font-bold tabular-nums text-white">$140,501</span>
@@ -494,7 +494,7 @@ function AbstractionSection() {
 /* ============================================= lifecycle section */
 function LifecycleSection() {
   return (
-    <section className="border-t border-[#ddd9d0] bg-white px-6 py-28">
+    <section className="border-t border-[#e7e3db] bg-white px-6 py-28">
       <div className="mx-auto max-w-6xl">
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">MRR Lifecycle</p>
         <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
@@ -545,7 +545,7 @@ function LifecycleSection() {
 /* ================================================= problem section */
 function ProblemSection() {
   return (
-    <section className="border-t border-[#ddd9d0] px-6 py-28">
+    <section className="border-t border-[#e7e3db] px-6 py-28">
       <div className="mx-auto max-w-6xl">
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">The problem</p>
         <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
@@ -555,7 +555,7 @@ function ProblemSection() {
           You want to see your numbers. Instead, you're logging into dashboards.
         </p>
 
-        <div className="grid gap-px bg-[#ddd9d0] overflow-hidden rounded-sm border border-[#ddd9d0] sm:grid-cols-2">
+        <div className="grid gap-px bg-[#e7e3db] overflow-hidden rounded-sm border border-[#e7e3db] sm:grid-cols-2">
           {[
             {
               title: "Fragmented Dashboards",
@@ -589,7 +589,7 @@ function ProblemSection() {
 /* ================================================= how it works */
 function HowItWorks() {
   return (
-    <section id="how" className="scroll-mt-20 border-t border-[#ddd9d0] bg-white px-6 py-28">
+    <section id="how" className="scroll-mt-20 border-t border-[#e7e3db] bg-white px-6 py-28">
       <div className="mx-auto max-w-6xl">
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">How it works</p>
         <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
@@ -765,7 +765,7 @@ function HowItWorks() {
 /* ================================================= benefits */
 function BenefitsSection() {
   return (
-    <section className="border-t border-[#ddd9d0] px-6 py-20">
+    <section className="border-t border-[#e7e3db] px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 sm:grid-cols-3">
           {[
@@ -783,7 +783,7 @@ function BenefitsSection() {
             },
           ].map((b) => (
             <div key={b.title}>
-              <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#ddd9d0] bg-white">
+              <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7e3db] bg-white">
                 <CheckIcon className="h-4 w-4 text-[#5c5856]" />
               </div>
               <h3 className="mb-2 text-[15px] font-semibold text-[#1a1a1a]">{b.title}</h3>
@@ -799,7 +799,7 @@ function BenefitsSection() {
 /* ================================================ pricing */
 function PricingSection() {
   return (
-    <section id="pricing" className="scroll-mt-20 border-t border-[#ddd9d0] bg-white px-6 py-28">
+    <section id="pricing" className="scroll-mt-20 border-t border-[#e7e3db] bg-white px-6 py-28">
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Pricing</p>
         <h2 className="mb-4 text-[36px] font-[680] tracking-[-0.025em] text-[#1a1a1a]">
@@ -896,11 +896,11 @@ function FAQSection() {
   ];
 
   return (
-    <section className="border-t border-[#ddd9d0] px-6 py-28">
+    <section className="border-t border-[#e7e3db] px-6 py-28">
       <div className="mx-auto max-w-3xl">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">FAQ</p>
         <h2 className="mb-14 text-[32px] font-[680] tracking-[-0.022em] text-[#1a1a1a]">Common questions</h2>
-        <div className="divide-y divide-[#ddd9d0]">
+        <div className="divide-y divide-[#e7e3db]">
           {faqs.map((f) => (
             <details key={f.q} className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
@@ -919,10 +919,10 @@ function FAQSection() {
 /* ==================================================== footer */
 function SiteFooter() {
   return (
-    <footer className="border-t border-[#ddd9d0] bg-white px-6 py-16">
+    <footer className="border-t border-[#e7e3db] bg-white px-6 py-16">
       <div className="mx-auto max-w-6xl">
         {/* Newsletter strip */}
-        <div className="mb-14 flex flex-col items-start gap-4 rounded-lg border border-[#ddd9d0] bg-[#f3f1ec] p-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-14 flex flex-col items-start gap-4 rounded-lg border border-[#e7e3db] bg-[#f3f1ec] p-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="mb-1 text-[14px] font-semibold text-[#1a1a1a]">Stay updated</p>
             <p className="text-[13px] text-[#9c9894]">New integrations, product updates, and indie hacker stories. No spam.</p>
@@ -931,7 +931,7 @@ function SiteFooter() {
             <input
               type="email"
               placeholder="you@example.com"
-              className="flex-1 rounded border border-[#ddd9d0] bg-white px-3 py-2 text-[13px] text-[#1a1a1a] placeholder:text-[#9c9894] focus:outline-none focus:ring-1 focus:ring-[#1a1a2e]"
+              className="flex-1 rounded border border-[#e7e3db] bg-white px-3 py-2 text-[13px] text-[#1a1a1a] placeholder:text-[#9c9894] focus:outline-none focus:ring-1 focus:ring-[#1a1a2e]"
             />
             <button className="rounded bg-[#1a1a2e] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-85">
               Subscribe
@@ -968,7 +968,7 @@ function SiteFooter() {
           ]} />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#ddd9d0] pt-8 text-[12px] text-[#9c9894]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e7e3db] pt-8 text-[12px] text-[#9c9894]">
           <span>© 2026 Compound. MIT licensed.</span>
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />

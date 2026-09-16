@@ -17,14 +17,14 @@ export default async function AnalyticsPage() {
 
   if (subs.length === 0) {
     return (
-      <div className="py-10">
+      <div>
         <h1 className="text-[26px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>Analytics</h1>
-        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl bg-white py-20 text-center" style={{ border: "1px solid #ddd9d0" }}>
+        <div className="mt-8 flex flex-col items-center justify-center rounded-sm bg-white py-20 text-center" style={{ border: "1px solid #ebebeb" }}>
           <p className="text-[15px] font-semibold text-lx-text">No customer data yet</p>
           <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-lx-muted">
             Cohorts, LTV and retention are built from individual subscriptions. Connect a product and run a sync to populate them.
           </p>
-          <a href="/app/connect" className="mt-6 rounded-lg px-5 py-2.5 text-[13px] font-semibold text-white" style={{ background: "#5e6ad2" }}>
+          <a href="/app/connect" className="mt-6 rounded-sm px-5 py-2.5 text-[13px] font-semibold text-white" style={{ background: "#5e6ad2" }}>
             Connect a product →
           </a>
         </div>
@@ -37,7 +37,7 @@ export default async function AnalyticsPage() {
   const funnel = lifecycleFunnel(subs);
 
   return (
-    <div className="py-10 pb-20">
+    <div className="pb-20">
       <div className="mb-8">
         <h1 className="text-[26px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>Analytics</h1>
         <p className="mt-1 text-[14px] text-lx-muted">
@@ -47,17 +47,17 @@ export default async function AnalyticsPage() {
 
       {/* Unit economics */}
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Tile label="ARPA" value={fmtMrr(m.arpaCents)} sub="avg revenue per account" icon={IconArpa} />
-        <Tile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo average lifetime`} icon={IconLtv} />
+        <Tile label="ARPA" value={fmtMrr(m.arpaCents)} sub="avg revenue per account" icon={IconArpa} accent="#fff2a8" />
+        <Tile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo average lifetime`} icon={IconLtv} accent="#c9f0ff" />
         <Tile label="Monthly churn" value={`${m.monthlyChurnPct.toFixed(1)}%`} sub="customers lost, last 30d"
-              valueColor={m.monthlyChurnPct > 5 ? "#e3493c" : undefined} icon={IconChurn} />
+              valueColor={m.monthlyChurnPct > 5 ? "#e3493c" : undefined} icon={IconChurn} accent="#ffd4e8" />
         <Tile label="Quick ratio" value={m.quickRatio === null ? "∞" : m.quickRatio.toFixed(1)}
               sub="new MRR per $1 churned"
-              valueColor={m.quickRatio !== null && m.quickRatio < 1 ? "#e3493c" : "#10b981"} icon={IconQuick} />
+              valueColor={m.quickRatio !== null && m.quickRatio < 1 ? "#e3493c" : "#10b981"} icon={IconQuick} accent="#d4ffc9" />
       </div>
 
       {/* Cohort retention */}
-      <section className="mb-6 overflow-hidden rounded-2xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
+      <section className="mb-6 overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
         <div className="flex items-baseline justify-between px-7 pb-3 pt-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">MRR cohort retention</p>
           <p className="text-[11px] text-lx-faint">% of signup-month MRR still active</p>
@@ -89,16 +89,26 @@ export default async function AnalyticsPage() {
 /* ============================================================ pieces */
 
 function Tile({
-  label, value, sub, valueColor, icon: Icon,
-}: { label: string; value: string; sub: string; valueColor?: string; icon?: () => React.ReactElement }) {
+  label, value, sub, valueColor, icon: Icon, accent,
+}: { label: string; value: string; sub: string; valueColor?: string; icon?: () => React.ReactElement; accent?: string }) {
   return (
-    <div className="rounded-2xl bg-white px-5 py-4" style={{ border: "1px solid #ddd9d0" }}>
-      <div className="mb-1 flex items-center gap-1.5 text-lx-faint">
-        {Icon && <Icon />}
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</p>
+    <div
+      className="rounded-sm bg-white px-5 py-4 transition-transform hover:-translate-y-1"
+      style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}
+    >
+      <div className="mb-2 flex items-center gap-2">
+        {Icon && (
+          <span
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm"
+            style={{ background: accent ?? "#fff2a8", border: "1px solid #1c1c22" }}
+          >
+            <Icon />
+          </span>
+        )}
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-lx-faint">{label}</p>
       </div>
-      <p className="text-[22px] font-bold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em", color: valueColor }}>{value}</p>
-      <p className="mt-0.5 text-[11px] text-lx-faint">{sub}</p>
+      <p className="text-[23px] font-extrabold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em", color: valueColor }}>{value}</p>
+      <p className="mt-0.5 text-[11px] font-medium text-lx-faint">{sub}</p>
     </div>
   );
 }

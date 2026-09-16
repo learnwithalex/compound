@@ -1,4 +1,4 @@
-import { fmtMrr } from "@/lib/metrics";
+import { fmtMrr } from "@/lib/format";
 
 /** 1 / 2 / 2.5 / 5 / 10 x a power of ten — the steps that read as round money. */
 function niceStep(raw: number): number {
@@ -16,10 +16,12 @@ export function TrendChart({
   series,
   height = 240,
   color = "#5e6ad2",
+  animate = false,
 }: {
   series: { date: string; value: number }[];
   height?: number;
   color?: string;
+  animate?: boolean;
 }) {
   const data = series.map((s) => s.value);
   const w = 960;
@@ -110,9 +112,9 @@ export function TrendChart({
         </g>
       ))}
 
-      <line x1={padX} x2={w - padX} y1={floor} y2={floor} stroke="#ddd9d0" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      <line x1={padX} x2={w - padX} y1={floor} y2={floor} stroke="#ebebeb" strokeWidth="1" vectorEffect="non-scaling-stroke" />
 
-      <path d={area} fill={`url(#fill-${uid})`} />
+      <path d={area} fill={`url(#fill-${uid})`} className={animate ? "draw-area" : undefined} />
       <path
         d={d}
         fill="none"
@@ -121,9 +123,11 @@ export function TrendChart({
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
+        className={animate ? "draw-line" : undefined}
+        pathLength={animate ? 1 : undefined}
       />
 
-      <circle cx={last[0]} cy={last[1]} r="9" fill={color} opacity="0.14" />
+      <circle cx={last[0]} cy={last[1]} r="9" fill={color} opacity="0.14" className={animate ? "ping-ring" : undefined} />
       <circle cx={last[0]} cy={last[1]} r="4" fill={color} stroke="#ffffff" strokeWidth="2" vectorEffect="non-scaling-stroke" />
 
       {labelAt.map((i) => (
@@ -170,7 +174,7 @@ export function ChartCard({
   const up = pct >= 0;
 
   return (
-    <section className={`overflow-hidden rounded-2xl bg-white ${className}`} style={{ border: "1px solid #ddd9d0" }}>
+    <section className={`overflow-hidden rounded-sm bg-white ${className}`} style={{ border: "1px solid #ebebeb" }}>
       <div className="flex flex-wrap items-end justify-between gap-4 px-7 pb-5 pt-6">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">{label}</p>
@@ -200,13 +204,13 @@ export function ChartCard({
       {ready ? (
         <TrendChart series={series} height={height} color={color} />
       ) : (
-        <div className="mx-7 mb-7 flex h-[160px] items-center justify-center rounded-xl text-[13px] text-lx-faint" style={{ background: "#f7f5f1" }}>
+        <div className="mx-7 mb-7 flex h-[160px] items-center justify-center rounded-sm text-[13px] text-lx-faint" style={{ background: "#fafafa" }}>
           {emptyHint}
         </div>
       )}
 
       {ready && (
-        <div className="grid grid-cols-3" style={{ borderTop: "1px solid #f0ede8" }}>
+        <div className="grid grid-cols-3" style={{ borderTop: "1px solid #f0f0f0" }}>
           <Foot label="Low" value={fmtMrr(Math.min(...values))} />
           <Foot label="Average" value={fmtMrr(Math.round(values.reduce((a, b) => a + b, 0) / values.length))} divider />
           <Foot label="High" value={fmtMrr(Math.max(...values))} divider />
@@ -218,7 +222,7 @@ export function ChartCard({
 
 function Foot({ label, value, divider }: { label: string; value: string; divider?: boolean }) {
   return (
-    <div className="px-7 py-3.5" style={divider ? { borderLeft: "1px solid #f0ede8" } : undefined}>
+    <div className="px-7 py-3.5" style={divider ? { borderLeft: "1px solid #f0f0f0" } : undefined}>
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-lx-faint">{label}</p>
       <p className="mt-1 text-[14px] font-semibold tabular-nums text-lx-text">{value}</p>
     </div>

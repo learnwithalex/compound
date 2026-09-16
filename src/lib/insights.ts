@@ -2,12 +2,26 @@ import type { ProductMetrics } from "./metrics";
 
 /* ============================================================ churn radar */
 
+export type Severity = "red" | "amber";
+
+export interface RadarReason {
+  severity: Severity;
+  message: string;
+}
+
+/** One entry per struggling product rather than per reason: a product with
+ *  three problems is still one thing to go and fix. */
 export interface RadarSignal {
   connectionId: string;
   label: string;
   color: string;
-  severity: "red" | "amber";
-  message: string;
+  provider: string;
+  severity: Severity;
+  /** Churned MRR over the last 30 days — what triage should be ordered by. */
+  atRiskCents: number;
+  /** Churn minus new + expansion; positive means the product is net shrinking. */
+  netCents: number;
+  reasons: RadarReason[];
 }
 
 function downStreak(history: { mrrCents: number }[]): number {
@@ -21,28 +35,43 @@ function downStreak(history: { mrrCents: number }[]): number {
 
 export function radarSignals(products: ProductMetrics[]): RadarSignal[] {
   const signals: RadarSignal[] = [];
+
   for (const p of products) {
-    const per: RadarSignal[] = [];
+    const reasons: RadarReason[] = [];
     const streak = downStreak(p.history);
-    if (streak >= 3) {
-      per.push({ connectionId: p.connectionId, label: p.label, color: p.color, severity: "red", message: `Down ${streak} days straight` });
-    } else if (streak === 2) {
-      per.push({ connectionId: p.connectionId, label: p.label, color: p.color, severity: "amber", message: "Down 2 days in a row" });
-    }
+    if (streak >= 3) reasons.push({ severity: "red", message: `Down ${streak} days straight` });
+    else if (streak === 2) reasons.push({ severity: "amber", message: "Down 2 days in a row" });
+
     const growth = p.newMrrCents + p.expansionMrrCents;
     if (p.churnedMrrCents > 0 && p.churnedMrrCents > growth) {
-      per.push({ connectionId: p.connectionId, label: p.label, color: p.color, severity: "red", message: "Churn outpacing growth" });
+      reasons.push({ severity: "red", message: "Churn outpacing growth" });
     }
+
     if (p.mrrChange30d <= -5) {
-      per.push({ connectionId: p.connectionId, label: p.label, color: p.color, severity: "red", message: `Down ${Math.abs(p.mrrChange30d).toFixed(1)}% in 30d` });
-    } else if (p.mrrChange30d < 0 && per.length === 0 && p.churnedMrrCents > 0) {
-      per.push({ connectionId: p.connectionId, label: p.label, color: p.color, severity: "amber", message: `Drifting down ${Math.abs(p.mrrChange30d).toFixed(1)}% in 30d` });
+      reasons.push({ severity: "red", message: `Down ${Math.abs(p.mrrChange30d).toFixed(1)}% in 30d` });
+    } else if (p.mrrChange30d < 0 && reasons.length === 0 && p.churnedMrrCents > 0) {
+      reasons.push({ severity: "amber", message: `Drifting down ${Math.abs(p.mrrChange30d).toFixed(1)}% in 30d` });
     }
-    // Red first, max 2 per product to avoid noise
-    per.sort((a, b) => (a.severity === b.severity ? 0 : a.severity === "red" ? -1 : 1));
-    signals.push(...per.slice(0, 2));
+
+    if (reasons.length === 0) continue;
+
+    reasons.sort((a, b) => (a.severity === b.severity ? 0 : a.severity === "red" ? -1 : 1));
+    signals.push({
+      connectionId: p.connectionId,
+      label: p.label,
+      color: p.color,
+      provider: p.provider,
+      severity: reasons.some((r) => r.severity === "red") ? "red" : "amber",
+      atRiskCents: p.churnedMrrCents,
+      netCents: p.churnedMrrCents - growth,
+      reasons,
+    });
   }
-  return signals;
+
+  // Worst first: red before amber, then by the money actually at stake.
+  return signals.sort((a, b) =>
+    a.severity !== b.severity ? (a.severity === "red" ? -1 : 1) : b.atRiskCents - a.atRiskCents,
+  );
 }
 
 /* ============================================================ milestones */

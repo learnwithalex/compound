@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { userIdFromSession } from "@/lib/auth";
-import { singleProductMetrics, fmtMrr } from "@/lib/metrics";
+import { singleProductMetrics, portfolioMetrics, fmtMrr } from "@/lib/metrics";
 import { productIcon } from "@/lib/format";
 import { Avatar } from "@/app/app/avatar";
 import { milestoneFor, radarSignals } from "@/lib/insights";
@@ -24,7 +25,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   if (!result) redirect("/app");
 
   const { product: p, lastSyncedAt } = result;
-  const [subs, activity] = await Promise.all([loadSubs(userId, id), recentActivity(id, 12)]);
+  const [subs, activity, portfolio] = await Promise.all([
+    loadSubs(userId, id), recentActivity(id, 12), portfolioMetrics(userId),
+  ]);
+  const ranked = [...portfolio.products].sort((a, b) => b.mrrCents - a.mrrCents);
+  const rank = ranked.findIndex((x) => x.connectionId === p.connectionId) + 1;
+  const fastest = [...portfolio.products].sort((a, b) => b.mrrChange30d - a.mrrChange30d)[0];
 
   const icon = productIcon(p.label, p.provider);
   const up = p.mrrChange30d > 0;
@@ -33,7 +39,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   const series = p.history.map((h) => ({ date: h.date, value: h.mrrCents }));
   const milestone = milestoneFor(p.mrrCents);
-  const signals = radarSignals([p]);
+  const health = radarSignals([p])[0];
 
   const m = coreMetrics(subs);
   const cohorts = cohortRetention(subs).slice(-13);
@@ -43,11 +49,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "never";
 
   return (
-    <div className="py-10 pb-20">
-      <a href="/app" className="mb-8 inline-flex items-center gap-1.5 text-[12px] font-medium text-lx-muted hover:text-lx-text">
-        ← Portfolio
-      </a>
-
+    <div className="pb-20">
       {/* Header */}
       <div className="mb-8 flex flex-wrap items-center gap-4">
         <img
@@ -55,8 +57,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           alt={p.label}
           width={56}
           height={56}
-          className="h-14 w-14 shrink-0 rounded-2xl object-cover"
-          style={{ border: "1px solid #ece9e3" }}
+          className="h-14 w-14 shrink-0 rounded-sm object-cover"
+          style={{ border: "1px solid #ebebeb" }}
         />
         <div className="min-w-0 flex-1">
           <h1 className="text-[26px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
@@ -66,31 +68,55 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             {p.provider} · {p.activeSubscriptions.toLocaleString()} active subscriptions · synced {fmtDate(lastSyncedAt)}
           </p>
         </div>
+        {(() => {
+          const isFastest = fastest && fastest.connectionId === p.connectionId && p.mrrChange30d > 0;
+          const stamp = isFastest
+            ? { emoji: "🚀", top: "Fastest", bottom: "growing", title: `Growing ${p.mrrChange30d.toFixed(1)}% in 30 days — fastest in the portfolio` }
+            : rank === 1 && ranked.length > 1
+              ? { emoji: "🏆", top: "#1 Top", bottom: "performer", title: "Your highest-MRR product" }
+              : null;
+          return stamp ? (
+            <div
+              className="flex shrink-0 -rotate-3 flex-col items-center rounded-sm bg-white px-4 py-2.5 text-center"
+              style={{ border: "2px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}
+              title={stamp.title}
+            >
+              <span className="text-[18px] leading-none">{stamp.emoji}</span>
+              <span className="mt-1 text-[10px] font-extrabold uppercase leading-tight tracking-[0.08em] text-[#1c1c22]">
+                {stamp.top}
+                <br />
+                {stamp.bottom}
+              </span>
+            </div>
+          ) : null;
+        })()}
       </div>
 
       {/* Hero stats */}
       <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatTile label="MRR" value={fmtMrr(p.mrrCents)} icon={IconMrr} />
-        <StatTile label="ARR" value={fmtMrr(p.arrCents)} icon={IconArr} />
-        <StatTile label="Active subs" value={p.activeSubscriptions.toLocaleString()} icon={IconSubs} />
+        <StatTile label="MRR" value={fmtMrr(p.mrrCents)} icon={IconMrr} accent="#fff2a8" />
+        <StatTile label="ARR" value={fmtMrr(p.arrCents)} icon={IconArr} accent="#c9f0ff" />
+        <StatTile label="Active subs" value={p.activeSubscriptions.toLocaleString()} icon={IconSubs} accent="#ffd4e8" />
         <StatTile
           label="30d change"
           value={`${up ? "+" : ""}${p.mrrChange30d.toFixed(1)}%`}
-          valueColor={up ? "#10b981" : down ? "#e3493c" : "#9c9894"}
+          valueColor={up ? "#10b981" : down ? "#e3493c" : "#9a9a9a"}
           icon={IconTrend}
+          accent="#d4ffc9"
         />
       </div>
 
       {/* Unit economics */}
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatTile label="ARPA" value={fmtMrr(m.arpaCents)} sub="per active account" icon={IconArpa} />
-        <StatTile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo lifetime`} icon={IconLtv} />
+        <StatTile label="ARPA" value={fmtMrr(m.arpaCents)} sub="per active account" icon={IconArpa} accent="#fff2a8" />
+        <StatTile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo lifetime`} icon={IconLtv} accent="#c9f0ff" />
         <StatTile
           label="Monthly churn"
           value={`${m.monthlyChurnPct.toFixed(1)}%`}
           sub="customers lost, last 30d"
           valueColor={m.monthlyChurnPct > 5 ? "#e3493c" : undefined}
           icon={IconChurn}
+          accent="#ffd4e8"
         />
         <StatTile
           label="Quick ratio"
@@ -98,6 +124,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           sub="new MRR per $1 churned"
           valueColor={m.quickRatio !== null && m.quickRatio < 1 ? "#e3493c" : "#10b981"}
           icon={IconQuick}
+          accent="#d4ffc9"
         />
       </div>
 
@@ -119,7 +146,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Cohorts */}
-      <section className="mb-6 overflow-hidden rounded-2xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
+      <section className="mb-6 overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
         <div className="flex items-baseline justify-between px-7 pb-3 pt-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">MRR cohort retention</p>
           <p className="text-[11px] text-lx-faint">% of signup-month MRR still active</p>
@@ -130,7 +157,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       {/* Customers + activity */}
       <div className="mb-6 grid gap-4 lg:grid-cols-5">
         <div className="lg:col-span-3">
-          <TopCustomersCard customers={customers} />
+          <TopCustomersCard customers={customers} connectionId={p.connectionId} productLabel={p.label} />
         </div>
         <div className="lg:col-span-2">
           <ActivityCard items={activity} />
@@ -155,19 +182,43 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <SegmentCard title="By country" segments={segmentByCountry(subs).slice(0, 8)} color={color} kind="country" />
       </div>
 
-      {/* Health signals */}
-      {signals.length > 0 && (
-        <section className="mb-6 rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
-          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Health signals</p>
-          <div className="space-y-2">
-            {signals.map((s, i) => (
+      {/* Health + milestone */}
+      {health && (
+        <section
+          className="mb-6 overflow-hidden rounded-sm bg-white"
+          style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}
+        >
+          <div className="flex flex-wrap items-center gap-3 px-7 py-5" style={{ background: health.severity === "red" ? "#ffc1b6" : "#fff2a8", borderBottom: "1.5px solid #1c1c22" }}>
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-white text-[16px]"
+              style={{ border: "1.5px solid #1c1c22" }}
+            >
+              {health.severity === "red" ? "🚨" : "⚠️"}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] font-extrabold text-[#1c1c22]">
+                −{fmtMrr(health.atRiskCents)} churned in 30d
+                {health.netCents > 0 && ` · ${fmtMrr(health.netCents)} net loss`}
+              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1c1c22]/60">
+                Health signals · needs attention
+              </p>
+            </div>
+          </div>
+          <div className="space-y-2 px-7 py-5">
+            {health.reasons.map((r) => (
               <div
-                key={i}
-                className="flex items-center gap-3 rounded-xl px-4 py-3"
-                style={{ background: s.severity === "red" ? "rgba(227,73,60,0.07)" : "rgba(245,158,11,0.07)" }}
+                key={r.message}
+                className="flex items-center gap-3 rounded-sm bg-white px-4 py-3"
+                style={{ border: "1px solid #ebebeb" }}
               >
-                <span className="text-[15px]">{s.severity === "red" ? "🔴" : "🟡"}</span>
-                <span className="text-[13px] font-medium text-lx-text">{s.message}</span>
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-[12px] font-bold text-white"
+                  style={{ background: r.severity === "red" ? "#e3493c" : "#f2b030", border: "1px solid #1c1c22" }}
+                >
+                  !
+                </span>
+                <span className="text-[13px] font-semibold text-lx-text">{r.message}</span>
               </div>
             ))}
           </div>
@@ -175,18 +226,43 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       )}
 
       {/* Milestone */}
-      <section className="rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
-        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">
-          Next milestone · {milestone.crossed} crossed
-        </p>
-        <div className="mb-3 flex items-baseline justify-between">
-          <span className="text-[14px] font-semibold text-lx-text">
-            {fmtMrr(milestone.prevCents)} → {fmtMrr(milestone.nextCents)} MRR
+      <section
+        className="overflow-hidden rounded-sm bg-white"
+        style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}
+      >
+        <div className="flex flex-wrap items-center gap-3 px-7 py-5" style={{ background: "#d4ffc9", borderBottom: "1.5px solid #1c1c22" }}>
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-white text-[16px]"
+            style={{ border: "1.5px solid #1c1c22" }}
+          >
+            🏁
           </span>
-          <span className="text-[12px] text-lx-muted">{milestone.pct.toFixed(0)}% · {fmtMrr(milestone.toGoCents)} to go</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-extrabold text-[#1c1c22]">
+              {fmtMrr(milestone.prevCents)} → {fmtMrr(milestone.nextCents)} MRR
+            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1c1c22]/60">
+              Next milestone · {milestone.crossed} crossed
+            </p>
+          </div>
+          <span
+            className="shrink-0 rounded-sm bg-white px-2.5 py-1 text-[13px] font-extrabold tabular-nums text-[#1c1c22]"
+            style={{ border: "1.5px solid #1c1c22" }}
+          >
+            {milestone.pct.toFixed(0)}%
+          </span>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "#f0ede8" }}>
-          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(milestone.pct, 100)}%`, background: color }} />
+        <div className="px-7 py-5">
+          <div className="h-3.5 overflow-hidden rounded-full bg-white" style={{ border: "1.5px solid #1c1c22" }}>
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${Math.min(milestone.pct, 100)}%`,
+                background: `repeating-linear-gradient(-45deg, ${color}, ${color} 8px, ${color}cc 8px, ${color}cc 16px)`,
+              }}
+            />
+          </div>
+          <p className="mt-2 text-right text-[12px] font-medium text-lx-muted">{fmtMrr(milestone.toGoCents)} to go</p>
         </div>
       </section>
     </div>
@@ -198,7 +274,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 function Pill({ label, tint }: { label: string; tint: string }) {
   return (
     <span
-      className="inline-flex items-center rounded-md px-2 py-[3px] text-[11px] font-semibold"
+      className="inline-flex items-center rounded-sm px-2 py-[3px] text-[11px] font-semibold"
       style={{ color: tint, background: `${tint}14`, border: `1px solid ${tint}2e` }}
     >
       {label}
@@ -206,11 +282,11 @@ function Pill({ label, tint }: { label: string; tint: string }) {
   );
 }
 
-function TopCustomersCard({ customers }: { customers: TopCustomer[] }) {
+function TopCustomersCard({ customers, connectionId, productLabel }: { customers: TopCustomer[]; connectionId: string; productLabel: string }) {
   const top = customers[0]?.mrrCents ?? 1;
 
   return (
-    <section className="h-full overflow-hidden rounded-2xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
+    <section className="h-full overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
       <div className="flex items-baseline justify-between px-7 pb-4 pt-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Top customers</p>
         <p className="text-[11px] text-lx-faint">by MRR</p>
@@ -231,12 +307,25 @@ function TopCustomersCard({ customers }: { customers: TopCustomer[] }) {
             </thead>
             <tbody>
               {customers.map((c, i) => (
-                <tr key={i} className="group" style={{ borderTop: "1px solid #f0ede8" }}>
+                <tr
+                  key={i}
+                  className="group transition-colors hover:bg-lx-sidebar"
+                  style={{ borderTop: "1px solid #f0f0f0" }}
+                >
                   <td className="max-w-[220px] py-2.5 pr-3">
                     <div className="flex items-center gap-2.5">
                       <Avatar name={c.name} size={34} />
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-medium text-lx-text">{c.name}</p>
+                        {c.customerId ? (
+                          <Link
+                            href={`/app/customers/${c.customerId}?connection=${connectionId}&name=${encodeURIComponent(c.name)}&pname=${encodeURIComponent(productLabel)}`}
+                            className="block truncate text-[13px] font-medium text-lx-text hover:text-lx-purple hover:underline"
+                          >
+                            {c.name}
+                          </Link>
+                        ) : (
+                          <p className="truncate text-[13px] font-medium text-lx-text">{c.name}</p>
+                        )}
                         <p className="flex items-center gap-1.5 truncate text-[11px] text-lx-faint">
                           {c.country && <CountryMark code={c.country} />}
                           {c.country ?? "—"}
@@ -254,7 +343,7 @@ function TopCustomersCard({ customers }: { customers: TopCustomer[] }) {
                   <td className="py-2.5 text-right text-[12px] tabular-nums text-lx-muted">{fmtMrr(c.ltdCents)}</td>
                   <td className="py-2.5 pl-3 text-right">
                     <p className="text-[13px] font-semibold tabular-nums text-lx-text">{fmtMrr(c.mrrCents)}</p>
-                    <div className="ml-auto mt-1 h-[3px] w-14 overflow-hidden rounded-full" style={{ background: "#f0ede8" }}>
+                    <div className="ml-auto mt-1 h-[3px] w-14 overflow-hidden rounded-full" style={{ background: "#f0f0f0" }}>
                       <div
                         className="h-full rounded-full"
                         style={{ width: `${(c.mrrCents / top) * 100}%`, background: planTint(c.planName) }}
@@ -289,7 +378,7 @@ function ActivityCard({ items }: { items: ActivityItem[] }) {
   };
 
   return (
-    <section className="h-full rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
+    <section className="h-full rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
       <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Recent activity</p>
       {items.length === 0 ? (
         <p className="text-[13px] text-lx-faint">No movements recorded yet.</p>
@@ -297,10 +386,10 @@ function ActivityCard({ items }: { items: ActivityItem[] }) {
         <div className="space-y-1">
           {items.map((it, i) => {
             const style = EVENT_STYLE[it.eventType] ?? {
-              color: "#9c9894", verb: it.eventType, glyph: "•", sign: "",
+              color: "#9a9a9a", verb: it.eventType, glyph: "•", sign: "",
             };
             return (
-              <div key={i} className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-lx-sidebar">
+              <div key={i} className="flex items-center gap-3 rounded-sm px-2 py-2 transition-colors hover:bg-lx-sidebar">
                 <div className="relative shrink-0">
                   <Avatar name={it.customerName} size={32} />
                   <span
@@ -332,25 +421,35 @@ function ActivityCard({ items }: { items: ActivityItem[] }) {
 }
 
 function StatTile({
-  label, value, sub, valueColor, icon: Icon,
-}: { label: string; value: string; sub?: string; valueColor?: string; icon?: () => React.ReactElement }) {
+  label, value, sub, valueColor, icon: Icon, accent,
+}: { label: string; value: string; sub?: string; valueColor?: string; icon?: () => React.ReactElement; accent?: string }) {
   return (
-    <div className="rounded-2xl bg-white px-5 py-4" style={{ border: "1px solid #ddd9d0" }}>
-      <div className="mb-1 flex items-center gap-1.5 text-lx-faint">
-        {Icon && <Icon />}
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</p>
+    <div
+      className="rounded-sm bg-white px-5 py-4 transition-transform hover:-translate-y-1"
+      style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}
+    >
+      <div className="mb-2 flex items-center gap-2">
+        {Icon && (
+          <span
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm"
+            style={{ background: accent ?? "#fff2a8", border: "1px solid #1c1c22" }}
+          >
+            <Icon />
+          </span>
+        )}
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-lx-faint">{label}</p>
       </div>
-      <p className="text-[22px] font-bold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em", color: valueColor }}>
+      <p className="text-[23px] font-extrabold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em", color: valueColor }}>
         {value}
       </p>
-      {sub && <p className="mt-0.5 text-[11px] text-lx-faint">{sub}</p>}
+      {sub && <p className="mt-0.5 text-[11px] font-medium text-lx-faint">{sub}</p>}
     </div>
   );
 }
 
 function MovementTile({ label, value, color, bg }: { label: string; value: string; color: string; bg: string }) {
   return (
-    <div className="rounded-2xl px-5 py-4" style={{ background: bg, border: `1px solid ${color}22` }}>
+    <div className="rounded-sm px-5 py-4" style={{ background: bg, border: `1px solid ${color}22` }}>
       <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color }}>{label}</p>
       <p className="text-[20px] font-bold tabular-nums" style={{ color, letterSpacing: "-0.02em" }}>{value}</p>
     </div>

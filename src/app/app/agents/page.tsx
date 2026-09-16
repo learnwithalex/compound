@@ -53,7 +53,7 @@ export default function AgentsPage() {
   }
 
   return (
-    <div className="px-7 py-6">
+    <div>
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Agents</p>
@@ -66,7 +66,7 @@ export default function AgentsPage() {
 
       <div className="max-w-2xl space-y-4">
         {/* Create token */}
-        <div className="rounded-xl bg-white p-5" style={{ border: "1px solid #ddd9d0" }}>
+        <div className="rounded-sm bg-white p-5" style={{ border: "1px solid #ebebeb" }}>
           <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Token name</label>
           <div className="flex gap-2">
             <input
@@ -74,13 +74,13 @@ export default function AgentsPage() {
               placeholder="e.g. claude-desktop, cursor, cron-report"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex-1 rounded-lg px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}
+              className="flex-1 rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
             />
             <button
               onClick={create}
               disabled={busy}
-              className="rounded-lg px-4 py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+              className="rounded-sm px-4 py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
               style={{ background: "#5e6ad2" }}
             >
               {busy ? "Creating…" : "Create token"}
@@ -90,21 +90,21 @@ export default function AgentsPage() {
 
         {/* Fresh token — shown once */}
         {fresh && (
-          <div className="rounded-xl bg-white p-5" style={{ border: "1px solid #10b981", boxShadow: "0 0 0 3px rgba(16,185,129,0.08)" }}>
+          <div className="rounded-sm bg-white p-5" style={{ border: "1px solid #10b981", boxShadow: "0 0 0 3px rgba(16,185,129,0.08)" }}>
             <div className="mb-2 text-[13px] font-semibold text-lx-text">Copy this now — it won&apos;t be shown again</div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 break-all rounded-lg px-3 py-2.5 font-mono text-[12px] text-lx-muted" style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}>
+              <code className="flex-1 break-all rounded-sm px-3 py-2.5 font-mono text-[12px] text-lx-muted" style={{ background: "#fafafa", border: "1px solid #ebebeb" }}>
                 {fresh.token}
               </code>
               <button
                 onClick={() => copy(fresh.token)}
-                className="rounded-lg px-3 py-2.5 text-[12px] font-semibold text-lx-muted transition-colors hover:text-lx-text"
-                style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}
+                className="rounded-sm px-3 py-2.5 text-[12px] font-semibold text-lx-muted transition-colors hover:text-lx-text"
+                style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
               >
                 {copied ? "Copied ✓" : "Copy"}
               </button>
             </div>
-            <pre className="mt-3 overflow-x-auto rounded-lg p-3 font-mono text-[11px] leading-5 text-lx-muted" style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}>
+            <pre className="mt-3 overflow-x-auto rounded-sm p-3 font-mono text-[11px] leading-5 text-lx-muted" style={{ background: "#fafafa", border: "1px solid #ebebeb" }}>
 {`curl -H "Authorization: Bearer ${fresh.token.slice(0, 12)}…" \\
   ${typeof window !== "undefined" ? window.location.origin : ""}/api/portfolio`}
             </pre>
@@ -116,11 +116,11 @@ export default function AgentsPage() {
 
         {/* Existing tokens */}
         {tokens.length > 0 && (
-          <div className="rounded-xl bg-white" style={{ border: "1px solid #ddd9d0" }}>
-            <div className="px-5 py-3" style={{ borderBottom: "1px solid #ddd9d0" }}>
+          <div className="rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+            <div className="px-5 py-3" style={{ borderBottom: "1px solid #ebebeb" }}>
               <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Active tokens</p>
             </div>
-            <div className="divide-y divide-[#ddd9d0]">
+            <div className="divide-y divide-[#ebebeb]">
               {tokens.map((t) => (
                 <div key={t.id} className="flex items-center gap-3 px-5 py-3">
                   <div>
@@ -140,9 +140,9 @@ export default function AgentsPage() {
         )}
 
         {/* How agents use it */}
-        <div className="rounded-xl bg-white p-5" style={{ border: "1px solid #ddd9d0" }}>
+        <div className="rounded-sm bg-white p-5" style={{ border: "1px solid #ebebeb" }}>
           <div className="mb-3 text-[13px] font-semibold text-lx-text">What your agent can do</div>
-          <pre className="overflow-x-auto rounded-lg p-4 font-mono text-[11px] leading-6 text-lx-muted" style={{ background: "#f7f5f1", border: "1px solid #ddd9d0" }}>
+          <pre className="overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-6 text-lx-muted" style={{ background: "#fafafa", border: "1px solid #ebebeb" }}>
 {`GET /api/portfolio              → full snapshot (MRR, ARR, subs, 30d trend)
 POST /api/sync                   → refresh all connections first
 POST /api/analyze                → Claude CFO briefing as JSON

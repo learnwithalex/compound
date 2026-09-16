@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  allowedDevOrigins: ["dis-skin-pattern-shipping.trycloudflare.com"],
 };
 
 export default nextConfig;

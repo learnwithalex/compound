@@ -48,7 +48,7 @@ export function AgentPillLink() {
               Paste this into Claude, Cursor, or any agent. It creates an account,
               connects revenue, and briefs you — hands-free.
             </p>
-            <pre className="mb-4 max-h-[220px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-[#ddd9d0] bg-[#f8f7f4] p-4 font-mono text-[12px] leading-5 text-[#1a1a1a]">
+            <pre className="mb-4 max-h-[220px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-[#e7e3db] bg-[#f8f7f4] p-4 font-mono text-[12px] leading-5 text-[#1a1a1a]">
               {skill}
             </pre>
             <div className="flex gap-3">

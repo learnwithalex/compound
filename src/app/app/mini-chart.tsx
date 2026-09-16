@@ -54,7 +54,7 @@ export function MiniChart({ data, color }: { data: number[]; color: string }) {
             x2={w - padX}
             y1={padTop + f * innerH}
             y2={padTop + f * innerH}
-            stroke="#ece9e3"
+            stroke="#ebebeb"
             strokeWidth="1"
             strokeDasharray="3 4"
             vectorEffect="non-scaling-stroke"

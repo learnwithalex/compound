@@ -232,6 +232,7 @@ export const segmentBySource = (s: LoadedSub[]) => segmentBy(s, (x) => x.utmSour
 /* ============================================================ customers */
 
 export interface TopCustomer {
+  customerId: string | null;
   name: string;
   email: string | null;
   planName: string | null;
@@ -252,6 +253,7 @@ export function topCustomers(subs: LoadedSub[], limit = 10): TopCustomer[] {
     .map((s) => {
       const months = s.startedAt ? (now - s.startedAt.getTime()) / (30.44 * 864e5) : 0;
       return {
+        customerId: s.customerId,
         name: s.customerName ?? s.customerEmail ?? "Unknown",
         email: s.customerEmail,
         planName: s.planName,
@@ -309,6 +311,121 @@ export async function recentActivity(connectionId: string, limit = 12): Promise<
       planName: sub?.planName ?? null,
     };
   });
+}
+
+export interface PortfolioActivityItem extends ActivityItem {
+  productLabel: string;
+  productColor: string;
+}
+
+/** The same feed across every connection, merged newest-first. */
+export async function portfolioActivity(
+  products: { connectionId: string; label: string; color: string }[],
+  limit = 8,
+): Promise<PortfolioActivityItem[]> {
+  const perProduct = await Promise.all(
+    products.map(async (p) =>
+      (await recentActivity(p.connectionId, limit)).map((item) => ({
+        ...item,
+        productLabel: p.label,
+        productColor: p.color,
+      })),
+    ),
+  );
+
+  return perProduct
+    .flat()
+    .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
+    .slice(0, limit);
+}
+
+/* ============================================================ customer journey */
+
+export interface JourneyEvent {
+  eventType: string;
+  amountCents: number;
+  occurredAt: Date;
+  planName: string | null;
+}
+
+export interface JourneySub {
+  planName: string | null;
+  status: string;
+  mrrCents: number;
+  interval: string | null;
+  startedAt: Date | null;
+  trialStartAt: Date | null;
+  trialEndAt: Date | null;
+  canceledAt: Date | null;
+}
+
+export interface CustomerJourney {
+  customerId: string;
+  customerName: string;
+  customerEmail: string | null;
+  country: string | null;
+  utmSource: string | null;
+  connectionId: string;
+  productLabel: string;
+  provider: string;
+  subs: JourneySub[];
+  events: JourneyEvent[];
+}
+
+export async function loadCustomerJourney(
+  userId: string, connectionId: string, customerId: string,
+): Promise<CustomerJourney | null> {
+  const conns = await db.query.connections.findMany({
+    where: (c, { eq }) => eq(c.userId, userId),
+  });
+  const conn = conns.find((c) => c.id === connectionId);
+  if (!conn) return null;
+
+  const cust = await db.query.customers.findFirst({
+    where: (c, { and, eq }) => and(eq(c.id, customerId), eq(c.connectionId, connectionId)),
+  });
+  if (!cust) return null;
+
+  const subs = await db.query.subscriptions.findMany({
+    where: (s, { and, eq }) => and(eq(s.connectionId, connectionId), eq(s.customerId, customerId)),
+  });
+
+  const extIds = [...new Set(subs.map((s) => s.externalId))];
+  const events = extIds.length
+    ? await db.query.revenueEvents.findMany({
+        where: (e, { and, eq, inArray }) =>
+          and(eq(e.connectionId, connectionId), inArray(e.externalId, extIds)),
+        orderBy: (e, { asc }) => [asc(e.occurredAt)],
+      })
+    : [];
+  const subByExt = new Map(subs.map((s) => [s.externalId, s]));
+
+  return {
+    customerId: cust.id,
+    customerName: cust.name ?? cust.email ?? "Unknown",
+    customerEmail: cust.email,
+    country: cust.country,
+    utmSource: cust.utmSource,
+    connectionId: conn.id,
+    productLabel: conn.label,
+    provider: conn.provider,
+    subs: subs.map((s) => ({
+      planName: s.planName,
+      status: s.status,
+      mrrCents: s.mrrCents,
+      interval: s.interval,
+      startedAt: s.startedAt,
+      trialStartAt: s.trialStartAt,
+      trialEndAt: s.trialEndAt,
+      canceledAt: s.canceledAt,
+    })),
+    events: events.map((e) => ({
+      eventType: e.eventType,
+      amountCents: e.amountCents,
+      occurredAt: e.occurredAt,
+      planName: e.externalId ? subByExt.get(e.externalId)?.planName ?? null : null,
+    })),
+  };
 }
 
 /* ============================================================ lifecycle funnel */

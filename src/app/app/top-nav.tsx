@@ -16,30 +16,40 @@ export function TopNav() {
     return pathname.startsWith(href);
   }
   return (
-    <header className="sticky top-0 z-40" style={{ background: "rgba(243,241,236,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid #ddd9d0" }}>
-      <div className="mx-auto flex h-[60px] max-w-[1080px] items-center gap-8 px-6">
-        <Link href="/app" className="flex shrink-0 items-center gap-2.5">
-          <CompoundMark size={30} theme="light" />
-          <span className="text-[15px] font-bold text-lx-text" style={{ letterSpacing: "-0.02em" }}>compound</span>
+    // Fade, not a bar: hides content scrolling through the gap above the island.
+    <header
+      className="sticky top-0 z-40 px-4 pb-4 pt-3"
+      style={{ background: "linear-gradient(to bottom, #ffffff 55%, rgba(255,255,255,0))" }}
+    >
+      <div
+        className="mx-auto flex h-[52px] max-w-[940px] items-center gap-6 rounded-sm pl-4 pr-3"
+        style={{
+          background: "rgba(250,250,250,0.88)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          border: "1px solid #ebebeb",
+          boxShadow: "0 1px 2px rgba(20,20,20,0.03), 0 6px 18px rgba(20,20,20,0.04)",
+        }}
+      >
+        <Link href="/app" className="flex shrink-0 items-center gap-2">
+          <CompoundMark size={26} theme="light" />
+          <span className="text-[14px] font-bold text-lx-text" style={{ letterSpacing: "-0.02em" }}>compound</span>
         </Link>
 
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-1">
           {NAV.map(({ href, label }) => {
             const active = isActive(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className="relative py-1 text-[13px] font-medium transition-colors"
-                style={{ color: active ? "#1a1a1a" : "#9c9894" }}
+                className="rounded-sm px-2.5 py-1.5 text-[13px] font-medium transition-colors"
+                style={{
+                  color: active ? "#1a1a1a" : "#9a9a9a",
+                  background: active ? "#ededed" : "transparent",
+                }}
               >
                 {label}
-                {active && (
-                  <span
-                    className="absolute inset-x-0 -bottom-[3px] h-[2px] rounded-full"
-                    style={{ background: "#5e6ad2" }}
-                  />
-                )}
               </Link>
             );
           })}
@@ -48,7 +58,7 @@ export function TopNav() {
         <div className="ml-auto flex shrink-0 items-center gap-4">
           <Link
             href="/app/connect"
-            className="rounded-full px-4 py-1.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+            className="rounded-sm px-3.5 py-1.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
             style={{ background: "#5e6ad2" }}
           >
             + New product

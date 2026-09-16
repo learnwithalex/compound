@@ -10,13 +10,13 @@ const config: Config = {
       },
       colors: {
         lx: {
-          bg: "#f3f1ec",
-          sidebar: "#f7f5f1",
+          bg: "#ffffff",
+          sidebar: "#fafafa",
           surface: "#ffffff",
-          border: "#ddd9d0",
+          border: "#ebebeb",
           text: "#1a1a1a",
-          muted: "#5c5856",
-          faint: "#9c9894",
+          muted: "#5c5c5c",
+          faint: "#9a9a9a",
           purple: "#5e6ad2",
           amber: "#f2b030",
           green: "#10b981",
@@ -36,7 +36,7 @@ const config: Config = {
           900: "#0a2c21",
         },
         sand: {
-          50: "#faf8f4",
+          50: "#fafafa",
           100: "#f4f0e8",
           200: "#e9e2d5",
           300: "#d9cfbc",

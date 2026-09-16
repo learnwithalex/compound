@@ -24,6 +24,7 @@ const DIAGONAL =
   "repeating-linear-gradient(-45deg, transparent, transparent 14px, rgba(0,0,0,0.028) 14px, rgba(0,0,0,0.028) 15px)";
 
 export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
+  const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<CardTheme>("cream");
   const [metric, setMetric] = useState<MetricChoice>("mrr");
   const [included, setIncluded] = useState<string[]>(metrics.products.map((p) => p.connectionId));
@@ -68,12 +69,41 @@ export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
   }
 
   return (
-    <section className="mb-10">
+    <section className="mb-4">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-3 rounded-sm bg-white px-5 py-3.5 text-left transition-colors hover:bg-[#fafafa]"
+        style={{ border: "1px solid #ebebeb" }}
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm" style={{ background: "#f4f4f5", border: "1px solid #ebebeb" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f6a63" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+            <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+          </svg>
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] font-semibold text-lx-text">Share card</span>
+          <span className="block text-[11.5px] text-lx-muted">
+            Post your numbers — pick a theme, choose which products to include.
+          </span>
+        </span>
+        <svg
+          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          className="shrink-0 transition-transform"
+          style={{ transform: open ? "rotate(180deg)" : "none" }}
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {!open ? null : (
+      <div className="mt-3">
       {/* Card */}
       <div
-        className="overflow-hidden rounded-2xl"
+        className="overflow-hidden rounded-sm"
         style={{
-          border: `1px solid ${t.border}`,
+          border: theme === "cream" ? "1.5px solid #c9c4b8" : `1px solid ${t.border}`,
           background: t.bg,
           backgroundImage: theme === "cream" ? DIAGONAL : undefined,
         }}
@@ -136,7 +166,10 @@ export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
           {/* Contribution bar */}
           {visible.length > 0 && (
             <div className="mt-7">
-              <div className="flex h-2 overflow-hidden rounded-full" style={{ background: theme === "cream" ? "#ece9e3" : "rgba(255,255,255,0.12)" }}>
+              <div
+                className="flex h-2 overflow-hidden rounded-full"
+                style={{ background: theme === "cream" ? "#ebebeb" : "rgba(255,255,255,0.12)" }}
+              >
                 {visible.map((p) => (
                   <div key={p.connectionId} title={`${p.label} — ${fmtMrr(p.mrrCents)}`} style={{ flex: Math.max(p.mrrCents, 0), background: p.color, minWidth: p.mrrCents > 0 ? 4 : 0 }} />
                 ))}
@@ -163,15 +196,15 @@ export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
       </div>
 
       {/* Controls */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl bg-white px-5 py-3.5" style={{ border: "1px solid #ddd9d0" }}>
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-sm bg-white px-5 py-3.5" style={{ border: "1px solid #ebebeb" }}>
         {/* Metric picker */}
-        <div className="flex items-center gap-1 rounded-full p-0.5" style={{ background: "#f3f1ec", border: "1px solid #ece9e3" }}>
+        <div className="flex items-center gap-1 rounded-full p-0.5" style={{ background: "#f4f4f5", border: "1px solid #ebebeb" }}>
           {METRICS.map((m) => (
             <button
               key={m.id}
               onClick={() => setMetric(m.id)}
               className={`rounded-full px-3 py-1 text-[12px] font-semibold transition-all ${metric === m.id ? "bg-white text-lx-text shadow-sm" : "text-lx-faint hover:text-lx-muted"}`}
-              style={metric === m.id ? { border: "1px solid #ddd9d0" } : { border: "1px solid transparent" }}
+              style={metric === m.id ? { border: "1px solid #ebebeb" } : { border: "1px solid transparent" }}
             >
               {m.label}
             </button>
@@ -188,7 +221,7 @@ export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
               className="h-6 w-6 rounded-full transition-transform hover:scale-110"
               style={{
                 background: THEMES[th].bg,
-                border: theme === th ? "2px solid #5e6ad2" : "1px solid #ddd9d0",
+                border: theme === th ? "2px solid #5e6ad2" : "1px solid #ebebeb",
                 outline: theme === th ? "2px solid rgba(94,106,210,0.25)" : "none",
                 outlineOffset: 1,
               }}
@@ -205,7 +238,7 @@ export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
                 key={p.connectionId}
                 onClick={() => toggle(p.connectionId)}
                 className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all ${on ? "text-lx-text" : "text-lx-faint line-through opacity-60"}`}
-                style={{ background: on ? "#f3f1ec" : "transparent", border: "1px solid #ddd9d0" }}
+                style={{ background: on ? "#f4f4f5" : "transparent", border: "1px solid #ebebeb" }}
               >
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
                 {p.label}
@@ -222,6 +255,8 @@ export function ShareCard({ metrics }: { metrics: ShareableMetrics }) {
           {copied ? "Copied ✓" : "Copy share link"}
         </button>
       </div>
+      </div>
+      )}
     </section>
   );
 }

@@ -14,7 +14,7 @@ function Badge({
 }: { bg: string; fg: string; border?: string; children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-[5px] text-[10px] font-bold leading-none"
+      className="inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-sm text-[10px] font-bold leading-none"
       style={{ background: bg, color: fg, border }}
     >
       {children}
@@ -78,8 +78,8 @@ export function SourceMark({ source }: { source: string }) {
   if (k.includes("github")) return <Badge bg="#24292f" fg="#fff">GH</Badge>;
   if (k.includes("linkedin")) return <Badge bg="#0A66C2" fg="#fff">in</Badge>;
   if (k.includes("youtube")) return <Badge bg="#FF0000" fg="#fff">▶</Badge>;
-  if (k.includes("direct") || k.includes("organic")) return <Badge bg="#9c9894" fg="#fff"><GlobeMark /></Badge>;
-  return <Badge bg="#9c9894" fg="#fff">{source.charAt(0).toUpperCase()}</Badge>;
+  if (k.includes("direct") || k.includes("organic")) return <Badge bg="#9a9a9a" fg="#fff"><GlobeMark /></Badge>;
+  return <Badge bg="#9a9a9a" fg="#fff">{source.charAt(0).toUpperCase()}</Badge>;
 }
 
 /* ============================================================ country */
@@ -211,7 +211,7 @@ const PLAN_TINTS = ["#5e6ad2", "#10b981", "#e8a838", "#e54d2e", "#8b5cf6", "#0ea
 
 /** Stable colour per plan name, so unseen plans still get a consistent tint. */
 export function planTint(plan: string | null): string {
-  if (!plan) return "#9c9894";
+  if (!plan) return "#9a9a9a";
   let h = 0;
   for (let i = 0; i < plan.length; i++) h = (h * 31 + plan.charCodeAt(i)) >>> 0;
   return PLAN_TINTS[h % PLAN_TINTS.length];
@@ -240,7 +240,7 @@ function PlanGlyph({ plan }: { plan: string }) {
 export function PlanMark({ plan, tint }: { plan: string; tint: string }) {
   return (
     <span
-      className="inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-[5px]"
+      className="inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-sm"
       style={{ background: `${tint}18`, color: tint }}
     >
       <PlanGlyph plan={plan} />
@@ -262,7 +262,7 @@ export function FunnelMark({ label, tint }: { label: string; tint: string }) {
   if (!glyph) return null;
   return (
     <span
-      className="inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-[5px]"
+      className="inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-sm"
       style={{ background: `${tint}18`, color: tint }}
     >
       {glyph}

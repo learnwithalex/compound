@@ -14,8 +14,8 @@ function Mark({ kind, seg, color }: { kind?: SegmentKind; seg: Segment; color: s
         alt=""
         width={19}
         height={19}
-        className="h-[19px] w-[19px] shrink-0 rounded-[5px] object-cover"
-        style={{ border: "1px solid #ece9e3" }}
+        className="h-[19px] w-[19px] shrink-0 rounded-sm object-cover"
+        style={{ border: "1px solid #ebebeb" }}
       />
     );
   }
@@ -28,7 +28,7 @@ export function SegmentCard({
   title, segments, note, color = "#5e6ad2", kind,
 }: { title: string; segments: Segment[]; note?: string; color?: string; kind?: SegmentKind }) {
   return (
-    <section className="rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
+    <section className="rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">{title}</p>
       {note && <p className="mt-1 text-[11px] text-lx-faint">{note}</p>}
       <div className="mt-5 space-y-3">
@@ -44,7 +44,7 @@ export function SegmentCard({
                 {fmtMrr(s.mrrCents)} · {s.pct.toFixed(0)}%
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "#f0ede8" }}>
+            <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "#f0f0f0" }}>
               <div
                 className="h-full rounded-full"
                 style={{
@@ -62,7 +62,7 @@ export function SegmentCard({
 
 export function FunnelCard({ steps, color = "#5e6ad2" }: { steps: FunnelStep[]; color?: string }) {
   return (
-    <section className="rounded-2xl bg-white p-7" style={{ border: "1px solid #ddd9d0" }}>
+    <section className="rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
       <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Subscription lifecycle</p>
       <div className="space-y-3">
         {steps.map((f) => (
@@ -76,7 +76,7 @@ export function FunnelCard({ steps, color = "#5e6ad2" }: { steps: FunnelStep[]; 
                 {f.count.toLocaleString()} · {f.pct.toFixed(0)}%
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full" style={{ background: "#f0ede8" }}>
+            <div className="h-2 overflow-hidden rounded-full" style={{ background: "#f0f0f0" }}>
               <div className="h-full rounded-full" style={{ width: `${f.pct}%`, background: color }} />
             </div>
           </div>

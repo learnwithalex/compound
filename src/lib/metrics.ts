@@ -2,6 +2,32 @@ import { db } from "@/db";
 import { snapshots } from "@/db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 
+type Snap = { date: string; mrrCents: number; newMrrCents: number; churnedMrrCents: number; expansionMrrCents: number };
+
+export function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The 30-day figures, derived from however wide a window the caller loaded.
+ *  Shared so the portfolio and the product page cannot disagree about the same
+ *  product — they did, because one summed 30 days of snapshots and the other 90. */
+export function movement30d(snaps: Snap[]) {
+  const cutoff = daysAgo(31);
+  const recent = snaps.filter((s) => s.date >= cutoff);
+  const window = recent.length > 0 ? recent : snaps;
+  const first = window[0];
+  const latest = snaps[snaps.length - 1];
+
+  return {
+    mrrChange30d: first.mrrCents > 0 ? ((latest.mrrCents - first.mrrCents) / first.mrrCents) * 100 : 0,
+    newMrrCents: window.reduce((s, r) => s + r.newMrrCents, 0),
+    churnedMrrCents: window.reduce((s, r) => s + r.churnedMrrCents, 0),
+    expansionMrrCents: window.reduce((s, r) => s + r.expansionMrrCents, 0),
+  };
+}
+
 export interface ProductMetrics {
   connectionId: string;
   label: string;
@@ -30,9 +56,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
     where: (c, { eq }) => eq(c.userId, userId),
   });
 
-  const since = new Date();
-  since.setDate(since.getDate() - 31);
-  const sinceStr = since.toISOString().slice(0, 10);
+  const sinceStr = daysAgo(31);
 
   const products: ProductMetrics[] = [];
 
@@ -61,15 +85,6 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
     }
 
     const latest = snaps[snaps.length - 1];
-    const oldest = snaps[0];
-    const mrrChange30d = oldest.mrrCents > 0
-      ? ((latest.mrrCents - oldest.mrrCents) / oldest.mrrCents) * 100
-      : 0;
-
-    // Sum movement over last 30d
-    const newMrrCents = snaps.reduce((s, r) => s + r.newMrrCents, 0);
-    const churnedMrrCents = snaps.reduce((s, r) => s + r.churnedMrrCents, 0);
-    const expansionMrrCents = snaps.reduce((s, r) => s + r.expansionMrrCents, 0);
 
     products.push({
       connectionId: conn.id,
@@ -78,11 +93,8 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
       provider: conn.provider,
       mrrCents: latest.mrrCents,
       arrCents: latest.mrrCents * 12,
-      churnedMrrCents,
-      newMrrCents,
-      expansionMrrCents,
       activeSubscriptions: latest.activeSubscriptions,
-      mrrChange30d,
+      ...movement30d(snaps),
       history: snaps.map((s) => ({ date: s.date, mrrCents: s.mrrCents })),
     });
   }
@@ -108,9 +120,7 @@ export async function singleProductMetrics(
   });
   if (!conn) return null;
 
-  const since = new Date();
-  since.setDate(since.getDate() - 90);
-  const sinceStr = since.toISOString().slice(0, 10);
+  const sinceStr = daysAgo(90);
 
   const snaps = await db.query.snapshots.findMany({
     where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
@@ -139,10 +149,6 @@ export async function singleProductMetrics(
   }
 
   const latest = snaps[snaps.length - 1];
-  const oldest = snaps[0];
-  const mrrChange30d = oldest.mrrCents > 0
-    ? ((latest.mrrCents - oldest.mrrCents) / oldest.mrrCents) * 100
-    : 0;
 
   return {
     product: {
@@ -152,11 +158,9 @@ export async function singleProductMetrics(
       provider: conn.provider,
       mrrCents: latest.mrrCents,
       arrCents: latest.mrrCents * 12,
-      churnedMrrCents: snaps.reduce((s, r) => s + r.churnedMrrCents, 0),
-      newMrrCents: snaps.reduce((s, r) => s + r.newMrrCents, 0),
-      expansionMrrCents: snaps.reduce((s, r) => s + r.expansionMrrCents, 0),
       activeSubscriptions: latest.activeSubscriptions,
-      mrrChange30d,
+      // 30-day figures, even though `snaps` spans 90 days for the chart.
+      ...movement30d(snaps),
       history: snaps.map((s) => ({ date: s.date, mrrCents: s.mrrCents })),
     },
     lastSyncedAt: conn.lastSyncedAt,
