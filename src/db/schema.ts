@@ -127,6 +127,9 @@ export const userSettings = pgTable("user_settings", {
   // Free trial
   trialStartedAt: timestamp("trial_started_at"),
   trialBannerDismissed: boolean("trial_banner_dismissed").notNull().default(false),
+  // Billing
+  isPro: boolean("is_pro").notNull().default(false),
+  dodoSubscriptionId: text("dodo_subscription_id"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

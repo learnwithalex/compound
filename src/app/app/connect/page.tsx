@@ -75,6 +75,8 @@ Page views are tracked automatically. Do not call window._cmpd.page() manually u
 
 export default function ConnectPage() {
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [isPro, setIsPro] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [form, setForm] = useState({ provider: "stripe", label: "", apiKey: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +96,10 @@ export default function ConnectPage() {
         }
       })
       .catch(() => {});
+    fetch("/api/billing/status")
+      .then((r) => r.ok ? r.json() : { isPro: false })
+      .then((d) => setIsPro(d.isPro))
+      .catch(() => {});
   }, []);
 
   const loadToken = useCallback(async (conn: Connection) => {
@@ -108,6 +114,10 @@ export default function ConnectPage() {
 
   async function addConnection(e: React.FormEvent) {
     e.preventDefault();
+    if (!isPro && connections.length >= 1) {
+      setShowUpgrade(true);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -222,6 +232,8 @@ export default function ConnectPage() {
 
   return (
     <div>
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
+
       {/* Header */}
       <div className="mb-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect</p>
@@ -353,6 +365,67 @@ export default function ConnectPage() {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function UpgradeModal({ onClose }: { onClose: () => void }) {
+  const [loading, setLoading] = useState(false);
+
+  async function upgrade() {
+    setLoading(true);
+    const res = await fetch("/api/billing/checkout", { method: "POST" });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else setLoading(false);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
+      <div className="w-full max-w-sm rounded-sm bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-start justify-between">
+          <div className="flex h-10 w-10 items-center justify-center rounded-sm" style={{ background: "rgba(94,106,210,0.10)" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5e6ad2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
+          <button onClick={onClose} className="text-lx-faint hover:text-lx-text">
+            <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <line x1="1" y1="1" x2="11" y2="11" /><line x1="11" y1="1" x2="1" y2="11" />
+            </svg>
+          </button>
+        </div>
+        <h2 className="text-[17px] font-bold text-lx-text" style={{ letterSpacing: "-0.02em" }}>
+          Upgrade to Compound Pro
+        </h2>
+        <p className="mt-2 text-[13px] leading-relaxed text-lx-muted">
+          Free accounts support one product. Upgrade to Pro for unlimited products, full history, AI briefings, and more.
+        </p>
+        <div className="mt-4 rounded-sm p-3.5" style={{ background: "#fafafa", border: "1px solid #ebebeb" }}>
+          <p className="text-[22px] font-bold text-lx-text" style={{ letterSpacing: "-0.02em" }}>
+            $9<span className="text-[14px] font-normal text-lx-muted">/month</span>
+          </p>
+          <ul className="mt-2 space-y-1">
+            {["Unlimited products", "Full history & trend charts", "AI briefings", "Goals & streak", "Auto-sync every 30s"].map((f) => (
+              <li key={f} className="flex items-center gap-2 text-[12px] text-lx-muted">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="2,8 6,12 14,4" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button
+          onClick={upgrade}
+          disabled={loading}
+          className="mt-4 w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          style={{ background: "#5e6ad2" }}
+        >
+          {loading ? "Redirecting…" : "Upgrade for $9/month →"}
+        </button>
+        <p className="mt-2 text-center text-[11px] text-lx-faint">Powered by DodoPayments · Cancel anytime</p>
       </div>
     </div>
   );

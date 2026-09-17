@@ -17,6 +17,7 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "autoprefixer": "^10.4.20",
     "clsx": "^2.1.1",
+    "dodopayments": "^2.50.0",
     "drizzle-orm": "^0.38.4",
     "geist": "^1.7.2",
     "next": "^16.3.4",
