@@ -36,7 +36,7 @@ function ProductNudgeRow({ item }: { item: NudgeItem }) {
   }
 
   return (
-    <div className="border-t" style={{ borderColor: "#f0f0f0" }}>
+    <div className="border-t" style={{ borderColor: "#fde68a" }}>
       <div className="flex items-center justify-between px-5 py-3">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#f59e0b" }} />
@@ -84,7 +84,7 @@ export function AnalyticsNudgeBanner({ items }: { items: NudgeItem[] }) {
   if (dismissed || items.length === 0) return null;
 
   return (
-    <div className="mb-4 overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+    <div className="mb-4 overflow-hidden rounded-sm" style={{ background: "#fffbeb", border: "1px solid #fde68a" }}>
       <div className="flex items-center justify-between px-5 py-3">
         <button
           onClick={() => setOpen((v) => !v)}
