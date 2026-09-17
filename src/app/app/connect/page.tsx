@@ -125,6 +125,12 @@ export default function ConnectPage() {
     } finally { setBusy(false); }
   }
 
+  async function deleteConnection(id: string) {
+    if (!confirm("Remove this product? All synced data will be deleted.")) return;
+    const res = await fetch("/api/connections", { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ id }) });
+    if (res.ok) setConnections((c) => c.filter((x) => x.id !== id));
+  }
+
   async function syncAll() {
     setSyncing(true);
     await fetch("/api/sync", { method: "POST" });
@@ -320,6 +326,13 @@ export default function ConnectPage() {
                       className="ml-auto text-[11px] font-semibold text-[#5e6ad2] hover:opacity-70"
                     >
                       Install tracking
+                    </button>
+                    <button
+                      onClick={() => deleteConnection(c.id)}
+                      className="text-[11px] font-medium text-lx-faint hover:text-lx-red"
+                      title="Remove product"
+                    >
+                      Remove
                     </button>
                   </div>
                   {c.webhookToken && (
