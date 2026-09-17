@@ -58,15 +58,34 @@ export async function createSessionToken(userId: string): Promise<string> {
   return token;
 }
 
+const SESSION_COOKIE = {
+  name: "session",
+  httpOnly: true,
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 60 * 60 * 24 * 30,
+};
+
 export async function setSessionCookie(token: string) {
   const jar = await cookies();
-  jar.set("session", token, {
-    httpOnly: true,
+  jar.set(SESSION_COOKIE.name, token, {
+    ...SESSION_COOKIE,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
   });
+}
+
+export function applySessionCookie(response: Response, token: string): Response {
+  const secure = process.env.NODE_ENV === "production";
+  const attrs = [
+    `${SESSION_COOKIE.name}=${token}`,
+    `Path=${SESSION_COOKIE.path}`,
+    `Max-Age=${SESSION_COOKIE.maxAge}`,
+    `SameSite=${SESSION_COOKIE.sameSite}`,
+    "HttpOnly",
+    ...(secure ? ["Secure"] : []),
+  ].join("; ");
+  response.headers.append("Set-Cookie", attrs);
+  return response;
 }
 
 export async function requestLink(email: string): Promise<{ devUrl: string | null }> {

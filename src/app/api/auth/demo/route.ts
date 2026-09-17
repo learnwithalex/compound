@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { appUrl, createSessionToken, setSessionCookie } from "@/lib/auth";
+import { appUrl, createSessionToken, applySessionCookie } from "@/lib/auth";
 
 const DEMO_EMAIL = "demo@compound.so";
 
@@ -13,6 +13,5 @@ export async function GET() {
   if (!user) return NextResponse.redirect(`${base}/login?error=demo-not-seeded`);
 
   const session = await createSessionToken(user.id);
-  await setSessionCookie(session);
-  return NextResponse.redirect(`${base}/app`);
+  return applySessionCookie(NextResponse.redirect(`${base}/app`), session);
 }

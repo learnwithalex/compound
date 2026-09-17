@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { appUrl, createSessionToken, setSessionCookie } from "@/lib/auth";
+import { appUrl, createSessionToken, applySessionCookie } from "@/lib/auth";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID!;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
-  // Exchange code for tokens
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -35,7 +34,6 @@ export async function GET(req: NextRequest) {
   if (!tokenRes.ok) return NextResponse.redirect(`${base}/login?error=oauth_token`);
   const { access_token } = await tokenRes.json();
 
-  // Fetch user info
   const infoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
     headers: { Authorization: `Bearer ${access_token}` },
   });
@@ -51,6 +49,5 @@ export async function GET(req: NextRequest) {
   }
 
   const session = await createSessionToken(user.id);
-  await setSessionCookie(session);
-  return NextResponse.redirect(`${base}/app`);
+  return applySessionCookie(NextResponse.redirect(`${base}/app`), session);
 }
