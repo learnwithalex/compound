@@ -57,15 +57,19 @@ async function fetchAllActiveSubs(apiKey: string): Promise<DodoSubscription[]> {
   const result: DodoSubscription[] = [];
   let page = 1;
   while (true) {
-    const data = await dodoGet<DodoListResponse>(apiKey, "/subscriptions", {
+    const raw = await dodoGet<unknown>(apiKey, "/subscriptions", {
       status: "active",
       page_number: String(page),
       page_size: "100",
     });
-    result.push(...data.items);
-    if (data.items.length < 100) break;
+    console.log("[dodo-sync] raw response page", page, JSON.stringify(raw).slice(0, 500));
+    const data = raw as DodoListResponse;
+    const items = Array.isArray(data.items) ? data.items : [];
+    result.push(...items);
+    if (items.length < 100) break;
     page++;
   }
+  console.log("[dodo-sync] total subs fetched:", result.length, result.map(s => ({ id: s.subscription_id, status: s.status, amount: s.recurring_pre_tax_amount, interval: s.payment_frequency_interval })));
   return result;
 }
 
