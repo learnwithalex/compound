@@ -118,6 +118,27 @@ export const userSettings = pgTable("user_settings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Per-connection public ingest token for the JS tracker
+export const trackerTokens = pgTable("tracker_tokens", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  connectionId: text("connection_id").notNull().unique().references(() => connections.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique().$defaultFn(() => "cmpd_" + crypto.randomUUID().replace(/-/g, "")),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Behavioral events sent by the embedded JS tracker
+export const analyticsEvents = pgTable("analytics_events", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  connectionId: text("connection_id").notNull().references(() => connections.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'page' | 'track' | 'identify'
+  userId: text("user_id"), // email or custom ID from identify()
+  name: text("name"), // event name or page title
+  properties: text("properties"), // JSON blob
+  url: text("url"),
+  sessionId: text("session_id"),
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+});
+
 // Individual subscription events for AI analysis context
 export const revenueEvents = pgTable("revenue_events", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),

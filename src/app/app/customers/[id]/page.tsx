@@ -4,6 +4,9 @@ import { loadCustomerJourney } from "@/lib/analytics";
 import { fmtMrr, productIcon } from "@/lib/format";
 import { Avatar } from "@/app/app/avatar";
 import { SourceMark, CountryMark } from "@/app/app/segment-icons";
+import { db } from "@/db";
+import { analyticsEvents } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 
 const EVENT_STYLE: Record<string, { color: string; bg: string; glyph: string; label: string }> = {
   new: { color: "#0f9b6c", bg: "#d4ffc9", glyph: "+", label: "Subscribed" },
@@ -28,6 +31,14 @@ export default async function CustomerPage({
 
   const j = await loadCustomerJourney(userId, connection, id);
   if (!j) redirect("/app");
+
+  const activity = j.customerEmail
+    ? await db.query.analyticsEvents.findMany({
+        where: and(eq(analyticsEvents.connectionId, connection), eq(analyticsEvents.userId, j.customerEmail.toLowerCase())),
+        orderBy: desc(analyticsEvents.occurredAt),
+        limit: 30,
+      })
+    : [];
 
   const totalMrr = j.subs.filter((s) => ["active", "past_due"].includes(s.status)).reduce((s, x) => s + x.mrrCents, 0);
   const billed = j.subs.reduce((sum, s) => {
@@ -123,7 +134,7 @@ export default async function CustomerPage({
       </section>
 
       {/* Subscriptions */}
-      <section className="rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
+      <section className="mb-6 rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">
           Subscriptions · {j.subs.length}
         </p>
@@ -146,6 +157,45 @@ export default async function CustomerPage({
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Activity */}
+      <section className="rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
+        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">
+          Activity · {activity.length}
+          {activity.length === 0 && (
+            <span className="ml-2 font-normal normal-case text-lx-faint">
+              — install the <a href="/app/connect" className="underline underline-offset-2 hover:text-lx-text">tracking script</a> to see behavioral data
+            </span>
+          )}
+        </p>
+        {activity.length > 0 && (
+          <div className="space-y-1.5">
+            {activity.map((e) => {
+              const isPage = e.type === "page";
+              const isIdentify = e.type === "identify";
+              const icon = isIdentify ? "👤" : isPage ? "📄" : "⚡";
+              const label = isIdentify
+                ? `Identified as ${e.userId}`
+                : isPage
+                ? e.name || e.url || "Page view"
+                : e.name || "Event";
+              const fmtTime = e.occurredAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+              return (
+                <div key={e.id} className="flex items-start gap-3 rounded-sm px-3 py-2.5" style={{ background: "#fafafa", border: "1px solid #ebebeb" }}>
+                  <span className="mt-px shrink-0 text-[14px]">{icon}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13px] font-medium text-lx-text">{label}</span>
+                    {e.url && !isIdentify && (
+                      <span className="block truncate text-[11px] text-lx-faint">{e.url}</span>
+                    )}
+                  </span>
+                  <span className="shrink-0 text-[11px] text-lx-faint">{fmtTime}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );

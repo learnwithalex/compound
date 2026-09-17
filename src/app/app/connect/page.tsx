@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { providerLogo } from "@/lib/format";
 
 interface Connection {
@@ -33,12 +33,56 @@ const KEY_PLACEHOLDERS: Record<string, string> = {
   paystack: "sk_live_… / sk_test_…",
 };
 
+function snippet(token: string) {
+  return `<!-- Compound analytics — paste before </head> -->
+<script>
+!function(w){w._cmpd=w._cmpd||{_q:[]};
+['identify','track','page'].forEach(function(m){
+  w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};
+});}(window);
+</script>
+<script async src="https://usecompound.xyz/t.js?k=${token}"></script>
+
+<!-- After a user logs in, call: -->
+<!-- window._cmpd.identify(user.email) -->`;
+}
+
+function aiPrompt(token: string) {
+  return `Install the Compound analytics tracker in this codebase.
+
+1. Paste this snippet before </head> on every page (or in your root layout/_document):
+
+<script>
+!function(w){w._cmpd=w._cmpd||{_q:[]};
+['identify','track','page'].forEach(function(m){
+  w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};
+});}(window);
+</script>
+<script async src="https://usecompound.xyz/t.js?k=${token}"></script>
+
+2. After a user successfully logs in or on any authenticated page, call:
+   window._cmpd.identify(user.email)
+
+   Optionally pass traits: window._cmpd.identify(user.email, { name: user.name, plan: user.plan })
+
+3. Optionally track key product events:
+   window._cmpd.track('Feature Used', { feature: 'export' })
+   window._cmpd.track('Upgraded', { from: 'free', to: 'pro' })
+
+Page views are tracked automatically. Do not call window._cmpd.page() manually unless you have a SPA that needs explicit page tracking on route change.`;
+}
+
 export default function ConnectPage() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [form, setForm] = useState({ provider: "stripe", label: "", apiKey: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+
+  // Install tracking state
+  const [installConn, setInstallConn] = useState<Connection | null>(null);
+  const [trackerToken, setTrackerToken] = useState<string | null>(null);
+  const [copied, setCopied] = useState<"snippet" | "prompt" | null>(null);
 
   useEffect(() => {
     fetch("/api/connections")
@@ -49,6 +93,16 @@ export default function ConnectPage() {
         }
       })
       .catch(() => {});
+  }, []);
+
+  const loadToken = useCallback(async (conn: Connection) => {
+    setInstallConn(conn);
+    setTrackerToken(null);
+    const res = await fetch(`/api/connections/${conn.id}/tracker`);
+    if (res.ok) {
+      const data = await res.json();
+      setTrackerToken(data.token);
+    }
   }, []);
 
   async function addConnection(e: React.FormEvent) {
@@ -63,8 +117,10 @@ export default function ConnectPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed"); return; }
-      setConnections((c) => [...c, data]);
+      const conn: Connection = { id: data.id, label: data.label, provider: data.provider, color: data.color };
+      setConnections((c) => [...c, conn]);
       setForm({ provider: "stripe", label: "", apiKey: "" });
+      loadToken(conn);
     } finally { setBusy(false); }
   }
 
@@ -73,6 +129,15 @@ export default function ConnectPage() {
     await fetch("/api/sync", { method: "POST" });
     setSyncing(false);
     window.location.href = "/app";
+  }
+
+  function copy(type: "snippet" | "prompt") {
+    if (!trackerToken) return;
+    const text = type === "snippet" ? snippet(trackerToken) : aiPrompt(trackerToken);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(type);
+      setTimeout(() => setCopied(null), 2000);
+    });
   }
 
   return (
@@ -84,7 +149,7 @@ export default function ConnectPage() {
         <p className="mt-1 text-[13px] text-lx-muted">Each product = one payment account. Add as many as you have.</p>
       </div>
 
-      {/* All payment providers + their connection state */}
+      {/* Provider grid */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {PROVIDERS.map((p) => {
           const linked = connections.filter((c) => c.provider === p.id);
@@ -94,23 +159,12 @@ export default function ConnectPage() {
               type="button"
               onClick={() => setForm((f) => ({ ...f, provider: p.id }))}
               className="rounded-sm bg-white p-4 text-left transition-shadow hover:shadow-sm"
-              style={{
-                border: form.provider === p.id ? "1.5px solid #5e6ad2" : "1px solid #ebebeb",
-              }}
+              style={{ border: form.provider === p.id ? "1.5px solid #5e6ad2" : "1px solid #ebebeb" }}
             >
-              <img
-                src={providerLogo(p.id)}
-                alt={p.label}
-                width={28}
-                height={28}
-                className="h-7 w-7 rounded-sm object-contain"
-                loading="lazy"
-              />
+              <img src={providerLogo(p.id)} alt={p.label} width={28} height={28} className="h-7 w-7 rounded-sm object-contain" loading="lazy" />
               <p className="mt-2.5 text-[13px] font-bold text-lx-text">{p.label}</p>
               <p className={`mt-0.5 text-[11px] font-semibold ${linked.length > 0 ? "text-lx-green" : "text-lx-faint"}`}>
-                {linked.length > 0
-                  ? `${linked.length} connected ✓`
-                  : "Not connected"}
+                {linked.length > 0 ? `${linked.length} connected ✓` : "Not connected"}
               </p>
             </button>
           );
@@ -118,7 +172,7 @@ export default function ConnectPage() {
       </div>
 
       <div className="max-w-md">
-        {/* Form card */}
+        {/* Step 1: Add connection */}
         <form onSubmit={addConnection} className="rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
           <div className="mb-4">
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Provider</label>
@@ -186,7 +240,12 @@ export default function ConnectPage() {
                   <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
                   <span className="text-[13px] font-medium text-lx-text">{c.label}</span>
                   <span className="text-[12px] text-lx-faint">· {c.provider}</span>
-                  <span className="ml-auto text-[11px] font-semibold text-lx-green">Connected ✓</span>
+                  <button
+                    onClick={() => loadToken(c)}
+                    className="ml-auto text-[11px] font-semibold text-[#5e6ad2] hover:opacity-70"
+                  >
+                    Install tracking
+                  </button>
                 </div>
               ))}
             </div>
@@ -200,6 +259,60 @@ export default function ConnectPage() {
                 {syncing ? "Syncing…" : "Sync & go to dashboard →"}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Step 2: Install tracking */}
+        {installConn && (
+          <div className="mt-6 rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 2 · Optional</p>
+                <p className="mt-0.5 text-[15px] font-bold text-lx-text" style={{ letterSpacing: "-0.02em" }}>
+                  Install tracking for {installConn.label}
+                </p>
+              </div>
+              <button onClick={() => setInstallConn(null)} className="text-[18px] leading-none text-lx-faint hover:text-lx-text">×</button>
+            </div>
+
+            <p className="mb-4 text-[13px] leading-relaxed text-lx-muted">
+              Embed this script in your product to capture page views and user events. Compound will match them to your Stripe customers by email to build a complete customer profile.
+            </p>
+
+            {!trackerToken ? (
+              <p className="text-[12px] text-lx-faint">Loading…</p>
+            ) : (
+              <>
+                {/* Snippet preview */}
+                <pre
+                  className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
+                  style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                >
+                  {snippet(trackerToken)}
+                </pre>
+
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={() => copy("snippet")}
+                    className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: "#5e6ad2" }}
+                  >
+                    {copied === "snippet" ? "Copied!" : "Copy snippet"}
+                  </button>
+                  <button
+                    onClick={() => copy("prompt")}
+                    className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]"
+                    style={{ border: "1px solid #dddad5" }}
+                  >
+                    {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
+                  </button>
+                </div>
+
+                <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
+                  Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link behavioral data to payment data.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
