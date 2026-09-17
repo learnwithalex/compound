@@ -29,5 +29,6 @@ export async function GET() {
     "Set-Cookie",
     `oauth_state=${state}; Path=/; HttpOnly; SameSite=lax; Max-Age=600${secure ? "; Secure" : ""}`,
   );
+  console.log("[oauth-init] state:", state, "set-cookie header:", res.headers.get("set-cookie"));
   return res;
 }
