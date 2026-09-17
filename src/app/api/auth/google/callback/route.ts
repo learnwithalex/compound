@@ -11,6 +11,8 @@ export async function GET(req: NextRequest) {
 
   const state = searchParams.get("state");
   const storedState = jar.get("oauth_state")?.value;
+  console.log("[oauth-cb] cookie header:", req.headers.get("cookie"));
+  console.log("[oauth-cb] storedState:", storedState, "state:", state);
   jar.delete("oauth_state");
   if (!state || state !== storedState) return NextResponse.redirect(`${base}/login?error=oauth_state`);
 
