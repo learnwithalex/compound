@@ -209,22 +209,35 @@ export function ChartCard({
         </div>
       )}
 
-      {ready && (
-        <div className="grid grid-cols-3" style={{ borderTop: "1px solid #f0f0f0" }}>
-          <Foot label="Low" value={fmtMrr(Math.min(...values))} />
-          <Foot label="Average" value={fmtMrr(Math.round(values.reduce((a, b) => a + b, 0) / values.length))} divider />
-          <Foot label="High" value={fmtMrr(Math.max(...values))} divider />
-        </div>
-      )}
+      {ready && (() => {
+        const lo = Math.min(...values);
+        const hi = Math.max(...values);
+        const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+        const flat = lo === hi;
+        return (
+          <div className="grid grid-cols-3" style={{ borderTop: "1px solid #f0f0f0" }}>
+            <Foot label="Low" value={fmtMrr(lo)} dim={!flat} />
+            <Foot label="Average" value={fmtMrr(avg)} divider highlight={!flat} />
+            <Foot label="High" value={fmtMrr(hi)} divider accent={!flat ? "#10b981" : undefined} />
+          </div>
+        );
+      })()}
     </section>
   );
 }
 
-function Foot({ label, value, divider }: { label: string; value: string; divider?: boolean }) {
+function Foot({ label, value, divider, dim, highlight, accent }: {
+  label: string; value: string; divider?: boolean; dim?: boolean; highlight?: boolean; accent?: string;
+}) {
   return (
     <div className="px-7 py-3.5" style={divider ? { borderLeft: "1px solid #f0f0f0" } : undefined}>
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-lx-faint">{label}</p>
-      <p className="mt-1 text-[14px] font-semibold tabular-nums text-lx-text">{value}</p>
+      <p
+        className="mt-1 text-[14px] font-semibold tabular-nums"
+        style={{ color: accent ?? (dim ? "#b0b0b0" : highlight ? "#111" : "#111") }}
+      >
+        {value}
+      </p>
     </div>
   );
 }

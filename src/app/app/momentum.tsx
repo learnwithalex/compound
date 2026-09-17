@@ -4,7 +4,6 @@ import { milestoneFor } from "@/lib/insights";
 const fmtDay = (iso: string) =>
   new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-/** Consecutive days at the end of the series that didn't go down. */
 function upStreak(values: number[]): number {
   let n = 0;
   for (let i = values.length - 1; i > 0; i--) {
@@ -14,6 +13,12 @@ function upStreak(values: number[]): number {
   return n;
 }
 
+function streakStart(series: { date: string; value: number }[], streak: number): string {
+  if (streak <= 0) return "";
+  const idx = series.length - 1 - streak;
+  return idx >= 0 ? fmtDay(series[idx].date) : fmtDay(series[0].date);
+}
+
 function bestDay(series: { date: string; value: number }[]) {
   let best = { gain: 0, date: "" };
   for (let i = 1; i < series.length; i++) {
@@ -21,6 +26,11 @@ function bestDay(series: { date: string; value: number }[]) {
     if (gain > best.gain) best = { gain, date: series[i].date };
   }
   return best;
+}
+
+function peakDate(series: { date: string; value: number }[], peak: number): string {
+  const row = [...series].reverse().find((s) => s.value === peak);
+  return row ? fmtDay(row.date) : "";
 }
 
 export function MomentumStrip({
@@ -39,42 +49,44 @@ export function MomentumStrip({
   const atPeak = last >= peak;
   const best = bestDay(series);
   const m = milestoneFor(totalMrrCents);
+  const pDate = peakDate(series, peak);
+  const sStart = streakStart(series, streak);
 
-  const stats = [
+  const stats: { label: string; value: string; note: string; accent: string }[] = [
     {
       label: "Growth streak",
-      value: streak > 0 ? `${streak} day${streak === 1 ? "" : "s"}` : "Broken",
-      note: streak > 0 ? "without a dip" : "last day was down",
+      value: streak > 0 ? `${streak}d` : "Flat",
+      note: streak > 0 && sStart ? `since ${sStart}` : "no streak yet",
+      accent: streak > 5 ? "#10b981" : streak > 0 ? "#f59e0b" : "#a0a0a0",
     },
     {
       label: atPeak ? "All-time high" : "Peak MRR",
       value: fmtMrr(peak),
-      note: atPeak ? "at the top right now" : `${fmtMrr(peak - last)} off the peak`,
+      note: atPeak ? "you're there now" : pDate ? `hit on ${pDate}` : `${fmtMrr(peak - last)} below peak`,
+      accent: atPeak ? "#10b981" : "#5e6ad2",
     },
     {
       label: "Best day",
       value: best.gain > 0 ? `+${fmtMrr(best.gain)}` : "—",
-      note: best.date ? fmtDay(best.date) : "no gain yet in range",
+      note: best.date ? fmtDay(best.date) : "no new MRR yet",
+      accent: best.gain > 0 ? "#5e6ad2" : "#a0a0a0",
     },
     {
       label: "Next milestone",
-      value: fmtMrr(m.toGoCents),
-      note: `to go until ${fmtMrr(m.nextCents)}`,
+      value: fmtMrr(m.nextCents),
+      note: `${fmtMrr(m.toGoCents)} away`,
+      accent: "#5e6ad2",
     },
   ];
 
-  // gap-px over a tinted parent draws the dividers, so they stay correct when
-  // the grid reflows from four columns to two.
   return (
-    <div
-      className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-sm sm:grid-cols-4"
-      style={{ background: "#ebebeb" }}
-    >
+    <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-sm sm:grid-cols-4" style={{ background: "#ebebeb" }}>
       {stats.map((s) => (
-        <div key={s.label} className="bg-white px-5 py-4">
+        <div key={s.label} className="relative bg-white px-5 py-4">
+          <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full" style={{ background: s.accent }} />
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-lx-faint">{s.label}</p>
-          <p className="mt-2 text-[19px] font-semibold leading-none tabular-nums text-lx-text">{s.value}</p>
-          <p className="mt-1.5 text-[11.5px] text-lx-faint">{s.note}</p>
+          <p className="mt-2 text-[22px] font-bold leading-none tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>{s.value}</p>
+          <p className="mt-1.5 text-[11.5px] text-lx-muted">{s.note}</p>
         </div>
       ))}
     </div>
