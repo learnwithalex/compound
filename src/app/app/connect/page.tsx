@@ -141,6 +141,79 @@ export default function ConnectPage() {
     });
   }
 
+  // Step 2 view — replaces the entire content area
+  if (installConn) {
+    return (
+      <div>
+        <div className="mb-6">
+          <button
+            onClick={() => setInstallConn(null)}
+            className="mb-4 flex items-center gap-1.5 text-[12px] font-medium text-lx-muted hover:text-lx-text"
+          >
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 3L5 8l5 5" />
+            </svg>
+            Back to connect
+          </button>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 2 · Optional</p>
+          <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+            Install tracking for {installConn.label}
+          </h1>
+          <p className="mt-1 text-[13px] text-lx-muted">
+            Embed this script in your product to capture page views and user events. Compound will match them to your {installConn.provider} customers by email to build a complete customer profile.
+          </p>
+        </div>
+
+        <div className="max-w-md">
+          {!trackerToken ? (
+            <p className="text-[12px] text-lx-faint">Loading…</p>
+          ) : (
+            <>
+              <pre
+                className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
+                style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+              >
+                {snippet(trackerToken)}
+              </pre>
+
+              <div className="flex gap-2.5">
+                <button
+                  onClick={() => copy("snippet")}
+                  className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ background: "#5e6ad2" }}
+                >
+                  {copied === "snippet" ? "Copied!" : "Copy snippet"}
+                </button>
+                <button
+                  onClick={() => copy("prompt")}
+                  className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]"
+                  style={{ border: "1px solid #dddad5" }}
+                >
+                  {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
+                </button>
+              </div>
+
+              <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
+                Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link behavioral data to payment data.
+              </p>
+
+              <div className="mt-6 pt-5" style={{ borderTop: "1px solid #ebebeb" }}>
+                <button
+                  onClick={syncAll}
+                  disabled={syncing}
+                  className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+                  style={{ background: "#5e6ad2" }}
+                >
+                  {syncing ? "Syncing…" : "Sync & go to dashboard →"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Header */}
@@ -265,60 +338,6 @@ export default function ConnectPage() {
                 {syncing ? "Syncing…" : "Sync & go to dashboard →"}
               </button>
             </div>
-          </div>
-        )}
-
-        {/* Step 2: Install tracking */}
-        {installConn && (
-          <div className="mt-6 rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 2 · Optional</p>
-                <p className="mt-0.5 text-[15px] font-bold text-lx-text" style={{ letterSpacing: "-0.02em" }}>
-                  Install tracking for {installConn.label}
-                </p>
-              </div>
-              <button onClick={() => setInstallConn(null)} className="text-[18px] leading-none text-lx-faint hover:text-lx-text">×</button>
-            </div>
-
-            <p className="mb-4 text-[13px] leading-relaxed text-lx-muted">
-              Embed this script in your product to capture page views and user events. Compound will match them to your Stripe customers by email to build a complete customer profile.
-            </p>
-
-            {!trackerToken ? (
-              <p className="text-[12px] text-lx-faint">Loading…</p>
-            ) : (
-              <>
-                {/* Snippet preview */}
-                <pre
-                  className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
-                  style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-                >
-                  {snippet(trackerToken)}
-                </pre>
-
-                <div className="flex gap-2.5">
-                  <button
-                    onClick={() => copy("snippet")}
-                    className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ background: "#5e6ad2" }}
-                  >
-                    {copied === "snippet" ? "Copied!" : "Copy snippet"}
-                  </button>
-                  <button
-                    onClick={() => copy("prompt")}
-                    className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]"
-                    style={{ border: "1px solid #dddad5" }}
-                  >
-                    {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
-                  </button>
-                </div>
-
-                <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
-                  Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link behavioral data to payment data.
-                </p>
-              </>
-            )}
           </div>
         )}
       </div>
