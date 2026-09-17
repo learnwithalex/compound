@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/db";
+import { userSettings } from "@/db/schema";
 import { userIdFromSession } from "@/lib/auth";
 import { portfolioMetrics, fmtMrr, type ProductMetrics } from "@/lib/metrics";
 import { productIcon } from "@/lib/format";
@@ -14,6 +15,8 @@ import { PastDueTracker } from "./past-due";
 import { MilestoneBanner } from "./milestone-banner";
 import { GoalsWidget } from "./goals-widget";
 import { WaterfallChart } from "./waterfall-chart";
+import { UpgradeBanner } from "./upgrade-banner";
+import { StreakCard } from "./streak-card";
 
 function greeting(email: string): { hello: string; name: string } {
   const hour = new Date().getHours();
@@ -25,12 +28,34 @@ function greeting(email: string): { hello: string; name: string } {
   return { hello, name };
 }
 
+function prevDay(iso: string): string {
+  const d = new Date(iso + "T12:00:00");
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export default async function AppPage() {
   const userId = await userIdFromSession();
   if (!userId) redirect("/login");
 
   const user = await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, userId) });
   const { hello, name } = greeting(user?.email ?? "");
+
+  // Compute and persist streak on every visit
+  const settings = await db.query.userSettings.findFirst({ where: (s, { eq }) => eq(s.userId, userId) });
+  const today = new Date().toISOString().slice(0, 10);
+  const lastDate = settings?.streakLastDate ?? null;
+  let streakDays = settings?.streakDays ?? 0;
+  if (!lastDate || lastDate < prevDay(today)) {
+    streakDays = 1;
+  } else if (lastDate === prevDay(today)) {
+    streakDays = streakDays + 1;
+  }
+  if (lastDate !== today) {
+    await db.insert(userSettings)
+      .values({ userId, streakDays, streakLastDate: today })
+      .onConflictDoUpdate({ target: userSettings.userId, set: { streakDays, streakLastDate: today } });
+  }
 
   const metrics = await portfolioMetrics(userId);
   const hasData = metrics.products.length > 0;
@@ -71,8 +96,11 @@ export default async function AppPage() {
       >
         <div className="stagger min-w-0 pb-14">
           <MilestoneBanner totalMrrCents={metrics.totalMrrCents} />
-          <UpgradeBanner />
-          <StreakCard />
+          <UpgradeBanner
+            dismissed={settings?.trialBannerDismissed ?? false}
+            trialStartedAt={settings?.trialStartedAt ?? null}
+          />
+          <StreakCard streakDays={streakDays} />
 
           <PortfolioHero metrics={metrics} series={portfolioSeries} />
 
@@ -163,66 +191,6 @@ function ProductCard({ product: p, rank }: { product: ProductMetrics; rank: numb
   );
 }
 
-/* ============================================================ upgrade banner */
-
-function UpgradeBanner() {
-  return (
-    <div className="mb-4 flex items-center gap-4 rounded-sm bg-white px-5 py-4" style={{ border: "1px solid #ebebeb" }}>
-      <div
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm"
-        style={{ background: "#f0f0f0" }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-        </svg>
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-semibold text-lx-text">Try compound Pro free for 14 days</p>
-        <p className="mt-0.5 text-[12px]" style={{ color: "#5e6ad2" }}>
-          Unlock unlimited products, AI briefings, team collaboration, and more — free for 14 days, no charge.
-        </p>
-      </div>
-      <a
-        href="#"
-        className="shrink-0 rounded-sm px-3.5 py-1.5 text-[12px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f5]"
-        style={{ border: "1px solid #d0d0d0" }}
-      >
-        Start free trial
-      </a>
-    </div>
-  );
-}
-
-/* ============================================================ streak card */
-
-function StreakCard() {
-  const days = Array.from({ length: 14 }, () => false);
-  return (
-    <div className="mb-6 rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
-      <div className="flex items-center gap-1.5 px-5 py-2.5" style={{ borderBottom: "1px solid #ebebeb" }}>
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="2,4 6,8 10,4" />
-        </svg>
-        <span className="text-[12px] font-semibold text-lx-muted">Your streak</span>
-      </div>
-      <div className="flex items-center gap-4 px-5 py-4">
-        <span className="text-[22px] leading-none">🔥</span>
-        <div className="flex-1">
-          <p className="text-[16px] font-bold text-lx-text">0-day streak</p>
-          <p className="text-[12px] text-lx-muted">7 days to your 7-day milestone</p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex gap-[3px]">
-            {days.map((active, i) => (
-              <div key={i} className="h-[13px] w-[13px] rounded-sm" style={{ background: active ? "#10b981" : "#efefef" }} />
-            ))}
-          </div>
-          <a href="#" className="text-[12px] font-medium text-lx-muted hover:text-lx-text">View history →</a>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ============================================================ empty state */
 

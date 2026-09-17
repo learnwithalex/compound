@@ -121,6 +121,12 @@ export const userSettings = pgTable("user_settings", {
   alertChurn: boolean("alert_churn").notNull().default(false),
   alertUpgrade: boolean("alert_upgrade").notNull().default(false),
   alertPastDue: boolean("alert_past_due").notNull().default(false),
+  // Daily visit streak
+  streakDays: integer("streak_days").notNull().default(0),
+  streakLastDate: date("streak_last_date"),
+  // Free trial
+  trialStartedAt: timestamp("trial_started_at"),
+  trialBannerDismissed: boolean("trial_banner_dismissed").notNull().default(false),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
