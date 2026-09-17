@@ -17,10 +17,8 @@ export async function GET() {
 
   const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
 
-  // Use a 200 HTML response + meta-refresh instead of a 302 redirect.
-  // Caddy (and some other proxies) strip Set-Cookie headers from 302 responses.
-  // Browsers always commit cookies from the 200 response before meta-refresh fires.
-  const html = `<!doctype html><html><head><meta http-equiv="refresh" content="0;url=${googleUrl}"></head><body></body></html>`;
+  // Use location.replace() so /api/auth/google is not added to browser history.
+  const html = `<!doctype html><html><head><script>window.location.replace(${JSON.stringify(googleUrl)})</script></head><body></body></html>`;
   const res = new Response(html, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8" },

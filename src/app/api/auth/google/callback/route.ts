@@ -11,10 +11,19 @@ export async function GET(req: NextRequest) {
 
   const state = searchParams.get("state");
   const storedState = jar.get("oauth_state")?.value;
-  console.log("[oauth-cb] cookie header:", req.headers.get("cookie"));
-  console.log("[oauth-cb] storedState:", storedState, "state:", state);
   jar.delete("oauth_state");
-  if (!state || state !== storedState) return NextResponse.redirect(`${base}/login?error=oauth_state`);
+  if (!state || state !== storedState) {
+    // If the user already has a valid session (e.g. Back-button replay of the
+    // callback after a successful login), send them to the app instead of an error.
+    const sessionToken = jar.get("session")?.value;
+    if (sessionToken) {
+      const existing = await db.query.sessions.findFirst({
+        where: (s, { eq, gt, and }) => and(eq(s.token, sessionToken), gt(s.expiresAt, new Date())),
+      });
+      if (existing) return NextResponse.redirect(`${base}/app`);
+    }
+    return NextResponse.redirect(`${base}/login?error=oauth_state`);
+  }
 
   const code = searchParams.get("code");
   if (!code) return NextResponse.redirect(`${base}/login?error=oauth_denied`);

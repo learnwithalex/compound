@@ -88,11 +88,13 @@ export function applySessionCookie(response: Response, token: string): Response 
   return response;
 }
 
-// Use a 200 HTML response + meta-refresh instead of a 302 redirect.
-// Browsers always commit Set-Cookie before executing meta-refresh;
-// on 302 responses some proxies (Caddy) strip the header entirely.
+// Use a 200 HTML response + location.replace() instead of a 302 redirect.
+// Caddy strips Set-Cookie from 302 responses. location.replace() also removes
+// the callback URL from browser history, preventing a Back-button re-request
+// that would fail (oauth_state cookie already deleted after first callback).
 export function sessionHtmlRedirect(token: string, destination: string): Response {
-  const html = `<!doctype html><html><head><meta http-equiv="refresh" content="0;url=${destination}"></head><body></body></html>`;
+  const safe = JSON.stringify(destination);
+  const html = `<!doctype html><html><head><script>window.location.replace(${safe})</script></head><body></body></html>`;
   return applySessionCookie(
     new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }),
     token
