@@ -14,11 +14,10 @@ export async function GET() {
   const secure = process.env.NODE_ENV === "production";
   const loginUrl = `${appUrl()}/login`;
 
-  // 200 HTML + meta-refresh so Caddy doesn't strip the Set-Cookie deletion header
-  const html = `<!doctype html><html><head><meta http-equiv="refresh" content="0;url=${loginUrl}"></head><body></body></html>`;
+  const html = `<!doctype html><html><head><script>window.location.replace(${JSON.stringify(loginUrl)})</script></head><body></body></html>`;
   const res = new Response(html, {
     status: 200,
-    headers: { "Content-Type": "text/html; charset=utf-8" },
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, private" },
   });
   // Expire the session cookie
   res.headers.append(

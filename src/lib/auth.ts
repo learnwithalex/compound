@@ -44,10 +44,12 @@ export function appUrl() {
 export async function userIdFromSession(): Promise<string | null> {
   const jar = await cookies();
   const token = jar.get("session")?.value;
+  console.log("[session] token from cookie:", token ? token.slice(0, 8) + "…" : "NONE");
   if (!token) return null;
   const row = await db.query.sessions.findFirst({
     where: (s, { eq, gt, and }) => and(eq(s.token, token), gt(s.expiresAt, new Date())),
   });
+  console.log("[session] db lookup:", row ? "FOUND userId=" + row.userId : "NOT FOUND");
   return row?.userId ?? null;
 }
 
@@ -96,7 +98,7 @@ export function sessionHtmlRedirect(token: string, destination: string): Respons
   const safe = JSON.stringify(destination);
   const html = `<!doctype html><html><head><script>window.location.replace(${safe})</script></head><body></body></html>`;
   return applySessionCookie(
-    new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }),
+    new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, private" } }),
     token
   );
 }

@@ -21,7 +21,7 @@ export async function GET() {
   const html = `<!doctype html><html><head><script>window.location.replace(${JSON.stringify(googleUrl)})</script></head><body></body></html>`;
   const res = new Response(html, {
     status: 200,
-    headers: { "Content-Type": "text/html; charset=utf-8" },
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, private" },
   });
   res.headers.append(
     "Set-Cookie",
