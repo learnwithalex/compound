@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { appUrl, createSessionToken, applySessionCookie } from "@/lib/auth";
+import { appUrl, createSessionToken, sessionHtmlRedirect } from "@/lib/auth";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
@@ -49,5 +49,5 @@ export async function GET(req: NextRequest) {
   }
 
   const session = await createSessionToken(user.id);
-  return applySessionCookie(NextResponse.redirect(`${base}/app`), session);
+  return sessionHtmlRedirect(session, `${base}/app`);
 }
