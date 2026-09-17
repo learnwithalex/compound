@@ -55,25 +55,25 @@ function subscriptionMrr(sub: DodoSubscription): number {
 
 async function fetchAllActiveSubs(apiKey: string): Promise<DodoSubscription[]> {
   const result: DodoSubscription[] = [];
-  let page = 1;
+  let page = 0;
   while (true) {
     const raw = await dodoGet<unknown>(apiKey, "/subscriptions", {
       page_number: String(page),
       page_size: "100",
     });
-    console.log("[dodo-sync] all-subs page", page, JSON.stringify(raw).slice(0, 800));
+    console.log("[dodo-sync] subs page", page, JSON.stringify(raw).slice(0, 800));
     const data = raw as DodoListResponse;
     const items = Array.isArray(data.items) ? data.items : [];
     result.push(...items);
     if (items.length < 100) break;
     page++;
   }
-  // Also probe payments endpoint
+  // Also probe specific subscription from payment
   try {
-    const payments = await dodoGet<unknown>(apiKey, "/payments", { page_number: "1", page_size: "10" });
-    console.log("[dodo-sync] payments sample:", JSON.stringify(payments).slice(0, 800));
+    const sub = await dodoGet<unknown>(apiKey, "/subscriptions/sub_0NXgtr2YnRZc6meX1JMCq");
+    console.log("[dodo-sync] direct sub lookup:", JSON.stringify(sub).slice(0, 800));
   } catch (e) {
-    console.log("[dodo-sync] payments endpoint error:", String(e));
+    console.log("[dodo-sync] direct sub lookup error:", String(e));
   }
   console.log("[dodo-sync] total subs:", result.length, result.map(s => ({ id: s.subscription_id, status: s.status, amount: s.recurring_pre_tax_amount })));
   return result.filter(s => s.status === "active");
