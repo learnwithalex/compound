@@ -56,9 +56,7 @@ export function MiniHeader() {
     >
       {/* Workspace identity */}
       <Link href="/app" className="flex shrink-0 items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-[#5e6ad2]">
-          <CompoundMark size={14} theme="dark" />
-        </span>
+        <CompoundMark size={20} theme="light" />
         <span className="text-[13px] font-medium text-lx-text">compound</span>
       </Link>
 
