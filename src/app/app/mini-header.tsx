@@ -33,6 +33,7 @@ function resolveSegments(pathname: string, params: URLSearchParams): Segment[] {
   if (pathname.startsWith("/app/analytics")) return [{ label: "Analytics" }];
   if (pathname.startsWith("/app/connect")) return [{ label: "Connect" }];
   if (pathname.startsWith("/app/agents")) return [{ label: "Agents" }];
+  if (pathname.startsWith("/app/settings")) return [{ label: "Settings" }];
   if (pathname === "/app") return [{ label: "Overview" }];
 
   return [];

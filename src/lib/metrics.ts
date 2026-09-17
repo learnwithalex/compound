@@ -38,6 +38,7 @@ export interface ProductMetrics {
   churnedMrrCents: number;
   newMrrCents: number;
   expansionMrrCents: number;
+  pastDueMrrCents: number;
   activeSubscriptions: number;
   mrrChange30d: number; // percentage
   history: { date: string; mrrCents: number }[];
@@ -61,10 +62,17 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
   const products: ProductMetrics[] = [];
 
   for (const conn of connections) {
-    const snaps = await db.query.snapshots.findMany({
-      where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
-      orderBy: (s, { asc }) => [asc(s.date)],
-    });
+    const [snaps, pastDueSubs] = await Promise.all([
+      db.query.snapshots.findMany({
+        where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
+        orderBy: (s, { asc }) => [asc(s.date)],
+      }),
+      db.query.subscriptions.findMany({
+        where: (s, { eq, and }) => and(eq(s.connectionId, conn.id), eq(s.status, "past_due")),
+      }),
+    ]);
+
+    const pastDueMrrCents = pastDueSubs.reduce((s, x) => s + x.mrrCents, 0);
 
     if (snaps.length === 0) {
       products.push({
@@ -77,6 +85,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
         churnedMrrCents: 0,
         newMrrCents: 0,
         expansionMrrCents: 0,
+        pastDueMrrCents,
         activeSubscriptions: 0,
         mrrChange30d: 0,
         history: [],
@@ -94,6 +103,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
       mrrCents: latest.mrrCents,
       arrCents: latest.mrrCents * 12,
       activeSubscriptions: latest.activeSubscriptions,
+      pastDueMrrCents,
       ...movement30d(snaps),
       history: snaps.map((s) => ({ date: s.date, mrrCents: s.mrrCents })),
     });
@@ -122,10 +132,17 @@ export async function singleProductMetrics(
 
   const sinceStr = daysAgo(90);
 
-  const snaps = await db.query.snapshots.findMany({
-    where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
-    orderBy: (s, { asc }) => [asc(s.date)],
-  });
+  const [snaps, pastDueSubs] = await Promise.all([
+    db.query.snapshots.findMany({
+      where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
+      orderBy: (s, { asc }) => [asc(s.date)],
+    }),
+    db.query.subscriptions.findMany({
+      where: (s, { eq, and }) => and(eq(s.connectionId, conn.id), eq(s.status, "past_due")),
+    }),
+  ]);
+
+  const pastDueMrrCents = pastDueSubs.reduce((s, x) => s + x.mrrCents, 0);
 
   if (snaps.length === 0) {
     return {
@@ -139,6 +156,7 @@ export async function singleProductMetrics(
         churnedMrrCents: 0,
         newMrrCents: 0,
         expansionMrrCents: 0,
+        pastDueMrrCents,
         activeSubscriptions: 0,
         mrrChange30d: 0,
         history: [],
@@ -159,6 +177,7 @@ export async function singleProductMetrics(
       mrrCents: latest.mrrCents,
       arrCents: latest.mrrCents * 12,
       activeSubscriptions: latest.activeSubscriptions,
+      pastDueMrrCents,
       // 30-day figures, even though `snaps` spans 90 days for the chart.
       ...movement30d(snaps),
       history: snaps.map((s) => ({ date: s.date, mrrCents: s.mrrCents })),

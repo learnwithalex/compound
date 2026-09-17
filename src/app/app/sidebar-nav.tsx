@@ -13,9 +13,9 @@ const NAV_MORE = [
 ];
 
 const NAV_BOTTOM = [
-  { href: "/app/connect", label: "Settings",  icon: SettingsIcon },
-  { href: "/login",       label: "What's new", icon: WhatsNewIcon },
-  { href: "/login",       label: "Sign out",   icon: SignOutIcon },
+  { href: "/app/settings", label: "Settings",   icon: SettingsIcon },
+  { href: "/login",        label: "What's new", icon: WhatsNewIcon },
+  { href: "/api/auth/signout", label: "Sign out", icon: SignOutIcon },
 ];
 
 export function SidebarNav() {

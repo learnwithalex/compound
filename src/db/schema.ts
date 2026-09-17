@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, bigint, integer, date, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, bigint, integer, date, uniqueIndex, boolean } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -103,6 +103,19 @@ export const apiTokens = pgTable("api_tokens", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastUsedAt: timestamp("last_used_at"),
   revokedAt: timestamp("revoked_at"),
+});
+
+export const userSettings = pgTable("user_settings", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  digestEnabled: boolean("digest_enabled").notNull().default(false),
+  digestDay: integer("digest_day").notNull().default(1), // 1=Mon … 7=Sun
+  milestoneAlerts: boolean("milestone_alerts").notNull().default(true),
+  lastMilestoneCents: bigint("last_milestone_cents", { mode: "number" }).notNull().default(0),
+  publicPageEnabled: boolean("public_page_enabled").notNull().default(false),
+  publicSlug: text("public_slug").unique(),
+  publicShowMrr: boolean("public_show_mrr").notNull().default(true),
+  publicShowProducts: boolean("public_show_products").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Individual subscription events for AI analysis context

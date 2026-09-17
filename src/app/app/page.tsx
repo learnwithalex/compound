@@ -10,6 +10,8 @@ import { MomentumStrip } from "./momentum";
 import { ShareCard } from "./share-card";
 import { ChurnRadar } from "./insights";
 import { radarSignals } from "@/lib/insights";
+import { PastDueTracker } from "./past-due";
+import { MilestoneBanner } from "./milestone-banner";
 
 function greeting(email: string): { hello: string; name: string } {
   const hour = new Date().getHours();
@@ -66,6 +68,7 @@ export default async function AppPage() {
         subtitle={`Here's your portfolio across ${ranked.length} product${ranked.length === 1 ? "" : "s"}.`}
       >
         <div className="stagger min-w-0 pb-14">
+          <MilestoneBanner totalMrrCents={metrics.totalMrrCents} />
           <UpgradeBanner />
           <StreakCard />
 
@@ -76,6 +79,7 @@ export default async function AppPage() {
           <ShareCard metrics={metrics} />
 
           <div className="mb-8">
+            <PastDueTracker products={ranked} />
             <ChurnRadar signals={radarSignals(ranked)} />
           </div>
 
