@@ -111,7 +111,7 @@ export function PortfolioHero({
           className="mx-7 mb-7 flex h-[160px] items-center justify-center rounded-sm text-[13px] text-lx-faint"
           style={{ background: "#fafafa" }}
         >
-          Sync daily to build your trend
+          Syncing your history…
         </div>
       )}
 

@@ -155,7 +155,7 @@ export function ChartCard({
   series,
   color = "#5e6ad2",
   height = 260,
-  emptyHint = "Sync daily to build your trend",
+  emptyHint = "Syncing your history…",
   className = "",
 }: {
   label: string;

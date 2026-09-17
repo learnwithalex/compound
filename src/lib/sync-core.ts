@@ -2,6 +2,64 @@ import { db } from "@/db";
 import { connections, customers, subscriptions, snapshots, revenueEvents } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 
+// Reconstruct daily MRR snapshots from subscription start/cancel dates.
+// Only runs on the first sync for a connection (when there are ≤1 existing snapshots).
+// Uses churn revenue events to recover the MRR of cancelled subscriptions.
+async function backfillHistory(connectionId: string): Promise<void> {
+  const existing = await db.query.snapshots.findMany({
+    where: (s, { eq }) => eq(s.connectionId, connectionId),
+    limit: 2,
+  });
+  if (existing.length > 1) return;
+
+  const allSubs = await db.query.subscriptions.findMany({
+    where: (s, { eq }) => eq(s.connectionId, connectionId),
+  });
+  if (allSubs.length === 0) return;
+
+  // Recover MRR for cancelled subs from churn events (mrrCents is zeroed on cancel)
+  const churnEvents = await db.query.revenueEvents.findMany({
+    where: (e, { eq, and }) => and(eq(e.connectionId, connectionId), eq(e.eventType, "churn")),
+  });
+  const churnMrr = new Map(churnEvents.map((e) => [e.externalId, e.amountCents]));
+
+  type Range = { start: Date; end: Date | null; mrr: number };
+  const ranges: Range[] = [];
+  for (const sub of allSubs) {
+    if (!sub.startedAt) continue;
+    const mrr = sub.mrrCents > 0 ? sub.mrrCents : (churnMrr.get(sub.externalId) ?? 0);
+    if (mrr === 0) continue;
+    ranges.push({ start: sub.startedAt, end: sub.canceledAt, mrr });
+  }
+  if (ranges.length === 0) return;
+
+  const earliest = new Date(Math.min(...ranges.map((r) => r.start.getTime())));
+  const twoYearsAgo = new Date();
+  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+  const from = earliest < twoYearsAgo ? twoYearsAgo : earliest;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const toInsert: typeof snapshots.$inferInsert[] = [];
+  for (let d = new Date(from); d < today; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.toISOString().slice(0, 10);
+    let mrrCents = 0;
+    let activeSubscriptions = 0;
+    for (const r of ranges) {
+      if (r.start <= d && (!r.end || r.end > d)) {
+        mrrCents += r.mrr;
+        activeSubscriptions++;
+      }
+    }
+    toInsert.push({ connectionId, date: dateStr, mrrCents, newMrrCents: 0, churnedMrrCents: 0, expansionMrrCents: 0, contractionMrrCents: 0, activeSubscriptions });
+  }
+  if (toInsert.length === 0) return;
+
+  for (let i = 0; i < toInsert.length; i += 500) {
+    await db.insert(snapshots).values(toInsert.slice(i, i + 500)).onConflictDoNothing();
+  }
+}
+
 /* ============================================================ normalized shapes */
 
 export interface NormalizedCustomer {
@@ -178,6 +236,9 @@ export async function persistPull(connectionId: string, pull: ProviderPull) {
   }
 
   if (events.length > 0) await db.insert(revenueEvents).values(events);
+
+  // 4b. On first sync, backfill historical snapshots from subscription date ranges.
+  if (prevSubs.length === 0) await backfillHistory(connectionId);
 
   // 5. Daily snapshot, with movement now derived from real events rather than
   //    a day-over-day diff of the total.
