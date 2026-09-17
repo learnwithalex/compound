@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { snapshots } from "@/db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 
-type Snap = { date: string; mrrCents: number; newMrrCents: number; churnedMrrCents: number; expansionMrrCents: number };
+type Snap = { date: string; mrrCents: number; newMrrCents: number; churnedMrrCents: number; expansionMrrCents: number; contractionMrrCents: number };
 
 export function daysAgo(n: number): string {
   const d = new Date();
@@ -25,6 +25,7 @@ export function movement30d(snaps: Snap[]) {
     newMrrCents: window.reduce((s, r) => s + r.newMrrCents, 0),
     churnedMrrCents: window.reduce((s, r) => s + r.churnedMrrCents, 0),
     expansionMrrCents: window.reduce((s, r) => s + r.expansionMrrCents, 0),
+    contractionMrrCents: window.reduce((s, r) => s + r.contractionMrrCents, 0),
   };
 }
 
@@ -38,6 +39,7 @@ export interface ProductMetrics {
   churnedMrrCents: number;
   newMrrCents: number;
   expansionMrrCents: number;
+  contractionMrrCents: number;
   pastDueMrrCents: number;
   activeSubscriptions: number;
   mrrChange30d: number; // percentage
@@ -85,6 +87,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
         churnedMrrCents: 0,
         newMrrCents: 0,
         expansionMrrCents: 0,
+        contractionMrrCents: 0,
         pastDueMrrCents,
         activeSubscriptions: 0,
         mrrChange30d: 0,
@@ -110,7 +113,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
   }
 
   const totalMrrCents = products.reduce((s, p) => s + p.mrrCents, 0);
-  const netNewMrrCents = products.reduce((s, p) => s + p.newMrrCents + p.expansionMrrCents - p.churnedMrrCents, 0);
+  const netNewMrrCents = products.reduce((s, p) => s + p.newMrrCents + p.expansionMrrCents - p.churnedMrrCents - p.contractionMrrCents, 0);
 
   return {
     totalMrrCents,
@@ -156,6 +159,7 @@ export async function singleProductMetrics(
         churnedMrrCents: 0,
         newMrrCents: 0,
         expansionMrrCents: 0,
+        contractionMrrCents: 0,
         pastDueMrrCents,
         activeSubscriptions: 0,
         mrrChange30d: 0,

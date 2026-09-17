@@ -13,6 +13,10 @@ type SettingsPatch = {
   publicSlug?: string | null;
   publicShowMrr?: boolean;
   publicShowProducts?: boolean;
+  alertNewSub?: boolean;
+  alertChurn?: boolean;
+  alertUpgrade?: boolean;
+  alertPastDue?: boolean;
 };
 
 async function getOrCreate(userId: string) {
@@ -44,6 +48,10 @@ export async function PATCH(req: NextRequest) {
   if ("publicPageEnabled" in body) patch.publicPageEnabled = Boolean(body.publicPageEnabled);
   if ("publicShowMrr" in body) patch.publicShowMrr = Boolean(body.publicShowMrr);
   if ("publicShowProducts" in body) patch.publicShowProducts = Boolean(body.publicShowProducts);
+  if ("alertNewSub" in body) patch.alertNewSub = Boolean(body.alertNewSub);
+  if ("alertChurn" in body) patch.alertChurn = Boolean(body.alertChurn);
+  if ("alertUpgrade" in body) patch.alertUpgrade = Boolean(body.alertUpgrade);
+  if ("alertPastDue" in body) patch.alertPastDue = Boolean(body.alertPastDue);
 
   if ("publicSlug" in body && body.publicSlug) {
     const slug = String(body.publicSlug).toLowerCase().replace(/[^a-z0-9-]/g, "-").slice(0, 40);

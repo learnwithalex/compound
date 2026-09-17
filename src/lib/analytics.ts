@@ -428,6 +428,63 @@ export async function loadCustomerJourney(
   };
 }
 
+/* ============================================================ period comparison */
+
+export interface PeriodDelta {
+  arpaDelta: number;       // percentage points
+  ltvDelta: number;
+  churnDelta: number;      // absolute percentage points (current - prev)
+  quickRatioDelta: number | null;
+  trialConversionPct: number;      // current: trials that converted
+  prevTrialConversionPct: number;  // previous period
+}
+
+export function periodComparison(subs: LoadedSub[]): PeriodDelta {
+  const now = new Date();
+  const d30 = new Date(now.getTime() - 30 * 864e5);
+  const d60 = new Date(now.getTime() - 60 * 864e5);
+
+  function metricsAt(from: Date, to: Date) {
+    const active = subs.filter((s) => {
+      const started = s.startedAt && s.startedAt < to;
+      const notCanceled = !s.canceledAt || s.canceledAt > from;
+      return started && notCanceled && PAYING.has(s.status);
+    });
+    const mrrCents = active.reduce((s, x) => s + x.mrrCents, 0);
+    const arpaCents = active.length ? Math.round(mrrCents / active.length) : 0;
+    const paid = subs.filter((s) => !lapsedTrial(s));
+    const churned = paid.filter((s) => s.canceledAt && s.canceledAt >= from && s.canceledAt < to);
+    const activeAt = paid.filter((s) => s.startedAt && s.startedAt < from && (!s.canceledAt || s.canceledAt >= from)).length;
+    const churnPct = activeAt ? (churned.length / activeAt) * 100 : 0;
+    const avgLife = churnPct > 0 ? 100 / churnPct : 0;
+    const ltv = Math.round(arpaCents * avgLife);
+    const newIn = paid.filter((s) => s.startedAt && s.startedAt >= from && s.startedAt < to);
+    const medMrr = active.map((s) => s.mrrCents).sort((a, b) => a - b)[Math.floor(active.length / 2)] || 0;
+    const newMrr = newIn.reduce((s, x) => s + (x.mrrCents || medMrr), 0);
+    const churnedMrr = churned.reduce((s, x) => s + (x.mrrCents || medMrr), 0);
+    const quickRatio = churnedMrr > 0 ? newMrr / churnedMrr : null;
+
+    // Trial conversion: trials that started in window AND converted
+    const trials = subs.filter((s) => s.trialEndAt && s.trialEndAt >= from && s.trialEndAt < to);
+    const converted = trials.filter((s) => !lapsedTrial(s) && PAYING.has(s.status));
+    const trialConv = trials.length ? (converted.length / trials.length) * 100 : 0;
+
+    return { arpaCents, churnPct, ltv, quickRatio, trialConv };
+  }
+
+  const cur = metricsAt(d30, now);
+  const prev = metricsAt(d60, d30);
+
+  return {
+    arpaDelta: prev.arpaCents ? ((cur.arpaCents - prev.arpaCents) / prev.arpaCents) * 100 : 0,
+    ltvDelta: prev.ltv ? ((cur.ltv - prev.ltv) / prev.ltv) * 100 : 0,
+    churnDelta: cur.churnPct - prev.churnPct,
+    quickRatioDelta: cur.quickRatio !== null && prev.quickRatio !== null ? cur.quickRatio - prev.quickRatio : null,
+    trialConversionPct: cur.trialConv,
+    prevTrialConversionPct: prev.trialConv,
+  };
+}
+
 /* ============================================================ lifecycle funnel */
 
 export interface FunnelStep { label: string; count: number; pct: number }

@@ -10,6 +10,10 @@ interface Settings {
   publicSlug: string | null;
   publicShowMrr: boolean;
   publicShowProducts: boolean;
+  alertNewSub: boolean;
+  alertChurn: boolean;
+  alertUpgrade: boolean;
+  alertPastDue: boolean;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -101,6 +105,46 @@ export default function SettingsPage() {
           saving={saving === "milestoneAlerts"}
           onChange={(v) => patch("milestoneAlerts", v)}
         />
+      </Section>
+
+      {/* Real-time alerts */}
+      <Section title="Real-time alerts">
+        <p className="mb-4 text-[12px] leading-relaxed text-lx-faint">
+          Get an email the moment a subscription event happens. Requires a webhook set up in your payment provider — find the webhook URL on the <a href="/app/connect" className="text-[#5e6ad2] underline underline-offset-2 hover:opacity-80">Connect page</a>.
+        </p>
+        <div className="space-y-4">
+          <Toggle
+            label="New subscription"
+            description="Alert when a customer starts a paid subscription."
+            checked={settings.alertNewSub}
+            saving={saving === "alertNewSub"}
+            onChange={(v) => patch("alertNewSub", v)}
+          />
+          <Divider />
+          <Toggle
+            label="Churn"
+            description="Alert when a customer cancels their subscription."
+            checked={settings.alertChurn}
+            saving={saving === "alertChurn"}
+            onChange={(v) => patch("alertChurn", v)}
+          />
+          <Divider />
+          <Toggle
+            label="Upgrade"
+            description="Alert when a customer upgrades to a higher plan."
+            checked={settings.alertUpgrade}
+            saving={saving === "alertUpgrade"}
+            onChange={(v) => patch("alertUpgrade", v)}
+          />
+          <Divider />
+          <Toggle
+            label="Past due"
+            description="Alert when a customer's payment becomes past due."
+            checked={settings.alertPastDue}
+            saving={saving === "alertPastDue"}
+            onChange={(v) => patch("alertPastDue", v)}
+          />
+        </div>
       </Section>
 
       {/* Public page */}

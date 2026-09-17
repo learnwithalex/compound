@@ -7,6 +7,7 @@ interface Connection {
   label: string;
   provider: string;
   color: string;
+  webhookToken?: string | null;
 }
 
 const PROVIDERS = [
@@ -89,7 +90,7 @@ export default function ConnectPage() {
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
         if (Array.isArray(rows)) {
-          setConnections(rows.map((c: Connection) => ({ id: c.id, label: c.label, provider: c.provider, color: c.color })));
+          setConnections(rows.map((c: Connection) => ({ id: c.id, label: c.label, provider: c.provider, color: c.color, webhookToken: c.webhookToken })));
         }
       })
       .catch(() => {});
@@ -236,16 +237,21 @@ export default function ConnectPage() {
           <div className="mt-4 rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
             <div className="divide-y divide-[#ebebeb]">
               {connections.map((c) => (
-                <div key={c.id} className="flex items-center gap-2.5 px-5 py-3">
-                  <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
-                  <span className="text-[13px] font-medium text-lx-text">{c.label}</span>
-                  <span className="text-[12px] text-lx-faint">· {c.provider}</span>
-                  <button
-                    onClick={() => loadToken(c)}
-                    className="ml-auto text-[11px] font-semibold text-[#5e6ad2] hover:opacity-70"
-                  >
-                    Install tracking
-                  </button>
+                <div key={c.id} className="px-5 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
+                    <span className="text-[13px] font-medium text-lx-text">{c.label}</span>
+                    <span className="text-[12px] text-lx-faint">· {c.provider}</span>
+                    <button
+                      onClick={() => loadToken(c)}
+                      className="ml-auto text-[11px] font-semibold text-[#5e6ad2] hover:opacity-70"
+                    >
+                      Install tracking
+                    </button>
+                  </div>
+                  {c.webhookToken && (
+                    <WebhookRow token={c.webhookToken} provider={c.provider} />
+                  )}
                 </div>
               ))}
             </div>
@@ -316,6 +322,32 @@ export default function ConnectPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function WebhookRow({ token, provider }: { token: string; provider: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${typeof window !== "undefined" ? window.location.origin : "https://usecompound.xyz"}/api/webhooks/${provider}/${token}`;
+
+  function copy() {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  if (provider !== "stripe") return null;
+
+  return (
+    <div className="mt-2 flex items-center gap-2 rounded-sm px-2.5 py-2" style={{ background: "#fafafa", border: "1px solid #f0ede8" }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 5v14M5 12l7 7 7-7" />
+      </svg>
+      <span className="min-w-0 flex-1 truncate font-mono text-[10px] text-lx-faint">{url}</span>
+      <button onClick={copy} className="shrink-0 text-[10px] font-semibold text-[#5e6ad2] hover:opacity-70">
+        {copied ? "Copied!" : "Copy webhook URL"}
+      </button>
     </div>
   );
 }

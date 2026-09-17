@@ -28,6 +28,7 @@ export const connections = pgTable("connections", {
   apiKey: text("api_key").notNull(),    // stored as-is for now, encrypt in v2
   color: text("color").notNull().default("#5e6ad2"),
   currency: text("currency").notNull().default("usd"),
+  webhookToken: text("webhook_token").unique().$defaultFn(() => "whk_" + crypto.randomUUID().replace(/-/g, "")),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastSyncedAt: timestamp("last_synced_at"),
 });
@@ -115,7 +116,31 @@ export const userSettings = pgTable("user_settings", {
   publicSlug: text("public_slug").unique(),
   publicShowMrr: boolean("public_show_mrr").notNull().default(true),
   publicShowProducts: boolean("public_show_products").notNull().default(true),
+  // Real-time email alerts
+  alertNewSub: boolean("alert_new_sub").notNull().default(false),
+  alertChurn: boolean("alert_churn").notNull().default(false),
+  alertUpgrade: boolean("alert_upgrade").notNull().default(false),
+  alertPastDue: boolean("alert_past_due").notNull().default(false),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// MRR goals — target MRR by a given date
+export const revenueGoals = pgTable("revenue_goals", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  label: text("label").notNull().default("MRR Goal"),
+  targetMrrCents: bigint("target_mrr_cents", { mode: "number" }).notNull(),
+  targetDate: date("target_date").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Notes on a customer — lightweight CRM
+export const customerNotes = pgTable("customer_notes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  customerId: text("customer_id").notNull().references(() => customers.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  note: text("note").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Per-connection public ingest token for the JS tracker

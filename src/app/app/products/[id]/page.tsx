@@ -287,9 +287,15 @@ function TopCustomersCard({ customers, connectionId, productLabel }: { customers
 
   return (
     <section className="h-full overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
-      <div className="flex items-baseline justify-between px-7 pb-4 pt-6">
+      <div className="flex items-center justify-between px-7 pb-4 pt-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Top customers</p>
-        <p className="text-[11px] text-lx-faint">by MRR</p>
+        <a
+          href="/api/export/customers"
+          download
+          className="text-[11px] font-medium text-[#5e6ad2] hover:opacity-70"
+        >
+          Export CSV ↓
+        </a>
       </div>
       {customers.length === 0 ? (
         <p className="px-7 pb-7 text-[13px] text-lx-faint">No active customers yet.</p>

@@ -12,6 +12,8 @@ import { ChurnRadar } from "./insights";
 import { radarSignals } from "@/lib/insights";
 import { PastDueTracker } from "./past-due";
 import { MilestoneBanner } from "./milestone-banner";
+import { GoalsWidget } from "./goals-widget";
+import { WaterfallChart } from "./waterfall-chart";
 
 function greeting(email: string): { hello: string; name: string } {
   const hour = new Date().getHours();
@@ -77,6 +79,11 @@ export default async function AppPage() {
           <MomentumStrip series={portfolioSeries} totalMrrCents={metrics.totalMrrCents} />
 
           <ShareCard metrics={metrics} />
+
+          <div className="mb-6 grid gap-4 lg:grid-cols-2">
+            <GoalsWidget currentMrrCents={metrics.totalMrrCents} />
+            <WaterfallChart products={metrics.products} />
+          </div>
 
           <div className="mb-8">
             <PastDueTracker products={ranked} />

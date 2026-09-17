@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { userIdFromSession } from "@/lib/auth";
 import { loadCustomerJourney } from "@/lib/analytics";
 import { fmtMrr, productIcon } from "@/lib/format";
+import { NotesSection } from "./notes-section";
 import { Avatar } from "@/app/app/avatar";
 import { SourceMark, CountryMark } from "@/app/app/segment-icons";
 import { db } from "@/db";
@@ -197,6 +198,9 @@ export default async function CustomerPage({
           </div>
         )}
       </section>
+
+      {/* Notes */}
+      <NotesSection customerId={j.customerId} />
     </div>
   );
 }
