@@ -5,7 +5,7 @@ import { eq, and, inArray } from "drizzle-orm";
 // Reconstruct daily MRR snapshots from subscription start/cancel dates.
 // Only runs on the first sync for a connection (when there are ≤1 existing snapshots).
 // Uses churn revenue events to recover the MRR of cancelled subscriptions.
-async function backfillHistory(connectionId: string): Promise<void> {
+export async function backfillHistory(connectionId: string): Promise<void> {
   const existing = await db.query.snapshots.findMany({
     where: (s, { eq }) => eq(s.connectionId, connectionId),
     limit: 2,
