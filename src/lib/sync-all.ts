@@ -5,6 +5,7 @@ import { syncPolarConnection } from "@/lib/polar";
 import { syncDodoConnection } from "@/lib/dodopayments";
 import { syncPaystackConnection } from "@/lib/paystack";
 import { syncPaddleConnection } from "@/lib/paddle";
+import { syncGumroadConnection } from "@/lib/gumroad";
 
 function syncAny(connectionId: string, provider: string) {
   if (provider === "lemonsqueezy") return syncLemonSqueezyConnection(connectionId);
@@ -12,6 +13,7 @@ function syncAny(connectionId: string, provider: string) {
   if (provider === "dodopayments") return syncDodoConnection(connectionId);
   if (provider === "paystack") return syncPaystackConnection(connectionId);
   if (provider === "paddle") return syncPaddleConnection(connectionId);
+  if (provider === "gumroad") return syncGumroadConnection(connectionId);
   return syncConnection(connectionId);
 }
 

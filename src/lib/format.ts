@@ -25,6 +25,7 @@ export function providerLogo(provider: string): string {
       polar: "/polar-icon.svg",
       dodopayments: "/dodopayments-icon.svg",
       paddle: "https://cdn.simpleicons.org/paddle/0066ff",
+      gumroad: "https://cdn.simpleicons.org/gumroad/ff90e8",
       paystack: "/paystack-icon.png",
     } as Record<string, string>
   )[key] ?? "https://cdn.simpleicons.org/stripe/635bff";

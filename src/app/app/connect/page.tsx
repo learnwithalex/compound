@@ -16,6 +16,7 @@ const PROVIDERS = [
   { id: "polar", label: "Polar" },
   { id: "dodopayments", label: "DodoPayments" },
   { id: "paddle", label: "Paddle" },
+  { id: "gumroad", label: "Gumroad" },
   { id: "paystack", label: "Paystack" },
 ];
 
@@ -25,6 +26,7 @@ const KEY_LABELS: Record<string, string> = {
   polar: "Polar access token",
   dodopayments: "DodoPayments API key",
   paddle: "Paddle API key",
+  gumroad: "Gumroad access token",
   paystack: "Paystack secret key",
 };
 
@@ -34,6 +36,7 @@ const KEY_PLACEHOLDERS: Record<string, string> = {
   polar: "polar_…",
   dodopayments: "dodo_live_… / dodo_test_…",
   paddle: "pdl_apikey_…",
+  gumroad: "your_access_token",
   paystack: "sk_live_… / sk_test_…",
 };
 
