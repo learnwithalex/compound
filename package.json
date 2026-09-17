@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@paddle/paddle-node-sdk": "^3.10.0",
     "autoprefixer": "^10.4.20",
     "clsx": "^2.1.1",
     "dodopayments": "^2.50.0",
