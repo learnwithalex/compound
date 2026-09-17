@@ -216,13 +216,13 @@ export default function SettingsPage() {
             <p className="text-[13px] font-medium text-lx-text">Sign out</p>
             <p className="text-[12px] text-lx-faint">End your current session.</p>
           </div>
-          <a
-            href="/api/auth/signout"
+          <button
+            onClick={() => { window.location.href = "/api/auth/signout"; }}
             className="rounded-sm px-3 py-1.5 text-[12px] font-medium text-lx-muted transition-colors hover:bg-[#fafafa] hover:text-lx-text"
             style={{ border: "1px solid #ebebeb" }}
           >
             Sign out
-          </a>
+          </button>
         </div>
       </Section>
     </div>

@@ -15,7 +15,6 @@ const NAV_MORE = [
 const NAV_BOTTOM = [
   { href: "/app/settings", label: "Settings",   icon: SettingsIcon },
   { href: "/login",        label: "What's new", icon: WhatsNewIcon },
-  { href: "/api/auth/signout", label: "Sign out", icon: SignOutIcon },
 ];
 
 export function SidebarNav() {
@@ -48,6 +47,13 @@ export function SidebarNav() {
         {NAV_BOTTOM.map(({ href, label, icon: Icon }) => (
           <Item key={label} href={href} label={label} Icon={Icon} active={false} />
         ))}
+        <button
+          onClick={() => { window.location.href = "/api/auth/signout"; }}
+          className="mb-px flex h-[34px] w-full items-center gap-[9px] rounded-sm pl-3 pr-2 text-[13px] text-[#565656] transition-colors hover:bg-[#f3f4f6] hover:text-[#111111]"
+        >
+          <span className="shrink-0 text-[#a0a0a0]"><SignOutIcon /></span>
+          <span className="flex-1 leading-none text-left">Sign out</span>
+        </button>
       </div>
     </aside>
   );
