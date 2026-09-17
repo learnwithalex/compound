@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { userSettings } from "@/db/schema";
+import { userSettings, connections, trackerTokens, analyticsEvents } from "@/db/schema";
 import { userIdFromSession } from "@/lib/auth";
 import { portfolioMetrics, fmtMrr, type ProductMetrics } from "@/lib/metrics";
 import { productIcon } from "@/lib/format";
@@ -17,6 +17,8 @@ import { GoalsWidget } from "./goals-widget";
 import { WaterfallChart } from "./waterfall-chart";
 import { UpgradeBanner } from "./upgrade-banner";
 import { StreakCard } from "./streak-card";
+import { AnalyticsNudgeBanner } from "./analytics-nudge";
+import { eq } from "drizzle-orm";
 
 function greeting(email: string): { hello: string; name: string } {
   const hour = new Date().getHours();
@@ -55,6 +57,25 @@ export default async function AppPage() {
     await db.insert(userSettings)
       .values({ userId, streakDays, streakLastDate: today })
       .onConflictDoUpdate({ target: userSettings.userId, set: { streakDays, streakLastDate: today } });
+  }
+
+  // Analytics nudge: find connections with no events yet, auto-provision tokens
+  const userConns = await db.query.connections.findMany({
+    where: (c, { eq }) => eq(c.userId, userId),
+  });
+  const eventedConns = await db.selectDistinct({ connectionId: analyticsEvents.connectionId })
+    .from(analyticsEvents);
+  const eventedSet = new Set(eventedConns.map((r) => r.connectionId));
+  const needsTracking = userConns.filter((c) => !eventedSet.has(c.id));
+
+  const nudgeItems: { connectionId: string; label: string; provider: string; token: string }[] = [];
+  for (const conn of needsTracking) {
+    let tracker = await db.query.trackerTokens.findFirst({ where: (t) => eq(t.connectionId, conn.id) });
+    if (!tracker) {
+      const [created] = await db.insert(trackerTokens).values({ connectionId: conn.id }).returning();
+      tracker = created;
+    }
+    if (tracker) nudgeItems.push({ connectionId: conn.id, label: conn.label, provider: conn.provider, token: tracker.token });
   }
 
   const metrics = await portfolioMetrics(userId);
@@ -101,6 +122,7 @@ export default async function AppPage() {
             trialStartedAt={settings?.trialStartedAt ?? null}
           />
           <StreakCard streakDays={streakDays} />
+          <AnalyticsNudgeBanner items={nudgeItems} />
 
           <PortfolioHero metrics={metrics} series={portfolioSeries} />
 
