@@ -11,18 +11,14 @@ export function CompoundMark({
   size?: number;
   theme?: "light" | "dark";
 }) {
-  const bg = theme === "dark" ? INK : "transparent";
+  void theme;
   const w = Math.round(size * (48 / 41));
   const h = size;
 
   return (
     <span
       className="inline-flex shrink-0 items-center justify-center"
-      style={
-        theme === "dark"
-          ? { width: w, height: h, background: bg, borderRadius: Math.round(size * 0.22) }
-          : { width: w, height: h }
-      }
+      style={{ width: w, height: h }}
     >
       <svg
         width={w}
