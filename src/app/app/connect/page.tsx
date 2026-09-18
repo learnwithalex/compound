@@ -11,33 +11,33 @@ interface Connection {
 }
 
 const PROVIDERS = [
-  { id: "stripe", label: "Stripe" },
-  { id: "lemonsqueezy", label: "Lemon Squeezy" },
-  { id: "polar", label: "Polar" },
-  { id: "dodopayments", label: "DodoPayments" },
-  { id: "paddle", label: "Paddle" },
-  { id: "gumroad", label: "Gumroad" },
-  { id: "paystack", label: "Paystack" },
+  { id: "stripe",        label: "Stripe" },
+  { id: "lemonsqueezy",  label: "Lemon Squeezy" },
+  { id: "polar",         label: "Polar" },
+  { id: "dodopayments",  label: "DodoPayments" },
+  { id: "paddle",        label: "Paddle" },
+  { id: "gumroad",       label: "Gumroad" },
+  { id: "paystack",      label: "Paystack" },
 ];
 
 const KEY_LABELS: Record<string, string> = {
-  stripe: "Stripe secret key",
-  lemonsqueezy: "Lemon Squeezy API key",
-  polar: "Polar access token",
-  dodopayments: "DodoPayments API key",
-  paddle: "Paddle API key",
-  gumroad: "Gumroad access token",
-  paystack: "Paystack secret key",
+  stripe:        "Stripe secret key",
+  lemonsqueezy:  "Lemon Squeezy API key",
+  polar:         "Polar access token",
+  dodopayments:  "DodoPayments API key",
+  paddle:        "Paddle API key",
+  gumroad:       "Gumroad access token",
+  paystack:      "Paystack secret key",
 };
 
 const KEY_PLACEHOLDERS: Record<string, string> = {
-  stripe: "sk_live_…",
-  lemonsqueezy: "eyJ…",
-  polar: "polar_…",
-  dodopayments: "dodo_live_… / dodo_test_…",
-  paddle: "pdl_apikey_…",
-  gumroad: "your_access_token",
-  paystack: "sk_live_… / sk_test_…",
+  stripe:        "sk_live_…",
+  lemonsqueezy:  "eyJ…",
+  polar:         "polar_…",
+  dodopayments:  "dodo_live_… / dodo_test_…",
+  paddle:        "pdl_apikey_…",
+  gumroad:       "your_access_token",
+  paystack:      "sk_live_… / sk_test_…",
 };
 
 function snippet(token: string) {
@@ -83,12 +83,15 @@ export default function ConnectPage() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isPro, setIsPro] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [form, setForm] = useState({ provider: "stripe", label: "", apiKey: "", websiteUrl: "" });
+
+  // Progressive disclosure: null = pick provider, string = fill form
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const [form, setForm] = useState({ label: "", apiKey: "", websiteUrl: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
 
-  // Install tracking state
+  // Step 3: tracking install
   const [installConn, setInstallConn] = useState<Connection | null>(null);
   const [trackerToken, setTrackerToken] = useState<string | null>(null);
   const [copied, setCopied] = useState<"snippet" | "prompt" | null>(null);
@@ -98,7 +101,10 @@ export default function ConnectPage() {
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
         if (Array.isArray(rows)) {
-          setConnections(rows.map((c: Connection) => ({ id: c.id, label: c.label, provider: c.provider, color: c.color, webhookToken: c.webhookToken })));
+          setConnections(rows.map((c: Connection) => ({
+            id: c.id, label: c.label, provider: c.provider,
+            color: c.color, webhookToken: c.webhookToken,
+          })));
         }
       })
       .catch(() => {});
@@ -118,25 +124,34 @@ export default function ConnectPage() {
     }
   }, []);
 
+  function pickProvider(id: string) {
+    setSelectedProvider(id);
+    setForm({ label: "", apiKey: "", websiteUrl: "" });
+    setError(null);
+  }
+
   async function addConnection(e: React.FormEvent) {
     e.preventDefault();
-    if (!isPro && connections.length >= 1) {
-      setShowUpgrade(true);
-      return;
-    }
+    if (!isPro && connections.length >= 1) { setShowUpgrade(true); return; }
     setBusy(true);
     setError(null);
     try {
       const res = await fetch("/api/connections", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ provider: form.provider, label: form.label, apiKey: form.apiKey, websiteUrl: form.websiteUrl || null }),
+        body: JSON.stringify({
+          provider: selectedProvider,
+          label: form.label,
+          apiKey: form.apiKey,
+          websiteUrl: form.websiteUrl || null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed"); return; }
       const conn: Connection = { id: data.id, label: data.label, provider: data.provider, color: data.color };
       setConnections((c) => [...c, conn]);
-      setForm({ provider: "stripe", label: "", apiKey: "", websiteUrl: "" });
+      setSelectedProvider(null);
+      setForm({ label: "", apiKey: "", websiteUrl: "" });
       loadToken(conn);
     } finally { setBusy(false); }
   }
@@ -157,196 +172,225 @@ export default function ConnectPage() {
     });
   }
 
-  // Step 2 view — replaces the entire content area
+  /* ── Step 3: install tracking ── */
   if (installConn) {
     return (
-      <div>
-        <div className="mb-6">
-          <button
-            onClick={() => setInstallConn(null)}
-            className="mb-4 flex items-center gap-1.5 text-[12px] font-medium text-lx-muted hover:text-lx-text"
-          >
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 3L5 8l5 5" />
-            </svg>
-            Back to connect
-          </button>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 2 · Optional</p>
-          <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
-            Install tracking for {installConn.label}
-          </h1>
-          <p className="mt-1 text-[13px] text-lx-muted">
-            Embed this script in your product to capture page views and user events. Compound will match them to your {installConn.provider} customers by email to build a complete customer profile.
-          </p>
-        </div>
+      <div className="max-w-md">
+        <button
+          onClick={() => setInstallConn(null)}
+          className="mb-5 flex items-center gap-1.5 text-[12px] font-medium text-lx-muted hover:text-lx-text"
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
+          Back
+        </button>
 
-        <div className="max-w-md">
-          {!trackerToken ? (
-            <p className="text-[12px] text-lx-faint">Loading…</p>
-          ) : (
-            <>
-              <pre
-                className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
-                style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 3 · Optional</p>
+        <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+          Install tracking
+        </h1>
+        <p className="mt-1 mb-6 text-[13px] text-lx-muted">
+          Embed this in <span className="font-medium text-lx-text">{installConn.label}</span> to capture page views and user journeys — matched to your paying customers.
+        </p>
+
+        {!trackerToken ? (
+          <p className="text-[12px] text-lx-faint">Loading…</p>
+        ) : (
+          <>
+            <pre
+              className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
+              style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+            >
+              {snippet(trackerToken)}
+            </pre>
+
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => copy("snippet")}
+                className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: "#5e6ad2" }}
               >
-                {snippet(trackerToken)}
-              </pre>
+                {copied === "snippet" ? "Copied!" : "Copy snippet"}
+              </button>
+              <button
+                onClick={() => copy("prompt")}
+                className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]"
+                style={{ border: "1px solid #dddad5" }}
+              >
+                {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
+              </button>
+            </div>
 
-              <div className="flex gap-2.5">
-                <button
-                  onClick={() => copy("snippet")}
-                  className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ background: "#5e6ad2" }}
-                >
-                  {copied === "snippet" ? "Copied!" : "Copy snippet"}
-                </button>
-                <button
-                  onClick={() => copy("prompt")}
-                  className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]"
-                  style={{ border: "1px solid #dddad5" }}
-                >
-                  {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
-                </button>
-              </div>
+            <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
+              Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link behavioral data to payment data.
+            </p>
 
-              <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
-                Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link behavioral data to payment data.
-              </p>
-
-              <div className="mt-6 pt-5" style={{ borderTop: "1px solid #ebebeb" }}>
-                <button
-                  onClick={syncAll}
-                  disabled={syncing}
-                  className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
-                  style={{ background: "#5e6ad2" }}
-                >
-                  {syncing ? "Syncing…" : "Sync & go to dashboard →"}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+            <div className="mt-6 pt-5" style={{ borderTop: "1px solid #ebebeb" }}>
+              <button
+                onClick={syncAll}
+                disabled={syncing}
+                className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+                style={{ background: "#5e6ad2" }}
+              >
+                {syncing ? "Syncing…" : "Sync & go to dashboard →"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     );
   }
 
-  return (
-    <div>
-      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
+  /* ── Step 1: pick provider ── */
+  if (!selectedProvider) {
+    return (
+      <div className="max-w-lg">
+        {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
 
-      {/* Header */}
-      <div className="mb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect</p>
-        <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>Add a product</h1>
-        <p className="mt-1 text-[13px] text-lx-muted">Each product = one payment account. Add as many as you have.</p>
-      </div>
+        <div className="mb-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect · Step 1</p>
+          <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+            Which platform?
+          </h1>
+          <p className="mt-1 text-[13px] text-lx-muted">
+            Pick the payment provider your product uses.
+          </p>
+        </div>
 
-      {/* Provider grid */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {PROVIDERS.map((p) => {
-          const linked = connections.filter((c) => c.provider === p.id);
-          return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setForm((f) => ({ ...f, provider: p.id }))}
-              className="rounded-sm bg-white p-4 text-left transition-shadow hover:shadow-sm"
-              style={{ border: form.provider === p.id ? "1.5px solid #5e6ad2" : "1px solid #ebebeb" }}
-            >
-              <img src={providerLogo(p.id)} alt={p.label} width={28} height={28} className="h-7 w-7 rounded-sm object-contain" loading="lazy" />
-              <p className="mt-2.5 text-[13px] font-bold text-lx-text">{p.label}</p>
-              <p className={`mt-0.5 text-[11px] font-semibold ${linked.length > 0 ? "text-lx-green" : "text-lx-faint"}`}>
-                {linked.length > 0 ? `${linked.length} connected ✓` : "Not connected"}
-              </p>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="max-w-md">
-        {/* Step 1: Add connection */}
-        <form onSubmit={addConnection} className="rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
-          <div className="mb-4">
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Provider</label>
-            <select
-              value={form.provider}
-              onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value }))}
-              className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-            >
-              <option value="stripe">Stripe</option>
-              <option value="lemonsqueezy">Lemon Squeezy</option>
-              <option value="polar">Polar</option>
-              <option value="dodopayments">DodoPayments</option>
-              <option value="paddle">Paddle</option>
-              <option value="gumroad">Gumroad</option>
-              <option value="paystack">Paystack</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Product name</label>
-            <input
-              type="text"
-              placeholder="e.g. Event Organizer"
-              value={form.label}
-              onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
-              required
-              className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
-              Product website <span className="normal-case font-normal text-lx-faint">(optional — used for logo)</span>
-            </label>
-            <input
-              type="url"
-              placeholder="https://yourproduct.com"
-              value={form.websiteUrl}
-              onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
-              className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-            />
-            <p className="mt-1.5 text-[11px] text-lx-faint">We&apos;ll use your site&apos;s favicon as the product icon.</p>
-          </div>
-
-          <div className="mb-5">
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
-              {KEY_LABELS[form.provider] ?? "API key"}
-            </label>
-            <input
-              type="password"
-              placeholder={KEY_PLACEHOLDERS[form.provider] ?? "paste key…"}
-              value={form.apiKey}
-              onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
-              required
-              className="w-full rounded-sm px-3 py-2.5 font-mono text-[12px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-            />
-            <p className="mt-1.5 text-[11px] text-lx-faint">Read-only restricted key recommended. We never write to your account.</p>
-          </div>
-
-          {error && <p className="mb-3 text-[12px] text-lx-red">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
-            style={{ background: "#5e6ad2" }}
-          >
-            {busy ? "Verifying…" : "Add product"}
-          </button>
-        </form>
+        <div className="rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+          {PROVIDERS.map((p, i) => {
+            const linked = connections.filter((c) => c.provider === p.id);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => pickProvider(p.id)}
+                className="flex w-full items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-[#fafafa]"
+                style={i > 0 ? { borderTop: "1px solid #f0f0f0" } : undefined}
+              >
+                <img
+                  src={providerLogo(p.id)}
+                  alt={p.label}
+                  width={28} height={28}
+                  className="h-7 w-7 shrink-0 rounded-sm object-contain"
+                  loading="lazy"
+                />
+                <span className="flex-1 text-[13.5px] font-semibold text-lx-text">{p.label}</span>
+                {linked.length > 0 && (
+                  <span className="text-[11px] font-semibold text-[#10b981]">{linked.length} connected ✓</span>
+                )}
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 3l5 5-5 5" />
+                </svg>
+              </button>
+            );
+          })}
+        </div>
 
         {connections.length > 0 && (
-          <p className="mt-3 text-center text-[12px] text-lx-muted">
+          <p className="mt-4 text-center text-[12px] text-lx-muted">
             {connections.length} product{connections.length === 1 ? "" : "s"} connected.{" "}
             <a href="/app/products" className="font-medium text-[#5e6ad2] hover:opacity-70">View all →</a>
           </p>
         )}
       </div>
+    );
+  }
+
+  /* ── Step 2: fill in details ── */
+  const providerMeta = PROVIDERS.find((p) => p.id === selectedProvider)!;
+
+  return (
+    <div className="max-w-md">
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
+
+      {/* Selected provider chip + back */}
+      <button
+        onClick={() => setSelectedProvider(null)}
+        className="mb-5 flex items-center gap-2 text-[12px] font-medium text-lx-muted hover:text-lx-text"
+      >
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 3L5 8l5 5" />
+        </svg>
+        Change provider
+      </button>
+
+      <div className="mb-5 flex items-center gap-3">
+        <img
+          src={providerLogo(selectedProvider)}
+          alt={providerMeta.label}
+          width={36} height={36}
+          className="h-9 w-9 rounded-sm object-contain"
+          style={{ border: "1px solid #ebebeb" }}
+        />
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect · Step 2</p>
+          <h1 className="text-[20px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+            Add your {providerMeta.label} product
+          </h1>
+        </div>
+      </div>
+
+      <form onSubmit={addConnection} className="rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
+        <div className="mb-4">
+          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
+            Product name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Event Organizer"
+            value={form.label}
+            onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
+            required
+            autoFocus
+            className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+            style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
+            Product website{" "}
+            <span className="normal-case font-normal text-lx-faint">(optional — used for logo)</span>
+          </label>
+          <input
+            type="url"
+            placeholder="https://yourproduct.com"
+            value={form.websiteUrl}
+            onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
+            className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+            style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
+          />
+        </div>
+
+        <div className="mb-5">
+          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
+            {KEY_LABELS[selectedProvider] ?? "API key"}
+          </label>
+          <input
+            type="password"
+            placeholder={KEY_PLACEHOLDERS[selectedProvider] ?? "paste key…"}
+            value={form.apiKey}
+            onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
+            required
+            className="w-full rounded-sm px-3 py-2.5 font-mono text-[12px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+            style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
+          />
+          <p className="mt-1.5 text-[11px] text-lx-faint">Read-only restricted key recommended. We never write to your account.</p>
+        </div>
+
+        {error && <p className="mb-3 text-[12px] text-lx-red">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+          style={{ background: "#5e6ad2" }}
+        >
+          {busy ? "Verifying…" : "Connect product →"}
+        </button>
+      </form>
     </div>
   );
 }
@@ -408,32 +452,6 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
         </button>
         <p className="mt-2 text-center text-[11px] text-lx-faint">Powered by DodoPayments · Cancel anytime</p>
       </div>
-    </div>
-  );
-}
-
-function WebhookRow({ token, provider }: { token: string; provider: string }) {
-  const [copied, setCopied] = useState(false);
-  const url = `${typeof window !== "undefined" ? window.location.origin : "https://usecompound.xyz"}/api/webhooks/${provider}/${token}`;
-
-  function copy() {
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  if (provider !== "stripe") return null;
-
-  return (
-    <div className="mt-2 flex items-center gap-2 rounded-sm px-2.5 py-2" style={{ background: "#fafafa", border: "1px solid #f0ede8" }}>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 5v14M5 12l7 7 7-7" />
-      </svg>
-      <span className="min-w-0 flex-1 truncate font-mono text-[10px] text-lx-faint">{url}</span>
-      <button onClick={copy} className="shrink-0 text-[10px] font-semibold text-[#5e6ad2] hover:opacity-70">
-        {copied ? "Copied!" : "Copy webhook URL"}
-      </button>
     </div>
   );
 }
