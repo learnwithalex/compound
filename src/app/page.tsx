@@ -19,11 +19,11 @@ export default function Home() {
       <AnnouncementBar />
       <SiteNav />
       <Hero />
-      <AbstractionSection />
-      <LifecycleSection />
-      <ProblemSection />
-      <HowItWorks />
-      <BenefitsSection />
+      <StatsStrip />
+      <PortfolioShowcase />
+      <AIBriefingShowcase />
+      <FeatureGrid />
+      <AgentSection />
       <PricingSection />
       <FAQSection />
       <SiteFooter />
@@ -337,438 +337,179 @@ function HeroFlowDiagram() {
   );
 }
 
-/* ============================================ abstraction section */
-function AbstractionSection() {
-  const totalMrr = 140501;
-  const providers = [
-    { logo: "https://cdn.simpleicons.org/stripe/635bff", name: "Stripe",        product: "Event Organizer",   subs: 2104, mrr: 129801, mrrLabel: "$129,801", pct: 92 },
-    { logo: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d", name: "Lemon Squeezy", product: "BetterFlow",   subs: 680,  mrr: 8430,   mrrLabel: "$8,430",   pct: 6  },
-    { logo: "/polar-icon.svg",                          name: "Polar",          product: "Obsidian Sync Free", subs: 63,   mrr: 2270,   mrrLabel: "$2,270",   pct: 2  },
+
+/* ========================================================= stats strip */
+function StatsStrip() {
+  return (
+    <div className="border-t border-[#e7e3db] bg-[#0f0f14]">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-white/10 md:grid-cols-4">
+        {[
+          { value: "5", label: "Payment providers" },
+          { value: "30s", label: "Auto-sync interval" },
+          { value: "∞", label: "Products on Pro" },
+          { value: "$9", label: "Per month, Pro plan" },
+        ].map((s) => (
+          <div key={s.label} className="px-8 py-10 text-center">
+            <div className="mb-1 text-[48px] font-black leading-none tracking-tight text-white">{s.value}</div>
+            <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-white/40">{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ===================================================== portfolio showcase */
+function PortfolioShowcase() {
+  const products = [
+    { name: "Scarlet DB", provider: "Stripe",        icon: "https://cdn.simpleicons.org/stripe/635bff",                 mrr: "$8,430",  subs: 680,  pct: 60, change: "+12.4%", up: true,  color: "#5e6ad2" },
+    { name: "NotePad Pro", provider: "Lemon Squeezy", icon: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d",           mrr: "$3,200",  subs: 210,  pct: 23, change: "+4.1%",  up: true,  color: "#f97316" },
+    { name: "FormKit",    provider: "Polar",          icon: "/polar-icon.svg",                                           mrr: "$2,270",  subs: 63,   pct: 17, change: "−1.8%",  up: false, color: "#10b981" },
   ];
-  const barColors = ["bg-[#5e6ad2]", "bg-[#f97316]", "bg-emerald-400"];
-  const dotColors = ["bg-[#5e6ad2]", "bg-[#f97316]", "bg-emerald-400"];
 
   return (
-    <section id="abstraction" className="scroll-mt-20 border-t border-[#e7e3db] px-6 py-24">
+    <section className="bg-[#0f0f14] px-6 pb-24 pt-4">
       <div className="mx-auto max-w-6xl">
-        {/* header */}
-        <div className="mb-12">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Revenue intelligence</p>
-          <h2 className="mb-4 max-w-2xl text-[36px] font-[680] leading-[1.1] tracking-[-0.025em] text-[#1a1a1a]">
-            Five providers. One number.{" "}
-            <span className={`${instrumentSerif.className} font-normal italic text-[#5c5856]`}>explained in plain English.</span>
-          </h2>
-          <p className="max-w-lg text-[16px] leading-[1.7] text-[#5c5856]">
-            Compound syncs every account, normalizes billing intervals, and writes your daily briefing — so you open one tab, not five.
+        <div className="mb-10 flex items-end justify-between">
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#5e6ad2]">Portfolio</p>
+            <h2 className="text-[38px] font-black leading-none tracking-tight text-white">
+              Every product.<br />One number.
+            </h2>
+          </div>
+          <p className="hidden max-w-[260px] text-right text-[13px] leading-6 text-white/40 md:block">
+            Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack — Compound unifies everything.
           </p>
         </div>
 
-        {/* two-panel grid */}
-        <div className="grid gap-5 lg:grid-cols-2">
-
-          {/* LEFT — portfolio breakdown */}
-          <CornerBox variant="gray" className="overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#f7f5f1] px-5 py-3.5">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                <span className="text-[12px] font-semibold text-[#1a1a1a]">Portfolio · Sep 11, 2026</span>
-              </div>
-              <StatusBadge label="Live" color="green" />
+        {/* Dashboard mockup */}
+        <div className="overflow-hidden rounded-xl border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+          {/* Top bar */}
+          <div className="flex items-center justify-between border-b border-white/10 px-6 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+            <div className="flex items-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-[13px] font-semibold text-white">Portfolio Overview</span>
             </div>
+            <div className="flex items-center gap-4 text-[11px] text-white/30">
+              <span>Overview</span><span>Products</span><span>Customers</span><span>Analytics</span>
+            </div>
+          </div>
 
-            <div className="divide-y divide-[#ece9e3]">
-              {providers.map((r, i) => (
-                <div key={r.name} className="flex items-center gap-4 px-5 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[#ece9e3] bg-white">
-                    <img src={r.logo} alt={r.name} className="h-5 w-5 object-contain" width={20} height={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-[#1a1a1a]">{r.name}</span>
-                      <span className="rounded bg-[#f3f1ec] px-1.5 py-0.5 text-[9px] text-[#9c9894]">{r.subs.toLocaleString()} active</span>
-                    </div>
-                    <div className="text-[11px] text-[#9c9894]">{r.product}</div>
-                    {/* contribution bar */}
-                    <div className="mt-2 h-1 w-full rounded-full bg-[#ece9e3]">
-                      <div className={`h-1 rounded-full ${barColors[i]}`} style={{ width: `${r.pct}%` }} />
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-[14px] font-semibold tabular-nums text-[#1a1a1a]">{r.mrrLabel}</div>
-                    <div className="text-[10px] text-[#9c9894]">{r.pct}% of MRR</div>
-                  </div>
+          {/* Total MRR hero row */}
+          <div className="flex items-center justify-between border-b border-white/10 px-6 py-6">
+            <div>
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30">Total MRR</p>
+              <p className="text-[52px] font-black leading-none tracking-tight text-white">$13,900</p>
+              <p className="mt-2 flex items-center gap-2 text-[13px] text-emerald-400">
+                <span>↑ +8.7% this month</span>
+                <span className="text-white/20">·</span>
+                <span className="text-white/40">953 active subscribers</span>
+              </p>
+            </div>
+            <div className="hidden gap-6 md:flex">
+              {[{ l: "ARR", v: "$166,800" }, { l: "Net New MRR", v: "+$1,120" }, { l: "Churn MRR", v: "$240" }].map(s => (
+                <div key={s.l} className="text-right">
+                  <p className="text-[11px] uppercase tracking-[0.1em] text-white/30">{s.l}</p>
+                  <p className="text-[20px] font-bold text-white">{s.v}</p>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* total bar */}
-            <div className="border-t border-[#e7e3db] bg-[#1a1a2e] px-5 py-4">
-              <div className="mb-3 flex items-baseline justify-between">
-                <span className="text-[12px] font-medium text-white/60">Total Portfolio MRR</span>
-                <span className="text-[26px] font-bold tabular-nums text-white">$140,501</span>
+          {/* Product rows */}
+          <div className="divide-y divide-white/5">
+            {products.map((p) => (
+              <div key={p.name} className="flex items-center gap-4 px-6 py-4">
+                <img src={p.icon} alt={p.provider} className="h-8 w-8 shrink-0 rounded-lg object-contain" style={{ background: "rgba(255,255,255,0.08)", padding: 6 }} />
+                <div className="flex-1 min-w-0">
+                  <div className="mb-1.5 flex items-center gap-2">
+                    <span className="text-[13px] font-semibold text-white">{p.name}</span>
+                    <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/40" style={{ background: "rgba(255,255,255,0.06)" }}>{p.provider}</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div className="h-full rounded-full transition-all" style={{ width: `${p.pct}%`, background: p.color }} />
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-[15px] font-bold tabular-nums text-white">{p.mrr}</p>
+                  <p className="text-[11px] font-medium tabular-nums" style={{ color: p.up ? "#34d399" : "#f87171" }}>{p.change}</p>
+                </div>
               </div>
-              <div className="flex h-2 overflow-hidden rounded-full">
-                {providers.map((r, i) => (
-                  <div key={r.name} className={barColors[i]} style={{ flex: r.mrr }} />
-                ))}
-              </div>
-              <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1">
-                {providers.map((r, i) => (
-                  <span key={r.name} className="flex items-center gap-1.5 text-[10px] text-white/50">
-                    <span className={`h-1.5 w-1.5 rounded-full ${dotColors[i]}`} />
-                    {r.name} {r.pct}%
-                  </span>
-                ))}
-              </div>
+            ))}
+          </div>
+
+          {/* Bottom bar */}
+          <div className="flex items-center justify-between border-t border-white/10 px-6 py-3" style={{ background: "rgba(255,255,255,0.02)" }}>
+            <span className="text-[11px] text-white/20">Last synced 18 seconds ago</span>
+            <span className="flex items-center gap-1.5 text-[11px] text-white/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Auto-sync every 30s
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================= AI briefing showcase */
+function AIBriefingShowcase() {
+  return (
+    <section className="overflow-hidden bg-[#f3f1ec] px-6 py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-16 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+          <div>
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">AI briefings</p>
+            <h2 className="mb-5 text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
+              One click.<br />Claude reads<br />everything.
+            </h2>
+            <p className="mb-8 text-[15px] leading-[1.75] text-[#5c5856]">
+              Hit the briefing button — Compound feeds your full portfolio into Claude. You get plain English: what moved, why, and the one thing to act on.
+            </p>
+            <div className="space-y-3">
+              {["MRR, ARR, churn — all in context", "Which product is carrying the portfolio", "One clear action, not a chart dump"].map(f => (
+                <div key={f} className="flex items-center gap-2.5 text-[13px] text-[#5c5856]">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[9px] text-white">✓</span>
+                  {f}
+                </div>
+              ))}
             </div>
-          </CornerBox>
+          </div>
 
-          {/* RIGHT — AI brief */}
-          <CornerBox variant="orange" className="overflow-hidden">
-            <div className="flex items-center justify-between border-b border-orange-200/60 bg-orange-50/70 px-5 py-3.5">
+          {/* Briefing card mockup */}
+          <div className="rounded-xl border border-[#e0ddd6] bg-white shadow-xl shadow-[#1a1a1a]/5">
+            <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3.5 rounded-t-xl">
               <div className="flex items-center gap-2">
-                <SparklesIcon className="h-3.5 w-3.5 text-[#f97316]" />
-                <span className="text-[12px] font-semibold text-[#1a1a1a]">AI Daily Briefing</span>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1a1a2e]">
+                  <SparklesIcon className="h-3 w-3 text-white" />
+                </div>
+                <span className="text-[12px] font-semibold text-[#1a1a1a]">AI Briefing · Today 9:04 AM</span>
               </div>
-              <StatusBadge label="Generated" color="teal" />
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-600 border border-emerald-200">Done</span>
             </div>
-
-            <div className="px-5 py-5">
-              <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[#9c9894]">Sep 11, 2026 · 09:00 AM</p>
-              <p className="mb-5 text-[14px] font-semibold text-[#1a1a1a]">Good morning, Alex. Here's your portfolio.</p>
-
-              <div className="space-y-3.5 text-[13px] leading-[1.75] text-[#4a4845]">
-                <p>
-                  Your portfolio closed yesterday at{" "}
-                  <span className="inline-block rounded bg-[#1a1a2e] px-1.5 py-0.5 font-mono text-[12px] font-bold text-white">$140,501 MRR</span>
-                  {" "}— up{" "}
-                  <span className="font-semibold text-emerald-600">+$2,340 (+1.7%)</span> from the prior day.
-                </p>
-                <p>
-                  <span className="font-medium text-[#1a1a1a]">Event Organizer</span> added 43 subscribers overnight at an average of <span className="font-medium">$61.73/mo</span>, pushing it past its 30-day high.
-                </p>
-                <p>
-                  <span className="font-medium text-[#1a1a1a]">BetterFlow</span> had 4 annual-plan conversions from monthly — Compound auto-normalized <span className="font-medium">$2,388</span> of annualized revenue into MRR.
-                </p>
+            <div className="p-5">
+              <p className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">Good morning, Alex. Here's what moved overnight.</p>
+              <div className="space-y-3 text-[13px] leading-[1.75] text-[#4a4845]">
+                <p>Your portfolio hit <span className="rounded bg-[#1a1a2e] px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">$13,900 MRR</span> — up <span className="font-semibold text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subscribers at an average of $12.40/mo.</p>
+                <p><span className="font-medium text-[#1a1a1a]">FormKit</span> is the one to watch — it's down 3 subs this week. Not alarming yet, but at this rate it'll be net-negative by end of month.</p>
               </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-2">
+              <div className="mt-4 rounded-lg border border-[#5e6ad2]/20 bg-[#5e6ad2]/5 px-4 py-3">
+                <p className="text-[12px] text-[#4a4845]"><span className="font-semibold text-[#5e6ad2]">Action: </span>Check FormKit's last 10 churned users — a single exit-survey email could tell you exactly what to fix.</p>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
                 {[
-                  { label: "Fastest grower",   value: "Event Organizer", sub: "+43 subs today",  dot: "bg-[#5e6ad2]" },
-                  { label: "Plan conversions",  value: "4 annual",        sub: "BetterFlow",      dot: "bg-[#f97316]" },
-                  { label: "New MRR today",     value: "+$2,340",         sub: "across 3 apps",   dot: "bg-emerald-500" },
-                  { label: "Churn risk",         value: "0 flagged",       sub: "No expiries due", dot: "bg-[#c8c4bc]" },
-                ].map((c) => (
-                  <div key={c.label} className="rounded border border-[#ece9e3] bg-[#f7f5f1] px-3 py-2.5">
-                    <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-[#9c9894]">
-                      <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-                      {c.label}
-                    </div>
-                    <div className="mt-1 text-[13px] font-semibold text-[#1a1a1a]">{c.value}</div>
-                    <div className="text-[10px] text-[#9c9894]">{c.sub}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 flex items-center gap-2 rounded border border-orange-200/60 bg-orange-50/60 px-3 py-2.5">
-                <SparklesIcon className="h-3.5 w-3.5 shrink-0 text-[#f97316]" />
-                <p className="text-[12px] text-[#5c5856]">
-                  <span className="font-semibold text-[#1a1a1a]">Insight:</span> If BetterFlow keeps its current conversion rate, it'll hit <span className="font-medium">$10k MRR</span> by month-end.
-                </p>
-              </div>
-            </div>
-          </CornerBox>
-
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================= lifecycle section */
-function LifecycleSection() {
-  const features = [
-    {
-      n: "01",
-      label: "Portfolio overview",
-      sub: "All your products unified — one total MRR number across every provider and billing interval.",
-      badge: { label: "LIVE", color: "green" as const },
-    },
-    {
-      n: "02",
-      label: "Customer profiles",
-      sub: "Who's paying, which plan they're on, their MRR contribution, and who's at risk of churning.",
-      badge: { label: "LIVE", color: "green" as const },
-    },
-    {
-      n: "03",
-      label: "AI briefings",
-      sub: "One click: Claude reads your full portfolio and writes a CFO-style briefing — what moved, why, one action.",
-      badge: { label: "CLAUDE", color: "purple" as const },
-    },
-    {
-      n: "04",
-      label: "Real-time alerts",
-      sub: "Email you the moment a new subscription lands, a customer churns, upgrades, or goes past due.",
-      badge: { label: "EMAIL", color: "blue" as const },
-    },
-    {
-      n: "05",
-      label: "Public revenue page",
-      sub: "Share your portfolio publicly with a shareable /u/[slug] profile page — optional, always your call.",
-      badge: { label: "PUBLIC", color: "teal" as const },
-    },
-    {
-      n: "06",
-      label: "Agent API",
-      sub: "Create tokens so Claude, Cursor, ChatGPT, Windsurf, or Opencode can query your live portfolio data.",
-      badge: { label: "API", color: "blue" as const },
-    },
-  ];
-
-  return (
-    <section className="border-t border-[#e7e3db] bg-white px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Features</p>
-        <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
-          Everything your portfolio needs.
-        </h2>
-        <p className="mb-14 max-w-md text-[15px] leading-[1.7] text-[#5c5856]">
-          Not a chart dump — actual intelligence. Connect your providers and Compound handles the rest.
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((s) => (
-            <CornerBox key={s.n} variant="gray" className="rounded-sm">
-              <div className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#c8c4bc]">{s.n}</span>
-                  <StatusBadge label={s.badge.label} color={s.badge.color} />
-                </div>
-                <div className="mb-1 text-[16px] font-semibold text-[#1a1a1a]">{s.label}</div>
-                <p className="text-[13px] leading-6 text-[#5c5856]">{s.sub}</p>
-              </div>
-            </CornerBox>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ================================================= problem section */
-function ProblemSection() {
-  return (
-    <section className="border-t border-[#e7e3db] px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">The problem</p>
-        <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
-          The problem with multi-product analytics.
-        </h2>
-        <p className="mb-16 max-w-lg text-[16px] leading-[1.7] text-[#5c5856]">
-          You want to see your numbers. Instead, you&apos;re logging into dashboards.
-        </p>
-
-        <div className="grid gap-px overflow-hidden rounded-sm border border-[#e7e3db] bg-[#e7e3db] sm:grid-cols-2">
-          {[
-            {
-              title: "Six dashboards for six products",
-              body: "Separate logins for each Stripe account, each Lemon Squeezy store, Polar, DodoPayments, Paystack. Six tabs open just to answer \"what's my MRR today?\"",
-            },
-            {
-              title: "No portfolio total",
-              body: "Every platform shows its own total. You add them up manually — in a note, a spreadsheet, or your head — every single time.",
-            },
-            {
-              title: "Numbers without explanation",
-              body: "Charts tell you MRR moved. They don't tell you which product drove it, whether it'll hold, or what to do next.",
-            },
-            {
-              title: "$100+/mo analytics tools",
-              body: "Baremetrics ($108/mo), ChartMogul ($100+/mo) — both built for one business on one processor. You have a portfolio. They don't know what that is.",
-            },
-          ].map((c) => (
-            <div key={c.title} className="bg-[#f3f1ec] p-8">
-              <div className="mb-4 h-4 w-4 rounded-full border border-red-300 bg-red-100" />
-              <h3 className="mb-2 text-[15px] font-semibold text-[#1a1a1a]">{c.title}</h3>
-              <p className="text-[13px] leading-6 text-[#5c5856]">{c.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ================================================= how it works */
-function HowItWorks() {
-  return (
-    <section id="how" className="scroll-mt-20 border-t border-[#e7e3db] bg-white px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">How it works</p>
-        <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
-          Portfolio intelligence, handled for you.
-        </h2>
-        <p className="mb-20 max-w-lg text-[16px] leading-[1.7] text-[#5c5856]">
-          Three steps from zero to a complete view of your portfolio revenue.
-        </p>
-
-        <div className="space-y-20">
-          {/* Step 1: Connect */}
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Step 1 — Connect</p>
-              <h3 className="mb-4 text-[24px] font-[680] leading-tight tracking-[-0.018em] text-[#1a1a1a]">
-                One API key per account.<br />No OAuth, no approval flow.
-              </h3>
-              <p className="mb-6 text-[14px] leading-6 text-[#5c5856]">
-                Paste a read-only API key from any supported provider account.
-                Compound validates it immediately — active subscription count and
-                estimated MRR shown before you save.
-              </p>
-              <div className="space-y-2 text-[13px] text-[#5c5856]">
-                {["Key validated in under a second", "Stored encrypted, never logged", "Connect as many accounts as you have"].map((f) => (
-                  <div key={f} className="flex items-center gap-2">
-                    <CheckIcon className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                    {f}
+                  { l: "Fastest grower", v: "Scarlet DB", s: "+14 subs" },
+                  { l: "Needs attention", v: "FormKit", s: "−3 subs" },
+                  { l: "New MRR", v: "+$560", s: "across 3 products" },
+                  { l: "Churn risk", v: "1 flagged", s: "FormKit trend" },
+                ].map(c => (
+                  <div key={c.l} className="rounded-lg border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5">
+                    <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9c9894]">{c.l}</p>
+                    <p className="mt-0.5 text-[13px] font-semibold text-[#1a1a1a]">{c.v}</p>
+                    <p className="text-[10px] text-[#9c9894]">{c.s}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <CornerBox variant="gray" className="rounded-sm">
-              <div className="border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3">
-                <span className="text-[12px] font-semibold text-[#1a1a1a]">Add connection</span>
-              </div>
-              <div className="p-5">
-                <div className="mb-3 space-y-2">
-                  <div className="flex items-center justify-between rounded border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5 text-[13px]">
-                    <span className="text-[#9c9894]">Provider</span>
-                    <span className="font-medium text-[#1a1a1a]">Stripe</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5 text-[13px]">
-                    <span className="text-[#9c9894]">Label</span>
-                    <span className="font-medium text-[#1a1a1a]">Event Organizer</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5 font-mono text-[13px]">
-                    <span className="text-[#9c9894]">API key</span>
-                    <span className="text-[#9c9894]">rk_live_••••••••••</span>
-                  </div>
-                </div>
-                <button className="w-full rounded bg-[#1a1a2e] py-2.5 text-[13px] font-semibold text-white">
-                  Validate &amp; connect
-                </button>
-                <div className="mt-3 flex items-center gap-2 rounded border border-emerald-200 bg-emerald-50 px-3 py-2.5">
-                  <CheckIcon className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                  <span className="text-[12px] text-emerald-700">Valid — 2,104 active subscriptions · ~$129.8k MRR</span>
-                </div>
-              </div>
-            </CornerBox>
-          </div>
-
-          {/* Step 2: Sync */}
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div className="lg:order-2">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Step 2 — Normalize</p>
-              <h3 className="mb-4 text-[24px] font-[680] leading-tight tracking-[-0.018em] text-[#1a1a1a]">
-                Monthly, annual, custom intervals.<br />All normalized to monthly MRR.
-              </h3>
-              <p className="mb-6 text-[14px] leading-6 text-[#5c5856]">
-                Compound pulls every active subscription and normalizes billing intervals
-                to a monthly figure. Annual plan? Divided by 12. Daily snapshot. Automatic.
-              </p>
-              <div className="space-y-2 text-[13px] text-[#5c5856]">
-                {[
-                  "Monthly billing used as-is",
-                  "Annual detected via variant name → ÷ 12",
-                  "Trialing subscriptions included",
-                ].map((f) => (
-                  <div key={f} className="flex items-center gap-2">
-                    <CheckIcon className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="lg:order-1">
-              <CornerBox variant="gray" className="rounded-sm">
-                <div className="border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3">
-                  <span className="text-[12px] font-semibold text-[#1a1a1a]">Normalization engine</span>
-                </div>
-                <div className="divide-y divide-[#f3f4f6]">
-                  {[
-                    { plan: "Pro Monthly",  interval: "month × 1", price: "$49.00",   mrr: "$49.00" },
-                    { plan: "Pro Annual",   interval: "year × 1",  price: "$468.00",  mrr: "$39.00" },
-                    { plan: "Team Yearly",  interval: "year × 1",  price: "$1,188.00",mrr: "$99.00" },
-                    { plan: "Starter + LS", interval: "month × 1", price: "$19.00",   mrr: "$19.00" },
-                  ].map((row) => (
-                    <div key={row.plan} className="px-5 py-3">
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-[12px] font-medium text-[#1a1a1a]">{row.plan}</span>
-                        <span className="text-[11px] text-[#9c9894]">{row.interval}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[12px]">
-                        <span className="text-[#9c9894]">{row.price} billed</span>
-                        <span className="font-semibold text-blue-700">{row.mrr} MRR</span>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="flex items-center justify-between bg-[#fafaf8] px-5 py-3">
-                    <span className="text-[12px] text-[#5c5856]">Total MRR (this account)</span>
-                    <span className="text-[14px] font-bold text-[#1a1a1a]">$206.00</span>
-                  </div>
-                </div>
-              </CornerBox>
-            </div>
-          </div>
-
-          {/* Step 3: AI */}
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Step 3 — Analyze</p>
-              <h3 className="mb-4 text-[24px] font-[680] leading-tight tracking-[-0.018em] text-[#1a1a1a]">
-                One click. Claude writes<br />a CFO-style briefing.
-              </h3>
-              <p className="mb-6 text-[14px] leading-6 text-[#5c5856]">
-                Compound feeds your full portfolio into Claude — every product, every
-                trend, every churn signal. You get plain English: what's working,
-                what's at risk, one specific action. No chart dump.
-              </p>
-              <div className="space-y-2 text-[13px] text-[#5c5856]">
-                {[
-                  "Reads your entire portfolio in context",
-                  "Spots concentration risk, churn signals, momentum",
-                  "One action — not a list of vague suggestions",
-                ].map((f) => (
-                  <div key={f} className="flex items-center gap-2">
-                    <CheckIcon className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <CornerBox variant="gray" className="rounded-sm">
-              <div className="flex items-center gap-2 border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3">
-                <SparklesIcon className="h-3.5 w-3.5 text-violet-600" />
-                <span className="text-[12px] font-semibold text-[#1a1a1a]">AI portfolio analysis</span>
-                <StatusBadge label="COMPLETE" color="green" />
-              </div>
-              <div className="p-5 text-[13px] leading-6">
-                <p className="mb-3 text-[#5c5856]">
-                  <span className="font-semibold text-[#1a1a1a]">Portfolio healthy but lopsided.</span>{" "}
-                  Event Organizer is 92% of MRR — concentration risk, not a portfolio.
-                  BetterFlow is the momentum story at +18% month-over-month.
-                </p>
-                <p className="mb-4 text-[#5c5856]">
-                  Obsidian Sync Free is sliding at −4.1%. Small products churn faster — if
-                  you're not actively improving it, it'll hit zero before you notice.
-                </p>
-                <div className="rounded border border-violet-200 bg-violet-50 px-4 py-3 text-[#5b21b6]">
-                  <span className="font-semibold">Action this week: </span>
-                  Look at BetterFlow trial-to-paid conversion — one better onboarding
-                  email could double the growth rate.
-                </div>
-              </div>
-            </CornerBox>
           </div>
         </div>
       </div>
@@ -776,41 +517,213 @@ function HowItWorks() {
   );
 }
 
-/* ================================================= benefits */
-function BenefitsSection() {
+/* ===================================================== feature grid */
+function FeatureGrid() {
   return (
-    <section className="border-t border-[#e7e3db] px-6 py-20">
+    <section className="bg-[#0f0f14] px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <div className="grid gap-10 sm:grid-cols-3">
-          {[
-            {
-              title: "Start free, scale to Pro",
-              body: "Explore with one product on the free trial. When you're ready for unlimited products, full history, AI briefings, and goals — Pro is $9/mo.",
-            },
-            {
-              title: "AI that explains, not just charts",
-              body: "Claude reads your whole portfolio and writes a CFO-style briefing — what moved, which product drove it, one specific action. Plus a weekly digest in your inbox.",
-            },
-            {
-              title: "Built for portfolio founders",
-              body: "Multi-product and multi-provider from day one. Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack in a single dashboard — not five.",
-            },
-          ].map((b) => (
-            <div key={b.title}>
-              <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7e3db] bg-white">
-                <CheckIcon className="h-4 w-4 text-[#5c5856]" />
-              </div>
-              <h3 className="mb-2 text-[15px] font-semibold text-[#1a1a1a]">{b.title}</h3>
-              <p className="text-[13px] leading-6 text-[#5c5856]">{b.body}</p>
+        <div className="mb-14 max-w-lg">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#5e6ad2]">Everything included</p>
+          <h2 className="text-[38px] font-black leading-[1.05] tracking-tight text-white">
+            The full picture,<br />not just MRR.
+          </h2>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Customer profiles */}
+          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="mb-1 text-[15px] font-bold text-white">Customer profiles</p>
+            <p className="mb-5 text-[12px] leading-5 text-white/40">See every subscriber — plan, MRR, status, and risk.</p>
+            <div className="space-y-2">
+              {[
+                { name: "sarah@acme.com",  plan: "Pro Annual",   mrr: "$39", badge: "active",   dot: "bg-emerald-400" },
+                { name: "john@startup.io", plan: "Starter",      mrr: "$9",  badge: "past_due",  dot: "bg-amber-400" },
+                { name: "team@corp.com",   plan: "Team Monthly", mrr: "$99", badge: "active",   dot: "bg-emerald-400" },
+              ].map(r => (
+                <div key={r.name} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${r.dot}`} />
+                  <span className="flex-1 truncate text-[11px] text-white/60">{r.name}</span>
+                  <span className="text-[10px] text-white/30">{r.plan}</span>
+                  <span className="text-[11px] font-bold text-white">{r.mrr}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Real-time alerts */}
+          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="mb-1 text-[15px] font-bold text-white">Real-time alerts</p>
+            <p className="mb-5 text-[12px] leading-5 text-white/40">Email the moment a sub is created, churns, or upgrades.</p>
+            <div className="space-y-2">
+              {[
+                { icon: "↑", label: "New subscription", sub: "sarah@acme.com · Pro Annual", color: "#34d399", t: "just now" },
+                { icon: "↗", label: "Upgrade",          sub: "john@corp.com → Team plan",   color: "#818cf8", t: "4m ago" },
+                { icon: "↓", label: "Churn",            sub: "mike@free.io · Starter",      color: "#f87171", t: "1h ago" },
+              ].map(r => (
+                <div key={r.label} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <span className="text-[13px]" style={{ color: r.color }}>{r.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold text-white">{r.label}</p>
+                    <p className="truncate text-[10px] text-white/30">{r.sub}</p>
+                  </div>
+                  <span className="shrink-0 text-[10px] text-white/20">{r.t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Public page */}
+          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="mb-1 text-[15px] font-bold text-white">Public revenue page</p>
+            <p className="mb-5 text-[12px] leading-5 text-white/40">Share a live stats page — show what you want, hide the rest.</p>
+            <div className="overflow-hidden rounded-lg border border-white/10" style={{ background: "#f5f5f4" }}>
+              <div className="h-6 w-full" style={{ background: "linear-gradient(135deg, #5e6ad2, #4a54c0)" }} />
+              <div className="px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-[#5e6ad2] flex items-center justify-center text-[9px] font-bold text-white -mt-4 border-2 border-white">A</div>
+                  <div className="-mt-1">
+                    <p className="text-[10px] font-bold text-[#1a1a1a]">Alex</p>
+                    <p className="text-[9px] text-[#9c9894]">@heisalexie</p>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-1">
+                  <span className="text-[18px] font-black text-[#1a1a1a]">$13,900</span>
+                  <span className="text-[10px] text-[#9c9894]">MRR</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Goals & streaks */}
+          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="mb-1 text-[15px] font-bold text-white">Goals & streaks</p>
+            <p className="mb-5 text-[12px] leading-5 text-white/40">Set MRR milestones. Compound tracks the pace.</p>
+            <div className="space-y-3">
+              <div>
+                <div className="mb-1.5 flex items-center justify-between text-[11px]">
+                  <span className="text-white/50">Goal: $20k MRR by Dec</span>
+                  <span className="font-bold text-white">70%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                  <div className="h-full rounded-full bg-[#5e6ad2]" style={{ width: "70%" }} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <span className="text-[18px]">🔥</span>
+                <div>
+                  <p className="text-[12px] font-bold text-white">14-day streak</p>
+                  <p className="text-[10px] text-white/30">Logged in every day this month</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Analytics */}
+          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="mb-1 text-[15px] font-bold text-white">Product analytics</p>
+            <p className="mb-5 text-[12px] leading-5 text-white/40">Embed a snippet. See pageviews, events, and funnels.</p>
+            <div className="space-y-1.5">
+              {[
+                { page: "/pricing",  views: "1,240", bar: 100 },
+                { page: "/features", views: "844",   bar: 68 },
+                { page: "/docs",     views: "512",   bar: 41 },
+                { page: "/blog",     views: "231",   bar: 19 },
+              ].map(r => (
+                <div key={r.page} className="flex items-center gap-2">
+                  <span className="w-20 truncate text-[10px] text-white/30">{r.page}</span>
+                  <div className="flex-1 h-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div className="h-full rounded-full bg-[#5e6ad2]/70" style={{ width: `${r.bar}%` }} />
+                  </div>
+                  <span className="w-10 text-right text-[10px] font-semibold text-white">{r.views}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Weekly digest */}
+          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="mb-1 text-[15px] font-bold text-white">Weekly digest email</p>
+            <p className="mb-5 text-[12px] leading-5 text-white/40">AI-written summary hits your inbox every Monday.</p>
+            <div className="overflow-hidden rounded-lg border border-white/10 p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-white/20">Mon, Sep 15 · Weekly Digest</p>
+              <p className="mb-2 text-[11px] font-semibold text-white">Your week: +$1,120 net new MRR</p>
+              <p className="text-[10px] leading-4 text-white/40">Scarlet DB led growth with 44 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
+              <div className="mt-3 flex items-center gap-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[9px] text-white/20">Delivered every Monday · AI-written</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* ================================================ pricing */
+/* ====================================================== agent section */
+function AgentSection() {
+  return (
+    <section className="bg-[#f3f1ec] px-6 py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-16 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+          {/* Code mockup */}
+          <div className="overflow-hidden rounded-xl border border-[#e0ddd6] bg-[#0f0f14] shadow-xl">
+            <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3.5" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <div className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+              </div>
+              <span className="ml-2 text-[11px] text-white/30">claude — agent prompt</span>
+            </div>
+            <div className="p-5 font-mono text-[12px] leading-6">
+              <p className="text-white/30"># Compound revenue access</p>
+              <p className="mt-2"><span className="text-[#818cf8]">GET</span> <span className="text-[#34d399]">https://usecompound.xyz/api/portfolio</span></p>
+              <p><span className="text-[#818cf8]">Authorization:</span> <span className="text-white/50">Bearer</span> <span className="text-[#fbbf24]">cpd_live_••••••••</span></p>
+              <div className="mt-4 rounded-lg border border-white/10 p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
+                <p className="text-[#5e6ad2]">{"{"}</p>
+                <p className="pl-4"><span className="text-[#34d399]">"totalMrrCents"</span><span className="text-white/40">: </span><span className="text-[#fbbf24]">1390000</span><span className="text-white/40">,</span></p>
+                <p className="pl-4"><span className="text-[#34d399]">"totalActiveSubscriptions"</span><span className="text-white/40">: </span><span className="text-[#fbbf24]">953</span><span className="text-white/40">,</span></p>
+                <p className="pl-4"><span className="text-[#34d399]">"netNewMrrCents"</span><span className="text-white/40">: </span><span className="text-[#fbbf24]">56000</span></p>
+                <p className="text-[#5e6ad2]">{"}"}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 border-t border-white/10 px-5 py-3" style={{ background: "rgba(255,255,255,0.02)" }}>
+              {[
+                { src: "https://www.google.com/s2/favicons?domain=claude.ai&sz=32", label: "Claude" },
+                { src: "https://www.google.com/s2/favicons?domain=cursor.com&sz=32", label: "Cursor" },
+                { src: "https://www.google.com/s2/favicons?domain=windsurf.com&sz=32", label: "Windsurf" },
+                { src: "https://www.google.com/s2/favicons?domain=opencode.ai&sz=32", label: "Opencode" },
+              ].map(a => (
+                <div key={a.label} className="flex items-center gap-1.5">
+                  <img src={a.src} alt={a.label} width={14} height={14} className="h-3.5 w-3.5 rounded-sm opacity-60" />
+                  <span className="text-[10px] text-white/30">{a.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Agent API</p>
+            <h2 className="mb-5 text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
+              Give your AI live<br />revenue access.
+            </h2>
+            <p className="mb-8 text-[15px] leading-[1.75] text-[#5c5856]">
+              Create a read-only token. Point Claude, Cursor, Windsurf, or Opencode at <code className="rounded bg-[#1a1a2e]/10 px-1.5 py-0.5 font-mono text-[13px] text-[#1a1a2e]">/api/portfolio</code>. Your agent can now answer revenue questions, spot churn, and brief you — automatically.
+            </p>
+            <Link
+              href="/onboard"
+              className="inline-flex items-center gap-2 rounded-lg border-2 border-[#1a1a2e] bg-[#1a1a2e] px-5 py-3 text-[14px] font-semibold text-white shadow-[3px_3px_0_#1a1a2e] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#1a1a2e]"
+            >
+              Onboard your agent <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function PricingSection() {
   return (
     <section id="pricing" className="scroll-mt-20 border-t border-[#e7e3db] bg-white px-6 py-28">
