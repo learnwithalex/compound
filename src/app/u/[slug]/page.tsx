@@ -64,34 +64,41 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
         <span className="text-[12px] text-[#a8a39b]">Live stats · updates every 5 min</span>
       </header>
 
-      <main className="mx-auto w-full max-w-[520px] px-6 py-10">
-        {/* Profile card */}
+      <main className="mx-auto w-full max-w-[480px] px-6 py-10">
+        {/* Profile hero */}
         <div className="mb-5 rounded-sm bg-white overflow-hidden" style={{ border: "1px solid #ebebeb" }}>
-          <div className="h-[40px]" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #4a54c0 100%)" }} />
-          <div className="px-5 pb-5">
-            <div className="flex items-end gap-3 -mt-5 mb-3">
-              <div
-                className="h-12 w-12 shrink-0 rounded-full flex items-center justify-center text-[15px] font-bold text-white overflow-hidden shadow-sm"
-                style={{ background: settings.avatarUrl ? undefined : "#5e6ad2", border: "3px solid white" }}
-              >
-                {settings.avatarUrl
-                  ? <img src={settings.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
-                  : initials}
-              </div>
-              <div className="pb-1 min-w-0">
-                <p className="text-[14px] font-bold text-[#1a1a1a] truncate">{displayName}</p>
-                {settings.xHandle && (
-                  <a href={`https://x.com/${settings.xHandle}`} target="_blank" rel="noreferrer" className="text-[12px] text-[#a8a39b] hover:text-[#5e6ad2] transition-colors">
-                    @{settings.xHandle}
-                  </a>
-                )}
-              </div>
+          <div className="relative h-[80px]" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #4a54c0 100%)" }}>
+            <div
+              className="absolute left-1/2 -bottom-8 -translate-x-1/2 h-16 w-16 rounded-full flex items-center justify-center text-[20px] font-bold text-white overflow-hidden"
+              style={{ background: settings.avatarUrl ? undefined : "#5e6ad2", border: "3px solid white", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
+            >
+              {settings.avatarUrl
+                ? <img src={settings.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
+                : initials}
             </div>
-            {settings.bio && <p className="text-[12px] leading-relaxed text-[#6b6b6b]">{settings.bio}</p>}
+          </div>
+          <div className="pt-10 pb-6 px-6 text-center">
+            <p className="text-[16px] font-bold text-[#1a1a1a]" style={{ letterSpacing: "-0.02em" }}>{displayName}</p>
+            {settings.xHandle && (
+              <a
+                href={`https://x.com/${settings.xHandle}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-0.5 inline-flex items-center gap-1 text-[12px] text-[#a8a39b] hover:text-[#1a1a1a] transition-colors"
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                @{settings.xHandle}
+              </a>
+            )}
+            {settings.bio && (
+              <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "#6b6b6b" }}>{settings.bio}</p>
+            )}
           </div>
         </div>
 
-        <div className="mb-6 rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
+        <div className="mb-5 rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a8a39b]">
             Portfolio · {ranked.length} product{ranked.length !== 1 ? "s" : ""}
           </p>
@@ -123,7 +130,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                 const flat = p.mrrChange30d === 0;
                 return (
                   <div key={p.connectionId} className="flex items-center gap-3">
-                    <img src={productIcon(p.label, p.provider)} alt="" width={26} height={26} className="h-[26px] w-[26px] shrink-0 rounded-sm object-cover" style={{ border: "1px solid #ebebeb" }} />
+                    <img src={productIcon(p.label, p.provider, p.websiteUrl ?? undefined, p.iconUrl ?? undefined)} alt="" width={26} height={26} className="h-[26px] w-[26px] shrink-0 rounded-sm object-cover" style={{ border: "1px solid #ebebeb" }} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[12px] font-semibold text-[#1a1a1a]">{p.label}</span>
                       <span className="mt-1 block h-1.5 overflow-hidden rounded-full" style={{ background: "#f0f0f0" }}>
