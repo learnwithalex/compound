@@ -493,38 +493,58 @@ function AbstractionSection() {
 
 /* ============================================= lifecycle section */
 function LifecycleSection() {
+  const features = [
+    {
+      n: "01",
+      label: "Portfolio overview",
+      sub: "All your products unified — one total MRR number across every provider and billing interval.",
+      badge: { label: "LIVE", color: "green" as const },
+    },
+    {
+      n: "02",
+      label: "Customer profiles",
+      sub: "Who's paying, which plan they're on, their MRR contribution, and who's at risk of churning.",
+      badge: { label: "LIVE", color: "green" as const },
+    },
+    {
+      n: "03",
+      label: "AI briefings",
+      sub: "One click: Claude reads your full portfolio and writes a CFO-style briefing — what moved, why, one action.",
+      badge: { label: "CLAUDE", color: "purple" as const },
+    },
+    {
+      n: "04",
+      label: "Real-time alerts",
+      sub: "Email you the moment a new subscription lands, a customer churns, upgrades, or goes past due.",
+      badge: { label: "EMAIL", color: "blue" as const },
+    },
+    {
+      n: "05",
+      label: "Public revenue page",
+      sub: "Share your portfolio publicly with a shareable /u/[slug] profile page — optional, always your call.",
+      badge: { label: "PUBLIC", color: "teal" as const },
+    },
+    {
+      n: "06",
+      label: "Agent API",
+      sub: "Create tokens so Claude, Cursor, ChatGPT, Windsurf, or Opencode can query your live portfolio data.",
+      badge: { label: "API", color: "blue" as const },
+    },
+  ];
+
   return (
     <section className="border-t border-[#e7e3db] bg-white px-6 py-28">
       <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">MRR Lifecycle</p>
+        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Features</p>
         <h2 className="mb-4 text-[32px] font-[680] leading-[1.1] tracking-[-0.022em] text-[#1a1a1a]">
-          Full MRR visibility, daily.
+          Everything your portfolio needs.
         </h2>
         <p className="mb-14 max-w-md text-[15px] leading-[1.7] text-[#5c5856]">
-          Every sync produces a snapshot. Compare today to yesterday, spot the exact day numbers moved.
+          Not a chart dump — actual intelligence. Connect your providers and Compound handles the rest.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              n: "01",
-              label: "Synced",
-              sub: "Subscriptions fetched from all 5 providers",
-              badge: { label: "PULLED", color: "blue" as const },
-            },
-            {
-              n: "02",
-              label: "Normalized",
-              sub: "Annual, quarterly, custom intervals → monthly cents",
-              badge: { label: "NORMALIZED", color: "teal" as const },
-            },
-            {
-              n: "03",
-              label: "Snapshotted",
-              sub: "MRR, new MRR, churned MRR saved per connection per day",
-              badge: { label: "SAVED", color: "green" as const },
-            },
-          ].map((s) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((s) => (
             <CornerBox key={s.n} variant="gray" className="rounded-sm">
               <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -552,26 +572,26 @@ function ProblemSection() {
           The problem with multi-product analytics.
         </h2>
         <p className="mb-16 max-w-lg text-[16px] leading-[1.7] text-[#5c5856]">
-          You want to see your numbers. Instead, you're logging into dashboards.
+          You want to see your numbers. Instead, you&apos;re logging into dashboards.
         </p>
 
-        <div className="grid gap-px bg-[#e7e3db] overflow-hidden rounded-sm border border-[#e7e3db] sm:grid-cols-2">
+        <div className="grid gap-px overflow-hidden rounded-sm border border-[#e7e3db] bg-[#e7e3db] sm:grid-cols-2">
           {[
             {
-              title: "Fragmented Dashboards",
-              body: "Separate logins for each Stripe account, each Lemon Squeezy store, Polar, DodoPayments, Paystack. Six tabs to answer 'what's my MRR today?'",
+              title: "Six dashboards for six products",
+              body: "Separate logins for each Stripe account, each Lemon Squeezy store, Polar, DodoPayments, Paystack. Six tabs open just to answer \"what's my MRR today?\"",
             },
             {
-              title: "No Unified Number",
-              body: "Every platform shows its own total. You do the addition manually — every time you want a portfolio view.",
+              title: "No portfolio total",
+              body: "Every platform shows its own total. You add them up manually — in a note, a spreadsheet, or your head — every single time.",
             },
             {
-              title: "Zero AI Context",
-              body: "Your analytics tell you MRR moved. They don't explain which product drove it, or what you should do next.",
+              title: "Numbers without explanation",
+              body: "Charts tell you MRR moved. They don't tell you which product drove it, whether it'll hold, or what to do next.",
             },
             {
-              title: "Tool Tax",
-              body: "Baremetrics ($108/mo), ChartMogul ($100+/mo), MultiMMR ($19/mo, Stripe-only). All assume one business — you have a portfolio.",
+              title: "$100+/mo analytics tools",
+              body: "Baremetrics ($108/mo), ChartMogul ($100+/mo) — both built for one business on one processor. You have a portfolio. They don't know what that is.",
             },
           ].map((c) => (
             <div key={c.title} className="bg-[#f3f1ec] p-8">
@@ -770,16 +790,16 @@ function BenefitsSection() {
         <div className="grid gap-10 sm:grid-cols-3">
           {[
             {
-              title: "Free forever",
-              body: "No paywalls, no 14-day trials, no credit card. Baremetrics charges $108/mo for one Stripe account — Compound is free for all of them.",
+              title: "Start free, scale to Pro",
+              body: "Explore with one product on the free trial. When you're ready for unlimited products, full history, AI briefings, and goals — Pro is $9/mo.",
             },
             {
-              title: "AI that explains",
-              body: "Every other analytics tool shows you a chart. Compound asks Claude to explain it — what moved, which product drove it, what to do next.",
+              title: "AI that explains, not just charts",
+              body: "Claude reads your whole portfolio and writes a CFO-style briefing — what moved, which product drove it, one specific action. Plus a weekly digest in your inbox.",
             },
             {
-              title: "Open source",
-              body: "Full source on GitHub, MIT licensed. Self-host in 5 minutes, bring your own Claude key, modify anything. No black box.",
+              title: "Built for portfolio founders",
+              body: "Multi-product and multi-provider from day one. Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack in a single dashboard — not five.",
             },
           ].map((b) => (
             <div key={b.title}>
@@ -803,24 +823,27 @@ function PricingSection() {
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Pricing</p>
         <h2 className="mb-4 text-[36px] font-[680] tracking-[-0.025em] text-[#1a1a1a]">
-          Free for indie hackers, forever.
+          Simple, honest pricing.
         </h2>
         <p className="mb-14 max-w-lg text-[16px] leading-[1.7] text-[#5c5856]">
-          Baremetrics charges $108/mo. ChartMogul starts at $100. Compound is free
-          — because you're already building on tight margins.
+          Try it free. Upgrade to Pro when you&apos;re ready for the full picture.
         </p>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Free */}
+        <div className="mb-10 grid gap-6 sm:grid-cols-2">
+          {/* Free Trial */}
           <CornerBox variant="gray" className="rounded-sm">
             <div className="p-7">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9c9894]">Indie</p>
-              <div className="mb-6 flex items-baseline gap-1">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9c9894]">Free trial</p>
+              <div className="mb-1 flex items-baseline gap-1">
                 <span className="text-4xl font-bold tracking-tight text-[#1a1a1a]">Free</span>
-                <span className="text-[14px] text-[#9c9894]">forever</span>
               </div>
+              <p className="mb-6 text-[13px] text-[#9c9894]">No credit card required</p>
               <ul className="mb-8 space-y-3">
-                {["Up to 5 connected accounts", "5 payment providers", "Daily MRR snapshots", "AI portfolio analysis", "30-day history"].map((f) => (
+                {[
+                  "1 product",
+                  "30-day history",
+                  "Basic analytics",
+                ].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-[13px] text-[#5c5856]">
                     <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
                     {f}
@@ -829,56 +852,75 @@ function PricingSection() {
               </ul>
               <Link href="/app"
                 className="block rounded border border-[#1a1a2e] py-2.5 text-center text-[13px] font-semibold text-[#1a1a2e] transition-colors hover:bg-[#1a1a2e] hover:text-white">
-                Get started
+                Get started free
               </Link>
             </div>
           </CornerBox>
 
-          {/* Studio */}
-          <CornerBox variant="blue" className="rounded-sm">
+          {/* Pro */}
+          <CornerBox variant="orange" className="rounded-sm">
             <div className="p-7">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-blue-600">Studio</p>
-              <div className="mb-6 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-[#1a1a1a]">$19</span>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#f97316]">Pro</p>
+              <div className="mb-1 flex items-baseline gap-1">
+                <span className="text-4xl font-bold tracking-tight text-[#1a1a1a]">$9</span>
                 <span className="text-[14px] text-[#9c9894]">/month</span>
               </div>
+              <p className="mb-6 text-[13px] text-[#9c9894]">Via DodoPayments</p>
               <ul className="mb-8 space-y-3">
-                {["Unlimited connected accounts", "Full MRR history", "Expansion + contraction tracking", "CSV export", "Email digest"].map((f) => (
+                {[
+                  "Unlimited products",
+                  "Full history & trend charts",
+                  "AI briefings & weekly digest",
+                  "Goals, streaks & milestones",
+                  "Auto-sync every 30s",
+                  "Customer profiles & cohorts",
+                ].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-[13px] text-[#5c5856]">
                     <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
                     {f}
                   </li>
                 ))}
               </ul>
-              <button className="w-full rounded bg-[#1a1a2e] py-2.5 text-[13px] font-semibold text-white opacity-50 cursor-not-allowed">
-                Coming soon
-              </button>
-            </div>
-          </CornerBox>
-
-          {/* Self-hosted */}
-          <CornerBox variant="gray" className="rounded-sm">
-            <div className="p-7">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9c9894]">Self-hosted</p>
-              <div className="mb-6 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-[#1a1a1a]">Free</span>
-                <span className="text-[14px] text-[#9c9894]">forever</span>
-              </div>
-              <ul className="mb-8 space-y-3">
-                {["Deploy on your own infra", "Bring your own Claude key", "Full source code", "MIT licensed"].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-[13px] text-[#5c5856]">
-                    <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <a href={GITHUB}
-                className="block rounded border border-[#c8c4bc] py-2.5 text-center text-[13px] font-medium text-[#5c5856] transition-colors hover:border-[#1a1a2e] hover:text-[#1a1a1a]">
-                View on GitHub
-              </a>
+              <Link href="/app"
+                className="block rounded bg-[#1a1a2e] py-2.5 text-center text-[13px] font-semibold text-white transition-opacity hover:opacity-85">
+                Upgrade to Pro
+              </Link>
             </div>
           </CornerBox>
         </div>
+
+        {/* Always free */}
+        <CornerBox variant="gray" className="rounded-sm">
+          <div className="border-b border-[#ece9e3] bg-[#fafaf8] px-6 py-4">
+            <span className="text-[13px] font-semibold text-[#1a1a1a]">Included at every level — always free</span>
+          </div>
+          <div className="grid gap-4 p-6 sm:grid-cols-3">
+            {[
+              {
+                label: "Public revenue page",
+                desc: "Share your portfolio publicly at /u/[slug] with a shareable profile card.",
+              },
+              {
+                label: "Agent API tokens",
+                desc: "Create tokens so Claude, Cursor, ChatGPT, Windsurf, or Opencode can query your data live.",
+              },
+              {
+                label: "Open source",
+                desc: "Full source on GitHub, MIT licensed. Self-host on your own infra with your own Claude key.",
+              },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[#e7e3db] bg-white">
+                  <SparklesIcon className="h-3.5 w-3.5 text-[#f97316]" />
+                </div>
+                <div>
+                  <div className="mb-0.5 text-[13px] font-semibold text-[#1a1a1a]">{item.label}</div>
+                  <p className="text-[12px] leading-5 text-[#5c5856]">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CornerBox>
       </div>
     </section>
   );
@@ -887,12 +929,30 @@ function PricingSection() {
 /* ==================================================== FAQ */
 function FAQSection() {
   const faqs = [
-    { q: "What is Compound?", a: "Compound is a revenue OS for indie hackers with multiple products. Connect all your payment accounts, see total MRR across your whole portfolio, and get an AI briefing that explains exactly why the numbers moved." },
-    { q: "How is Compound different from Baremetrics or ChartMogul?", a: "Both tools assume you have one business on one payment processor. Compound is built for founders with a portfolio — multiple products, multiple platforms, one unified view. It's also free and includes AI analysis." },
-    { q: "Do I need to specify which product to sync?", a: "No. Compound syncs all connected accounts in one request and aggregates them automatically. You see the portfolio view and per-product breakdown without any configuration." },
-    { q: "What happens if a sync fails?", a: "Failed connections are reported in the sync response. The rest of your portfolio continues syncing. No silent failures." },
-    { q: "Does Compound handle Lemon Squeezy annual plans?", a: "Yes. Compound detects annual plans via variant and product names (looking for 'year' or 'annual') and divides by 12 to produce a correct monthly MRR figure." },
-    { q: "How does the AI analysis work?", a: "Compound feeds your full portfolio snapshot into Claude Haiku — every product's MRR, growth rate, subscriber count, and 30-day trend. Claude returns a CFO-style briefing: what's working, what needs attention, and one specific action." },
+    {
+      q: "What is Compound?",
+      a: "Compound is a revenue OS for indie hackers and portfolio founders. Connect all your payment provider accounts — Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack — and see your total MRR in one place. It also gives you per-product customer lists, AI briefings that explain why numbers moved, real-time alerts, and an Agent API so your AI tools can query your live portfolio.",
+    },
+    {
+      q: "What's in the free trial vs Pro?",
+      a: "The free trial lets you connect 1 product with 30-day history and basic analytics — enough to see if Compound fits your workflow, no credit card needed. Pro ($9/mo via DodoPayments) unlocks unlimited products, full history and trend charts, AI briefings and weekly digest, goals/streaks/milestones, auto-sync every 30 seconds, and customer profiles with cohorts.",
+    },
+    {
+      q: "How do the AI briefings work?",
+      a: "Click the briefing button in the header and Compound feeds your entire portfolio snapshot into Claude — every product's MRR, growth rate, subscriber count, and recent trend. Claude returns a CFO-style briefing in plain English: what moved, which product drove it, what's at risk, and one specific action. You also get a weekly digest version delivered to your inbox.",
+    },
+    {
+      q: "What payment providers are supported?",
+      a: "Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack. You connect each with a read-only API key — no OAuth flow, no approval process. Compound validates the key immediately and shows you your active subscription count before you save.",
+    },
+    {
+      q: "Can I share my revenue publicly?",
+      a: "Yes. Compound gives every account a public page at /u/[your-slug] with a shareable profile card showing your portfolio. It's completely optional — you control whether it's visible. The public page is free at every plan level, including the free trial.",
+    },
+    {
+      q: "How do I connect Claude or Cursor to my data?",
+      a: "Compound has an Agent API. Go to Settings → API tokens, create a token, and configure your AI tool to use it. Claude, Cursor, ChatGPT, Windsurf, and Opencode can all query your live portfolio data through the token — MRR, product breakdown, customer info, whatever you ask for.",
+    },
   ];
 
   return (
