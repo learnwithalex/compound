@@ -70,8 +70,11 @@ export function MiniHeader() {
           <span className="text-[13px] font-medium text-lx-text">compound</span>
           {isPro !== null && (
             <span
-              className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.08em]"
-              style={{ color: isPro ? "#5e6ad2" : "#f59e0b" }}
+              className="mt-0.5 inline-block rounded-sm px-1.5 py-px text-[9px] font-bold uppercase tracking-[0.08em]"
+              style={isPro
+                ? { background: "#eff0fb", color: "#5e6ad2" }
+                : { background: "#fff8e6", color: "#d97706", border: "1px solid #fde68a" }
+              }
             >
               {isPro ? "Pro" : "Free Trial"}
             </span>
