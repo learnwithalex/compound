@@ -17,73 +17,73 @@ type AgentId = (typeof AGENTS)[number]["id"];
 const ORIGIN = "https://usecompound.xyz";
 
 function buildPrompt(agentId: AgentId): string {
-  const agent = AGENTS.find((a) => a.id === agentId)!;
+  const saveInstructions: Record<AgentId, string> = {
+    claude: `Save to your memory so you always have access:
+  Compound token: {the token I gave you}
+  Revenue API: GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}`,
+    cursor: `Add to my .cursorrules file:
+  # Compound revenue API
+  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}
+  Use this when I ask about MRR, subscribers, or business metrics.`,
+    windsurf: `Add to my .windsurfrules file:
+  # Compound revenue API
+  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}
+  Use this when I ask about MRR, subscribers, or business metrics.`,
+    opencode: `Add to my AGENTS.md file:
+  # Compound revenue API
+  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}
+  Use this when I ask about MRR, subscribers, or business metrics.`,
+    chatgpt: `Remember for all future conversations:
+  Compound token: {the token I gave you}
+  Revenue API: GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}`,
+    other: `Store the token and endpoint:
+  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}`,
+  };
 
-  const intro = `You are helping me set up Compound — a live revenue dashboard for indie hackers at ${ORIGIN}.
+  return `You are onboarding me to Compound — a live revenue dashboard at ${ORIGIN}. I have already signed in and created an agent token for you. Everything below is driven by API — no UI navigation needed.
 
-I want you to do the entire onboarding for me. Here is exactly what to do, step by step:`;
+STEP 1 — Get my token
+Ask me: "Please paste your Compound agent token (it starts with cpd_live_…)"
+Wait for me to paste it before continuing.
 
-  const step1 = `
-STEP 1 — Sign in (I'll do this part myself)
-Tell me: "Please sign in at ${ORIGIN}/login using Google, then let me know when you're done."
-Wait for my confirmation before continuing.`;
-
-  const step2 = `
 STEP 2 — Collect my product details
 Ask me:
   a) Which payment provider do I use? (Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack)
   b) What is my product called?
   c) What is my read-only API key for that provider?
-  d) What is my product's website URL? (optional, for the logo)`;
+  d) What is my product's website URL? (optional — used for the logo)
 
-  const step3 = `
-STEP 3 — Create your access token
-Tell me: "Please go to ${ORIGIN}/app/agents, pick your agent type, create a token, and paste it back to me."
-Wait for me to paste the token before continuing.`;
+STEP 3 — Connect my product via API
+Make this request with the details I gave you:
 
-  const step4 = `
-STEP 4 — Add my product connection
-Navigate me to ${ORIGIN}/app/connect and guide me to:
-  - Select the provider I told you in Step 2
-  - Enter the product name and API key
-  - Submit the form
-Tell me what to click or fill in at each field.`;
+  POST ${ORIGIN}/api/connect
+  Authorization: Bearer {the token I gave you}
+  Content-Type: application/json
+  {
+    "provider": "{provider from step 2a}",
+    "name": "{product name from step 2b}",
+    "apiKey": "{API key from step 2c}",
+    "websiteUrl": "{URL from step 2d, omit if not given}"
+  }
 
-  const step5 = `
-STEP 5 — Verify everything is working
-Call the Compound API with the token I gave you:
+If the response is 200, continue. If it errors, tell me the error message.
+
+STEP 4 — Pull my live data and brief me
+Make this request:
+
   GET ${ORIGIN}/api/portfolio
   Authorization: Bearer {the token I gave you}
 
 Parse the JSON response and give me a CFO-style briefing:
   - My total MRR and ARR
   - Active subscribers
-  - 30-day trend (is it growing or declining, and by how much?)
-  - The one thing I should focus on this week`;
+  - 30-day trend (growing or declining, and by how much?)
+  - The one thing I should focus on this week
 
-  const step6 = `
-STEP 6 — Set up ongoing access
-${agentId === "claude" ? `Save this to your memory or system prompt so you can always check my revenue:
-  GET ${ORIGIN}/api/portfolio  —  Authorization: Bearer {token}` : ""}
-${agentId === "cursor" ? `Add this to my .cursorrules file:
-  # Compound revenue API
-  GET ${ORIGIN}/api/portfolio with Authorization: Bearer {token}
-  Use this when I ask about MRR, subscribers, or business metrics.` : ""}
-${agentId === "windsurf" ? `Add this to my .windsurfrules file:
-  # Compound revenue API
-  GET ${ORIGIN}/api/portfolio with Authorization: Bearer {token}
-  Use this when I ask about MRR, subscribers, or business metrics.` : ""}
-${agentId === "opencode" ? `Add this to my AGENTS.md file:
-  # Compound revenue API
-  GET ${ORIGIN}/api/portfolio with Authorization: Bearer {token}
-  Use this when I ask about MRR, subscribers, or business metrics.` : ""}
-${(agentId === "chatgpt" || agentId === "other") ? `Remember this for future conversations:
-  My revenue data: GET ${ORIGIN}/api/portfolio
-  Authorization: Bearer {token}` : ""}
+STEP 5 — Save access for future use
+${saveInstructions[agentId]}
 
-Tell me: "You're all set. I now have live access to your revenue. Ask me anything about your MRR."`;
-
-  return [intro, step1, step2, step3, step4, step5, step6].join("\n");
+Then tell me: "You're all set. I have live access to your revenue — ask me anything about your MRR."`;
 }
 
 export default function OnboardPage() {
@@ -122,37 +122,42 @@ export default function OnboardPage() {
         <div className="mb-12 max-w-xl">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Agent onboarding</p>
           <h1 className="mb-4 text-[40px] font-[700] leading-[1.1] tracking-[-0.025em] text-[#1a1a1a]">
-            Let your AI agent<br />set up Compound.
+            Your agent does<br />the setup. Via API.
           </h1>
           <p className="text-[16px] leading-[1.7] text-[#5c5856]">
-            Sign in, pick your agent, copy the prompt. Your AI does the rest — connects your payment provider, creates its own access token, and briefs you on your revenue.
+            You do one thing: sign in and create a token. Paste it to your agent — it connects your payment provider, pulls your data, and briefs you. All via API, no UI hand-holding.
           </p>
+        </div>
+
+        {/* Pre-requisite banner */}
+        <div className="mb-10 flex items-start gap-4 rounded-xl border border-[#e7e3db] bg-white p-5 shadow-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[14px] font-bold text-white">!</div>
+          <div className="flex-1">
+            <p className="mb-1 text-[13px] font-semibold text-[#1a1a1a]">Do this once before copying the prompt</p>
+            <p className="mb-3 text-[12px] leading-5 text-[#9c9894]">Sign in to Compound, then go to <strong className="text-[#1a1a1a]">Settings → Agents</strong> and create a token. Copy it — you&apos;ll paste it to your agent in the prompt below.</p>
+            <div className="flex gap-3">
+              <Link
+                href="/login"
+                className="rounded-md bg-[#1a1a2e] px-3.5 py-2 text-[12px] font-semibold text-white transition-opacity hover:opacity-85"
+              >
+                Sign in →
+              </Link>
+              <Link
+                href="/app/agents"
+                className="rounded-md border border-[#e7e3db] bg-[#f3f1ec] px-3.5 py-2 text-[12px] font-semibold text-[#1a1a1a] transition-colors hover:bg-[#eceae4]"
+              >
+                Create token →
+              </Link>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
           {/* Left: agent picker + prompt */}
           <div>
-            {/* Step 1 */}
+            {/* Agent picker */}
             <div className="mb-8">
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">1 — Sign in first</p>
-              <div className="flex items-center gap-4 rounded-sm border border-[#e7e3db] bg-white p-5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[15px] font-bold text-white">1</div>
-                <div className="flex-1">
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Create your Compound account</p>
-                  <p className="text-[12px] text-[#9c9894]">One-click Google sign-in — your agent needs an account to connect to.</p>
-                </div>
-                <Link
-                  href="/login"
-                  className="shrink-0 rounded-sm bg-[#1a1a2e] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-85"
-                >
-                  Sign in →
-                </Link>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="mb-8">
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">2 — Pick your agent</p>
+              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">1 — Pick your agent</p>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                 {AGENTS.map((a) => (
                   <button
@@ -191,9 +196,9 @@ export default function OnboardPage() {
               </div>
             </div>
 
-            {/* Step 3: prompt */}
+            {/* Prompt */}
             <div>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">3 — Copy this prompt into {selectedAgent.label}</p>
+              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">2 — Copy this prompt into {selectedAgent.label}</p>
               <div className="relative rounded-sm border border-[#e7e3db] bg-white">
                 <div className="flex items-center justify-between border-b border-[#f0ede6] bg-[#fafaf8] px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -222,26 +227,30 @@ export default function OnboardPage() {
             </div>
           </div>
 
-          {/* Right: how it works */}
-          <div className="lg:pt-[68px]">
+          {/* Right: sidebar */}
+          <div className="lg:pt-[52px]">
             <div className="sticky top-[80px] space-y-4">
               <div className="rounded-sm border border-[#e7e3db] bg-white p-5">
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">What the agent does</p>
+                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">What your agent does via API</p>
                 <div className="space-y-4">
                   {[
-                    { n: "1", label: "Confirms you're signed in", desc: "Waits for your confirmation before continuing." },
-                    { n: "2", label: "Asks for your payment details", desc: "Provider, product name, and read-only API key — it types nothing without asking." },
-                    { n: "3", label: "Guides you to create a token", desc: "Walks you to /app/agents where you create its access token." },
-                    { n: "4", label: "Connects your product", desc: "Guides you through the Connect form step by step." },
-                    { n: "5", label: "Runs your first briefing", desc: "Fetches live data and gives you a CFO-style read on your MRR." },
-                    { n: "6", label: "Saves access for future use", desc: "Stores the token so it can answer revenue questions anytime." },
+                    { n: "1", label: "Asks for your token", desc: "You paste it once — that's the only manual step.", api: null },
+                    { n: "2", label: "Collects provider details", desc: "Asks for your provider, product name, and read-only API key.", api: null },
+                    { n: "3", label: "Connects your product", desc: "POST /api/connect — no form, no browser.", api: "POST /api/connect" },
+                    { n: "4", label: "Pulls your live data", desc: "GET /api/portfolio — parses it and briefs you in plain English.", api: "GET /api/portfolio" },
+                    { n: "5", label: "Saves access for later", desc: "Stores the token so it can answer revenue questions any time.", api: null },
                   ].map((s) => (
                     <div key={s.n} className="flex gap-3">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[10px] font-bold text-white mt-0.5">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[10px] font-bold text-white">
                         {s.n}
                       </span>
                       <div>
-                        <p className="text-[13px] font-semibold text-[#1a1a1a]">{s.label}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[13px] font-semibold text-[#1a1a1a]">{s.label}</p>
+                          {s.api && (
+                            <span className="rounded bg-[#eff0fb] px-1.5 py-0.5 font-mono text-[9px] font-semibold text-[#5e6ad2]">{s.api}</span>
+                          )}
+                        </div>
                         <p className="text-[12px] leading-5 text-[#9c9894]">{s.desc}</p>
                       </div>
                     </div>
