@@ -213,19 +213,12 @@ function Hero() {
                 <span className="flex h-5 w-5 items-center justify-center rounded border border-[#e5e7eb] text-[9px] font-semibold text-[#9c9894]">+</span>
               </div>
               <div className="flex flex-1 items-center gap-1.5 px-3 py-3">
-                <span className="font-mono text-[11px] text-[#9c9894]">$</span>
-                <span className="font-mono text-[12px] text-[#5c5856]">compound connect --all</span>
+                <span className="text-[12px] text-[#9c9894]">Paste your API key → connected in seconds</span>
               </div>
-              <button className="shrink-0 border-l border-[#e7e3db] px-3 py-3 text-[#c8c4bc] hover:text-[#5c5856]">
-                <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="4" y="4" width="9" height="9" rx="1.5" />
-                  <path d="M3 10H2.5A1.5 1.5 0 0 1 1 8.5v-6A1.5 1.5 0 0 1 2.5 1h6A1.5 1.5 0 0 1 10 2.5V3" />
-                </svg>
-              </button>
             </div>
 
             <p className="text-[13px] text-[#5c5856]">
-              <span className="font-bold text-[#1a1a1a]">Free forever</span>
+              <span className="font-bold text-[#1a1a1a]">Free to start</span>
               {" · replaces "}
               <a href="#pricing" className="text-blue-600 hover:underline">Baremetrics, ChartMogul &amp; MultiMMR</a>
               {" · "}
@@ -330,13 +323,14 @@ function HeroFlowDiagram() {
             <img src="/obsidian-sync-icon.jpg" alt="Obsidian Sync Free" className="h-5 w-5 rounded object-contain" width={20} height={20} loading="eager" />
           </div>
         </div>
-        <div className="border-t border-[#f0ede6] px-5 py-3 font-mono text-[12px] leading-5">
-          <span className="text-[#7c3aed]">compound</span>
-          <span className="text-[#1a1a1a]">.</span>
-          <span className="text-[#1a6fba]">sync</span>
-          <span className="text-[#1a1a1a]">(</span>
-          <span className="text-[#b45309]">&quot;portfolio&quot;</span>
-          <span className="text-[#1a1a1a]">);</span>
+        <div className="border-t border-[#f0ede6] px-5 py-3 font-mono text-[12px] leading-5 text-[#9c9894]">
+          <span className="text-[#5c5856]">GET</span>
+          {" "}
+          <span className="text-[#1a6fba]">/api/portfolio</span>
+          {" · "}
+          <span className="text-[#7c3aed]">Bearer</span>
+          {" "}
+          <span className="text-[#b45309]">&lt;token&gt;</span>
         </div>
       </CornerBox>
     </div>
