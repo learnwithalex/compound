@@ -31,10 +31,18 @@ export function providerLogo(provider: string): string {
   )[key] ?? "https://cdn.simpleicons.org/stripe/635bff";
 }
 
-// Real product icons for known demo products; otherwise the provider logo.
-export function productIcon(label: string, provider: string): string {
+// Real product icons for known demo products; then website favicon; then provider logo.
+export function productIcon(label: string, provider: string, websiteUrl?: string | null): string {
   for (const [re, icon] of PRODUCT_ICONS) {
     if (re.test(label)) return icon;
+  }
+  if (websiteUrl) {
+    try {
+      const domain = new URL(websiteUrl).hostname;
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    } catch {
+      // invalid URL — fall through
+    }
   }
   return providerLogo(provider);
 }

@@ -144,7 +144,7 @@ function ProductCard({ product: p, rank }: { product: ProductMetrics; rank: numb
   const change = p.mrrChange30d;
   const up = change > 0;
   const down = change < 0;
-  const icon = productIcon(p.label, p.provider);
+  const icon = productIcon(p.label, p.provider, p.websiteUrl);
 
   return (
     <a

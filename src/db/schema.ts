@@ -29,6 +29,7 @@ export const connections = pgTable("connections", {
   color: text("color").notNull().default("#5e6ad2"),
   currency: text("currency").notNull().default("usd"),
   webhookToken: text("webhook_token").unique().$defaultFn(() => "whk_" + crypto.randomUUID().replace(/-/g, "")),
+  websiteUrl: text("website_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastSyncedAt: timestamp("last_synced_at"),
 });

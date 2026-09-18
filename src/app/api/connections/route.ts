@@ -9,7 +9,7 @@ import { fetchPolarOverview } from "@/lib/polar";
 import { fetchDodoOverview } from "@/lib/dodopayments";
 import { fetchPaystackOverview } from "@/lib/paystack";
 
-export const PROVIDERS = ["stripe", "lemonsqueezy", "polar", "dodopayments", "paystack"] as const;
+export const PROVIDERS = ["stripe", "lemonsqueezy", "polar", "dodopayments", "paddle", "gumroad", "paystack"] as const;
 
 const COLORS = ["#5e6ad2", "#26c16b", "#f2b030", "#e3493c", "#06b6d4", "#a855f7", "#f97316"];
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   const userId = await userIdFromSession();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { provider, label, apiKey } = await req.json();
+  const { provider, label, apiKey, websiteUrl } = await req.json();
   if (!provider || !label || !apiKey) return NextResponse.json({ error: "missing fields" }, { status: 400 });
   if (!(PROVIDERS as readonly string[]).includes(provider)) return NextResponse.json({ error: "invalid provider" }, { status: 400 });
 
@@ -45,8 +45,9 @@ export async function POST(req: Request) {
   const existing = await db.query.connections.findMany({ where: (c, { eq }) => eq(c.userId, userId) });
   const color = COLORS[existing.length % COLORS.length];
 
-  const [conn] = await db.insert(connections).values({ userId, provider, label, apiKey, color }).returning();
-  return NextResponse.json({ id: conn.id, label: conn.label, provider: conn.provider, color: conn.color });
+  const cleanUrl = websiteUrl?.trim() || null;
+  const [conn] = await db.insert(connections).values({ userId, provider, label, apiKey, color, websiteUrl: cleanUrl }).returning();
+  return NextResponse.json({ id: conn.id, label: conn.label, provider: conn.provider, color: conn.color, websiteUrl: conn.websiteUrl });
 }
 
 export async function DELETE(req: Request) {

@@ -83,7 +83,7 @@ export default function ConnectPage() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isPro, setIsPro] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [form, setForm] = useState({ provider: "stripe", label: "", apiKey: "" });
+  const [form, setForm] = useState({ provider: "stripe", label: "", apiKey: "", websiteUrl: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
@@ -130,21 +130,15 @@ export default function ConnectPage() {
       const res = await fetch("/api/connections", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ provider: form.provider, label: form.label, apiKey: form.apiKey, websiteUrl: form.websiteUrl || null }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed"); return; }
       const conn: Connection = { id: data.id, label: data.label, provider: data.provider, color: data.color };
       setConnections((c) => [...c, conn]);
-      setForm({ provider: "stripe", label: "", apiKey: "" });
+      setForm({ provider: "stripe", label: "", apiKey: "", websiteUrl: "" });
       loadToken(conn);
     } finally { setBusy(false); }
-  }
-
-  async function deleteConnection(id: string) {
-    if (!confirm("Remove this product? All synced data will be deleted.")) return;
-    const res = await fetch("/api/connections", { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ id }) });
-    if (res.ok) setConnections((c) => c.filter((x) => x.id !== id));
   }
 
   async function syncAll() {
@@ -284,6 +278,8 @@ export default function ConnectPage() {
               <option value="lemonsqueezy">Lemon Squeezy</option>
               <option value="polar">Polar</option>
               <option value="dodopayments">DodoPayments</option>
+              <option value="paddle">Paddle</option>
+              <option value="gumroad">Gumroad</option>
               <option value="paystack">Paystack</option>
             </select>
           </div>
@@ -299,6 +295,21 @@ export default function ConnectPage() {
               className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
               style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
             />
+          </div>
+
+          <div className="mb-4">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
+              Product website <span className="normal-case font-normal text-lx-faint">(optional — used for logo)</span>
+            </label>
+            <input
+              type="url"
+              placeholder="https://yourproduct.com"
+              value={form.websiteUrl}
+              onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
+              className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+              style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
+            />
+            <p className="mt-1.5 text-[11px] text-lx-faint">We&apos;ll use your site&apos;s favicon as the product icon.</p>
           </div>
 
           <div className="mb-5">
@@ -329,47 +340,11 @@ export default function ConnectPage() {
           </button>
         </form>
 
-        {/* Connected list */}
         {connections.length > 0 && (
-          <div className="mt-4 rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
-            <div className="divide-y divide-[#ebebeb]">
-              {connections.map((c) => (
-                <div key={c.id} className="px-5 py-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
-                    <span className="text-[13px] font-medium text-lx-text">{c.label}</span>
-                    <span className="text-[12px] text-lx-faint">· {c.provider}</span>
-                    <button
-                      onClick={() => loadToken(c)}
-                      className="ml-auto text-[11px] font-semibold text-[#5e6ad2] hover:opacity-70"
-                    >
-                      Install tracking
-                    </button>
-                    <button
-                      onClick={() => deleteConnection(c.id)}
-                      className="text-[11px] font-medium text-lx-faint hover:text-lx-red"
-                      title="Remove product"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  {c.webhookToken && (
-                    <WebhookRow token={c.webhookToken} provider={c.provider} />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="px-5 py-4" style={{ borderTop: "1px solid #ebebeb" }}>
-              <button
-                onClick={syncAll}
-                disabled={syncing}
-                className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
-                style={{ background: "#5e6ad2" }}
-              >
-                {syncing ? "Syncing…" : "Sync & go to dashboard →"}
-              </button>
-            </div>
-          </div>
+          <p className="mt-3 text-center text-[12px] text-lx-muted">
+            {connections.length} product{connections.length === 1 ? "" : "s"} connected.{" "}
+            <a href="/app/products" className="font-medium text-[#5e6ad2] hover:opacity-70">View all →</a>
+          </p>
         )}
       </div>
     </div>

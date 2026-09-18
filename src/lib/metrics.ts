@@ -34,6 +34,7 @@ export interface ProductMetrics {
   label: string;
   color: string;
   provider: string;
+  websiteUrl: string | null;
   mrrCents: number;
   arrCents: number;
   churnedMrrCents: number;
@@ -82,6 +83,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
         label: conn.label,
         color: conn.color,
         provider: conn.provider,
+        websiteUrl: conn.websiteUrl ?? null,
         mrrCents: 0,
         arrCents: 0,
         churnedMrrCents: 0,
@@ -103,6 +105,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
       label: conn.label,
       color: conn.color,
       provider: conn.provider,
+      websiteUrl: conn.websiteUrl ?? null,
       mrrCents: latest.mrrCents,
       arrCents: latest.mrrCents * 12,
       activeSubscriptions: latest.activeSubscriptions,
@@ -154,6 +157,7 @@ export async function singleProductMetrics(
         label: conn.label,
         color: conn.color,
         provider: conn.provider,
+        websiteUrl: conn.websiteUrl ?? null,
         mrrCents: 0,
         arrCents: 0,
         churnedMrrCents: 0,
@@ -178,6 +182,7 @@ export async function singleProductMetrics(
       label: conn.label,
       color: conn.color,
       provider: conn.provider,
+      websiteUrl: conn.websiteUrl ?? null,
       mrrCents: latest.mrrCents,
       arrCents: latest.mrrCents * 12,
       activeSubscriptions: latest.activeSubscriptions,

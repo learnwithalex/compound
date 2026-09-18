@@ -6,6 +6,7 @@ import { Suspense } from "react";
 const NAV_MAIN = [
   { href: "/app",           label: "Overview",  icon: HomeIcon },
   { href: "/app/analytics", label: "Analytics", icon: ChartIcon },
+  { href: "/app/products",  label: "Products",  icon: ProductsIcon },
   { href: "/app/connect",   label: "Connect",   icon: LinkIcon },
 ];
 
@@ -226,6 +227,16 @@ function SegmentsIcon() {
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="8" cy="8" r="6" />
       <path d="M8 2v6l4 4" />
+    </svg>
+  );
+}
+function ProductsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="0.75" />
+      <rect x="9" y="1.5" width="5.5" height="5.5" rx="0.75" />
+      <rect x="1.5" y="9" width="5.5" height="5.5" rx="0.75" />
+      <rect x="9" y="9" width="5.5" height="5.5" rx="0.75" />
     </svg>
   );
 }

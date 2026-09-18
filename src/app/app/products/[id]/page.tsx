@@ -47,7 +47,7 @@ export default async function ProductPage({
   const [{ value: eventCount }] = await db.select({ value: count() }).from(analyticsEvents).where(eq(analyticsEvents.connectionId, id));
   const showNudge = Number(eventCount) === 0;
 
-  const icon = productIcon(p.label, p.provider);
+  const icon = productIcon(p.label, p.provider, p.websiteUrl);
   const color = p.color || "#5e6ad2";
   const up = p.mrrChange30d > 0;
   const down = p.mrrChange30d < 0;
