@@ -19,6 +19,7 @@ import { SegmentCard, FunnelCard } from "@/app/app/report-cards";
 import { IconMrr, IconArr, IconSubs, IconTrend, IconArpa, IconLtv, IconChurn, IconQuick } from "@/app/app/stat-icons";
 import { TrackingTab } from "./tracking-tab";
 import { AllCustomersTable } from "./customers-table";
+import { AnalyticsNudgeBanner } from "@/app/app/analytics-nudge";
 
 export default async function ProductPage({
   params,
@@ -36,6 +37,16 @@ export default async function ProductPage({
   if (!result) redirect("/app");
 
   const { product: p, lastSyncedAt } = result;
+
+  // Analytics nudge — get or create tracker token, check if any events received
+  let tracker = await db.query.trackerTokens.findFirst({ where: (t) => eq(t.connectionId, id) });
+  if (!tracker) {
+    const [created] = await db.insert(trackerTokens).values({ connectionId: id }).returning();
+    tracker = created;
+  }
+  const [{ value: eventCount }] = await db.select({ value: count() }).from(analyticsEvents).where(eq(analyticsEvents.connectionId, id));
+  const showNudge = Number(eventCount) === 0;
+
   const icon = productIcon(p.label, p.provider);
   const color = p.color || "#5e6ad2";
   const up = p.mrrChange30d > 0;
@@ -60,6 +71,12 @@ export default async function ProductPage({
 
   return (
     <div className="pb-20">
+        {showNudge && tracker && (
+          <AnalyticsNudgeBanner
+            items={[{ connectionId: p.connectionId, label: p.label, provider: p.provider, token: tracker.token }]}
+          />
+        )}
+
         {/* Header */}
         <div className="mb-8 flex flex-wrap items-center gap-4">
           <img
