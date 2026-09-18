@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { userIdFromSession } from "@/lib/auth";
+import { userIdFromSessionOrToken } from "@/lib/auth";
 import { db } from "@/db";
 import { syncConnection } from "@/lib/stripe";
 import { syncLemonSqueezyConnection } from "@/lib/lemonsqueezy";
@@ -15,8 +15,8 @@ function syncAny(connectionId: string, provider: string) {
   return syncConnection(connectionId);
 }
 
-export async function POST() {
-  const userId = await userIdFromSession();
+export async function POST(req: Request) {
+  const userId = await userIdFromSessionOrToken(req);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const conns = await db.query.connections.findMany({ where: (c, { eq }) => eq(c.userId, userId) });

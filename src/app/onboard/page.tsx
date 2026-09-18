@@ -56,19 +56,27 @@ Ask me:
 STEP 3 — Connect my product via API
 Make this request with the details I gave you:
 
-  POST ${ORIGIN}/api/connect
+  POST ${ORIGIN}/api/connections
   Authorization: Bearer {the token I gave you}
   Content-Type: application/json
   {
-    "provider": "{provider from step 2a}",
-    "name": "{product name from step 2b}",
+    "provider": "{provider from step 2a, lowercase: stripe | lemonsqueezy | polar | dodopayments | paystack}",
+    "label": "{product name from step 2b}",
     "apiKey": "{API key from step 2c}",
     "websiteUrl": "{URL from step 2d, omit if not given}"
   }
 
-If the response is 200, continue. If it errors, tell me the error message.
+If the response is 200, continue. If it errors, tell me the error message exactly.
 
-STEP 4 — Pull my live data and brief me
+STEP 4 — Sync my data
+Trigger a sync so your portfolio reflects the connection you just made:
+
+  POST ${ORIGIN}/api/sync
+  Authorization: Bearer {the token I gave you}
+
+Wait for the response before continuing.
+
+STEP 5 — Pull my live data and brief me
 Make this request:
 
   GET ${ORIGIN}/api/portfolio
@@ -80,7 +88,7 @@ Parse the JSON response and give me a CFO-style briefing:
   - 30-day trend (growing or declining, and by how much?)
   - The one thing I should focus on this week
 
-STEP 5 — Save access for future use
+STEP 6 — Save access for future use
 ${saveInstructions[agentId]}
 
 Then tell me: "You're all set. I have live access to your revenue — ask me anything about your MRR."`;
@@ -236,9 +244,10 @@ export default function OnboardPage() {
                   {[
                     { n: "1", label: "Asks for your token", desc: "You paste it once — that's the only manual step.", api: null },
                     { n: "2", label: "Collects provider details", desc: "Asks for your provider, product name, and read-only API key.", api: null },
-                    { n: "3", label: "Connects your product", desc: "POST /api/connect — no form, no browser.", api: "POST /api/connect" },
-                    { n: "4", label: "Pulls your live data", desc: "GET /api/portfolio — parses it and briefs you in plain English.", api: "GET /api/portfolio" },
-                    { n: "5", label: "Saves access for later", desc: "Stores the token so it can answer revenue questions any time.", api: null },
+                    { n: "3", label: "Connects your product", desc: "No form, no browser — pure API call.", api: "POST /api/connections" },
+                    { n: "4", label: "Syncs your data", desc: "Pulls fresh data from your payment provider.", api: "POST /api/sync" },
+                    { n: "5", label: "Briefs you on your revenue", desc: "Parses live portfolio data and explains what moved.", api: "GET /api/portfolio" },
+                    { n: "6", label: "Saves access for later", desc: "Stores the token so it can answer revenue questions any time.", api: null },
                   ].map((s) => (
                     <div key={s.n} className="flex gap-3">
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[10px] font-bold text-white">

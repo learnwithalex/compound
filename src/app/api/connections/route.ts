@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { userIdFromSession } from "@/lib/auth";
+import { userIdFromSessionOrToken } from "@/lib/auth";
 import { db } from "@/db";
 import { connections } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -13,8 +13,8 @@ export const PROVIDERS = ["stripe", "lemonsqueezy", "polar", "dodopayments", "pa
 
 const COLORS = ["#5e6ad2", "#26c16b", "#f2b030", "#e3493c", "#06b6d4", "#a855f7", "#f97316"];
 
-export async function GET() {
-  const userId = await userIdFromSession();
+export async function GET(req: Request) {
+  const userId = await userIdFromSessionOrToken(req);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const rows = await db.query.connections.findMany({
     where: (c, { eq }) => eq(c.userId, userId),
@@ -24,7 +24,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const userId = await userIdFromSession();
+  const userId = await userIdFromSessionOrToken(req);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { provider, label, apiKey, websiteUrl } = await req.json();
