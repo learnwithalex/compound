@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { providerLogo } from "@/lib/format";
 
 interface Connection {
@@ -86,6 +86,7 @@ export default function ConnectPage() {
 
   // Progressive disclosure: null = pick provider, string = fill form
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const [animKey, setAnimKey] = useState(0); // bump to retrigger slide-in
   const [form, setForm] = useState({ label: "", apiKey: "", websiteUrl: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +129,12 @@ export default function ConnectPage() {
     setSelectedProvider(id);
     setForm({ label: "", apiKey: "", websiteUrl: "" });
     setError(null);
+    setAnimKey((k) => k + 1);
+  }
+
+  function backToProviders() {
+    setSelectedProvider(null);
+    setAnimKey((k) => k + 1);
   }
 
   async function addConnection(e: React.FormEvent) {
@@ -172,226 +179,179 @@ export default function ConnectPage() {
     });
   }
 
-  /* ── Step 3: install tracking ── */
-  if (installConn) {
-    return (
-      <div className="max-w-md">
-        <button
-          onClick={() => setInstallConn(null)}
-          className="mb-5 flex items-center gap-1.5 text-[12px] font-medium text-lx-muted hover:text-lx-text"
-        >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10 3L5 8l5 5" />
-          </svg>
-          Back
-        </button>
-
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 3 · Optional</p>
-        <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
-          Install tracking
-        </h1>
-        <p className="mt-1 mb-6 text-[13px] text-lx-muted">
-          Embed this in <span className="font-medium text-lx-text">{installConn.label}</span> to capture page views and user journeys — matched to your paying customers.
-        </p>
-
-        {!trackerToken ? (
-          <p className="text-[12px] text-lx-faint">Loading…</p>
-        ) : (
-          <>
-            <pre
-              className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
-              style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-            >
-              {snippet(trackerToken)}
-            </pre>
-
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => copy("snippet")}
-                className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ background: "#5e6ad2" }}
-              >
-                {copied === "snippet" ? "Copied!" : "Copy snippet"}
-              </button>
-              <button
-                onClick={() => copy("prompt")}
-                className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]"
-                style={{ border: "1px solid #dddad5" }}
-              >
-                {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
-              </button>
-            </div>
-
-            <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
-              Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link behavioral data to payment data.
-            </p>
-
-            <div className="mt-6 pt-5" style={{ borderTop: "1px solid #ebebeb" }}>
-              <button
-                onClick={syncAll}
-                disabled={syncing}
-                className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
-                style={{ background: "#5e6ad2" }}
-              >
-                {syncing ? "Syncing…" : "Sync & go to dashboard →"}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  /* ── Step 1: pick provider ── */
-  if (!selectedProvider) {
-    return (
-      <div className="max-w-lg">
-        {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
-
-        <div className="mb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect · Step 1</p>
-          <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
-            Which platform?
-          </h1>
-          <p className="mt-1 text-[13px] text-lx-muted">
-            Pick the payment provider your product uses.
-          </p>
-        </div>
-
-        <div className="rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
-          {PROVIDERS.map((p, i) => {
-            const linked = connections.filter((c) => c.provider === p.id);
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => pickProvider(p.id)}
-                className="flex w-full items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-[#fafafa]"
-                style={i > 0 ? { borderTop: "1px solid #f0f0f0" } : undefined}
-              >
-                <img
-                  src={providerLogo(p.id)}
-                  alt={p.label}
-                  width={28} height={28}
-                  className="h-7 w-7 shrink-0 rounded-sm object-contain"
-                  loading="lazy"
-                />
-                <span className="flex-1 text-[13.5px] font-semibold text-lx-text">{p.label}</span>
-                {linked.length > 0 && (
-                  <span className="text-[11px] font-semibold text-[#10b981]">{linked.length} connected ✓</span>
-                )}
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 3l5 5-5 5" />
-                </svg>
-              </button>
-            );
-          })}
-        </div>
-
-        {connections.length > 0 && (
-          <p className="mt-4 text-center text-[12px] text-lx-muted">
-            {connections.length} product{connections.length === 1 ? "" : "s"} connected.{" "}
-            <a href="/app/products" className="font-medium text-[#5e6ad2] hover:opacity-70">View all →</a>
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  /* ── Step 2: fill in details ── */
-  const providerMeta = PROVIDERS.find((p) => p.id === selectedProvider)!;
+  const providerMeta = PROVIDERS.find((p) => p.id === selectedProvider);
 
   return (
-    <div className="max-w-md">
+    <>
+      <style>{`
+        @keyframes stepIn {
+          from { opacity: 0; transform: translateX(24px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .step-in { animation: stepIn 220ms cubic-bezier(0.25,0.46,0.45,0.94) both; }
+      `}</style>
+
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
 
-      {/* Selected provider chip + back */}
-      <button
-        onClick={() => setSelectedProvider(null)}
-        className="mb-5 flex items-center gap-2 text-[12px] font-medium text-lx-muted hover:text-lx-text"
-      >
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10 3L5 8l5 5" />
-        </svg>
-        Change provider
-      </button>
+      {/* Centered stage */}
+      <div className="flex min-h-[70vh] flex-col items-center justify-center">
+        <div key={animKey} className="step-in w-full max-w-sm">
 
-      <div className="mb-5 flex items-center gap-3">
-        <img
-          src={providerLogo(selectedProvider)}
-          alt={providerMeta.label}
-          width={36} height={36}
-          className="h-9 w-9 rounded-sm object-contain"
-          style={{ border: "1px solid #ebebeb" }}
-        />
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect · Step 2</p>
-          <h1 className="text-[20px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
-            Add your {providerMeta.label} product
-          </h1>
+          {/* ── Step 3: install tracking ── */}
+          {installConn && (
+            <>
+              <button
+                onClick={() => { setInstallConn(null); setAnimKey((k) => k + 1); }}
+                className="mb-5 flex items-center gap-1.5 text-[12px] font-medium text-lx-muted hover:text-lx-text"
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 3L5 8l5 5" />
+                </svg>
+                Back
+              </button>
+
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Step 3 · Optional</p>
+              <h1 className="mt-1 mb-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+                Install tracking
+              </h1>
+              <p className="mb-6 text-[13px] text-lx-muted">
+                Embed this in <span className="font-medium text-lx-text">{installConn.label}</span> to capture page views and user journeys.
+              </p>
+
+              {!trackerToken ? (
+                <p className="text-[12px] text-lx-faint">Loading…</p>
+              ) : (
+                <>
+                  <pre
+                    className="mb-4 overflow-x-auto rounded-sm p-4 font-mono text-[11px] leading-relaxed text-lx-text"
+                    style={{ background: "#fafafa", border: "1px solid #ebebeb", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                  >
+                    {snippet(trackerToken)}
+                  </pre>
+                  <div className="flex gap-2.5">
+                    <button onClick={() => copy("snippet")} className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "#5e6ad2" }}>
+                      {copied === "snippet" ? "Copied!" : "Copy snippet"}
+                    </button>
+                    <button onClick={() => copy("prompt")} className="flex-1 rounded-sm py-2.5 text-[13px] font-semibold text-lx-text transition-colors hover:bg-[#f5f5f4]" style={{ border: "1px solid #dddad5" }}>
+                      {copied === "prompt" ? "Copied!" : "Copy AI prompt"}
+                    </button>
+                  </div>
+                  <p className="mt-4 text-[11px] leading-relaxed text-lx-faint">
+                    Call <code className="rounded bg-[#f0ede8] px-1 py-0.5 font-mono">window._cmpd.identify(user.email)</code> after login to link sessions to customers.
+                  </p>
+                  <div className="mt-6 pt-5" style={{ borderTop: "1px solid #ebebeb" }}>
+                    <button onClick={syncAll} disabled={syncing} className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90" style={{ background: "#5e6ad2" }}>
+                      {syncing ? "Syncing…" : "Sync & go to dashboard →"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ── Step 1: pick provider ── */}
+          {!installConn && !selectedProvider && (
+            <>
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect · Step 1</p>
+                <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+                  Which platform?
+                </h1>
+                <p className="mt-1 text-[13px] text-lx-muted">Pick the payment provider your product uses.</p>
+              </div>
+
+              <div className="rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+                {PROVIDERS.map((p, i) => {
+                  const linked = connections.filter((c) => c.provider === p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => pickProvider(p.id)}
+                      className="flex w-full items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-[#fafafa]"
+                      style={i > 0 ? { borderTop: "1px solid #f0f0f0" } : undefined}
+                    >
+                      <img src={providerLogo(p.id)} alt={p.label} width={28} height={28} className="h-7 w-7 shrink-0 rounded-sm object-contain" loading="lazy" />
+                      <span className="flex-1 text-[13.5px] font-semibold text-lx-text">{p.label}</span>
+                      {linked.length > 0 && (
+                        <span className="text-[11px] font-semibold text-[#10b981]">{linked.length} connected ✓</span>
+                      )}
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 3l5 5-5 5" />
+                      </svg>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {connections.length > 0 && (
+                <p className="mt-4 text-center text-[12px] text-lx-muted">
+                  {connections.length} product{connections.length === 1 ? "" : "s"} connected.{" "}
+                  <a href="/app/products" className="font-medium text-[#5e6ad2] hover:opacity-70">View all →</a>
+                </p>
+              )}
+            </>
+          )}
+
+          {/* ── Step 2: fill in details ── */}
+          {!installConn && selectedProvider && providerMeta && (
+            <>
+              <button onClick={backToProviders} className="mb-5 flex items-center gap-2 text-[12px] font-medium text-lx-muted hover:text-lx-text">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 3L5 8l5 5" />
+                </svg>
+                Change provider
+              </button>
+
+              <div className="mb-5 flex items-center gap-3">
+                <img src={providerLogo(selectedProvider)} alt={providerMeta.label} width={36} height={36} className="h-9 w-9 rounded-sm object-contain" style={{ border: "1px solid #ebebeb" }} />
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Connect · Step 2</p>
+                  <h1 className="text-[20px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>
+                    Add your {providerMeta.label} product
+                  </h1>
+                </div>
+              </div>
+
+              <form onSubmit={addConnection} className="rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
+                <div className="mb-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Product name</label>
+                  <input type="text" placeholder="e.g. Event Organizer" value={form.label} onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))} required autoFocus
+                    className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+                    style={{ background: "#fafafa", border: "1px solid #ebebeb" }} />
+                </div>
+
+                <div className="mb-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
+                    Product website <span className="normal-case font-normal text-lx-faint">(optional — used for logo)</span>
+                  </label>
+                  <input type="url" placeholder="https://yourproduct.com" value={form.websiteUrl} onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
+                    className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+                    style={{ background: "#fafafa", border: "1px solid #ebebeb" }} />
+                </div>
+
+                <div className="mb-5">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
+                    {KEY_LABELS[selectedProvider] ?? "API key"}
+                  </label>
+                  <input type="password" placeholder={KEY_PLACEHOLDERS[selectedProvider] ?? "paste key…"} value={form.apiKey} onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))} required
+                    className="w-full rounded-sm px-3 py-2.5 font-mono text-[12px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
+                    style={{ background: "#fafafa", border: "1px solid #ebebeb" }} />
+                  <p className="mt-1.5 text-[11px] text-lx-faint">Read-only restricted key recommended. We never write to your account.</p>
+                </div>
+
+                {error && <p className="mb-3 text-[12px] text-lx-red">{error}</p>}
+
+                <button type="submit" disabled={busy} className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90" style={{ background: "#5e6ad2" }}>
+                  {busy ? "Verifying…" : "Connect product →"}
+                </button>
+              </form>
+            </>
+          )}
+
         </div>
       </div>
-
-      <form onSubmit={addConnection} className="rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
-        <div className="mb-4">
-          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
-            Product name
-          </label>
-          <input
-            type="text"
-            placeholder="e.g. Event Organizer"
-            value={form.label}
-            onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
-            required
-            autoFocus
-            className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-            style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
-            Product website{" "}
-            <span className="normal-case font-normal text-lx-faint">(optional — used for logo)</span>
-          </label>
-          <input
-            type="url"
-            placeholder="https://yourproduct.com"
-            value={form.websiteUrl}
-            onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
-            className="w-full rounded-sm px-3 py-2.5 text-[13px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-            style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-          />
-        </div>
-
-        <div className="mb-5">
-          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
-            {KEY_LABELS[selectedProvider] ?? "API key"}
-          </label>
-          <input
-            type="password"
-            placeholder={KEY_PLACEHOLDERS[selectedProvider] ?? "paste key…"}
-            value={form.apiKey}
-            onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
-            required
-            className="w-full rounded-sm px-3 py-2.5 font-mono text-[12px] text-lx-text placeholder:text-[#c8c4bc] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/30"
-            style={{ background: "#fafafa", border: "1px solid #ebebeb" }}
-          />
-          <p className="mt-1.5 text-[11px] text-lx-faint">Read-only restricted key recommended. We never write to your account.</p>
-        </div>
-
-        {error && <p className="mb-3 text-[12px] text-lx-red">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
-          style={{ background: "#5e6ad2" }}
-        >
-          {busy ? "Verifying…" : "Connect product →"}
-        </button>
-      </form>
-    </div>
+    </>
   );
 }
 
