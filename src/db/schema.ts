@@ -132,6 +132,11 @@ export const userSettings = pgTable("user_settings", {
   // Billing
   isPro: boolean("is_pro").notNull().default(false),
   dodoSubscriptionId: text("dodo_subscription_id"),
+  // Public profile
+  displayName: text("display_name"),
+  avatarUrl: text("avatar_url"),
+  xHandle: text("x_handle"),
+  bio: text("bio"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

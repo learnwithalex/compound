@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const data = await loadPublicData(slug);
   if (!data) return { title: "Not found" };
 
-  const { metrics, user } = data;
-  const name = ownerName(user.email ?? "");
+  const { metrics, user, settings } = data;
+  const name = settings.displayName || ownerName(user.email ?? "");
   const ranked = [...metrics.products].sort((a, b) => b.mrrCents - a.mrrCents);
   const productNames = ranked.slice(0, 2).map((p) => p.label).join(" & ");
   const title = productNames ? `${name}'s revenue — ${productNames}` : `${name}'s revenue dashboard`;
@@ -48,10 +48,12 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
   const data = await loadPublicData(slug);
   if (!data) notFound();
 
-  const { settings, metrics } = data;
+  const { settings, metrics, user } = data;
 
   const ranked = [...metrics.products].sort((a, b) => b.mrrCents - a.mrrCents);
   const top = ranked[0]?.mrrCents ?? 1;
+  const displayName = settings.displayName || ownerName(user.email ?? "");
+  const initials = displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f4]">
@@ -63,6 +65,32 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
       </header>
 
       <main className="mx-auto w-full max-w-[520px] px-6 py-10">
+        {/* Profile card */}
+        <div className="mb-5 rounded-sm bg-white overflow-hidden" style={{ border: "1px solid #ebebeb" }}>
+          <div className="h-[40px]" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #4a54c0 100%)" }} />
+          <div className="px-5 pb-5">
+            <div className="flex items-end gap-3 -mt-5 mb-3">
+              <div
+                className="h-12 w-12 shrink-0 rounded-full flex items-center justify-center text-[15px] font-bold text-white overflow-hidden shadow-sm"
+                style={{ background: settings.avatarUrl ? undefined : "#5e6ad2", border: "3px solid white" }}
+              >
+                {settings.avatarUrl
+                  ? <img src={settings.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
+                  : initials}
+              </div>
+              <div className="pb-1 min-w-0">
+                <p className="text-[14px] font-bold text-[#1a1a1a] truncate">{displayName}</p>
+                {settings.xHandle && (
+                  <a href={`https://x.com/${settings.xHandle}`} target="_blank" rel="noreferrer" className="text-[12px] text-[#a8a39b] hover:text-[#5e6ad2] transition-colors">
+                    @{settings.xHandle}
+                  </a>
+                )}
+              </div>
+            </div>
+            {settings.bio && <p className="text-[12px] leading-relaxed text-[#6b6b6b]">{settings.bio}</p>}
+          </div>
+        </div>
+
         <div className="mb-6 rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a8a39b]">
             Portfolio · {ranked.length} product{ranked.length !== 1 ? "s" : ""}

@@ -17,6 +17,10 @@ type SettingsPatch = {
   alertChurn?: boolean;
   alertUpgrade?: boolean;
   alertPastDue?: boolean;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  xHandle?: string | null;
+  bio?: string | null;
 };
 
 async function getOrCreate(userId: string) {
@@ -52,6 +56,11 @@ export async function PATCH(req: NextRequest) {
   if ("alertChurn" in body) patch.alertChurn = Boolean(body.alertChurn);
   if ("alertUpgrade" in body) patch.alertUpgrade = Boolean(body.alertUpgrade);
   if ("alertPastDue" in body) patch.alertPastDue = Boolean(body.alertPastDue);
+
+  if ("displayName" in body) patch.displayName = body.displayName ? String(body.displayName).slice(0, 80) : null;
+  if ("avatarUrl" in body) patch.avatarUrl = body.avatarUrl ? String(body.avatarUrl).slice(0, 500) : null;
+  if ("xHandle" in body) patch.xHandle = body.xHandle ? String(body.xHandle).replace(/^@/, "").slice(0, 50) : null;
+  if ("bio" in body) patch.bio = body.bio ? String(body.bio).slice(0, 160) : null;
 
   if ("publicSlug" in body && body.publicSlug) {
     const slug = String(body.publicSlug).toLowerCase().replace(/[^a-z0-9-]/g, "-").slice(0, 40);
