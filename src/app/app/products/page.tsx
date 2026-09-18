@@ -40,7 +40,7 @@ export default async function ProductsPage() {
 }
 
 function ProductRow({ product: p, divider }: { product: ProductMetrics; divider: boolean }) {
-  const icon = productIcon(p.label, p.provider, p.websiteUrl);
+  const icon = productIcon(p.label, p.provider, p.websiteUrl, p.iconUrl);
   const up = p.mrrChange30d > 0;
   const down = p.mrrChange30d < 0;
 

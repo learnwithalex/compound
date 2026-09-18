@@ -31,8 +31,9 @@ export function providerLogo(provider: string): string {
   )[key] ?? "https://cdn.simpleicons.org/stripe/635bff";
 }
 
-// Real product icons for known demo products; then website favicon; then provider logo.
-export function productIcon(label: string, provider: string, websiteUrl?: string | null): string {
+// Priority: custom iconUrl > known demo icons > website favicon > provider logo.
+export function productIcon(label: string, provider: string, websiteUrl?: string | null, iconUrl?: string | null): string {
+  if (iconUrl) return iconUrl;
   for (const [re, icon] of PRODUCT_ICONS) {
     if (re.test(label)) return icon;
   }

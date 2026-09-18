@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { portfolioMetrics } from "@/lib/metrics";
 import { fmtMrr, productIcon } from "@/lib/format";
@@ -14,7 +15,32 @@ async function loadPublicData(slug: string) {
   const user = await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, settings.userId) });
   if (!user) return null;
   const metrics = await portfolioMetrics(settings.userId);
-  return { settings, metrics };
+  return { settings, metrics, user };
+}
+
+function ownerName(email: string) {
+  const raw = email.split("@")[0].replace(/[._-]+/g, " ").trim();
+  return raw ? raw.split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "Someone";
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await loadPublicData(slug);
+  if (!data) return { title: "Not found" };
+
+  const { metrics, user } = data;
+  const name = ownerName(user.email ?? "");
+  const ranked = [...metrics.products].sort((a, b) => b.mrrCents - a.mrrCents);
+  const productNames = ranked.slice(0, 2).map((p) => p.label).join(" & ");
+  const title = productNames ? `${name}'s revenue — ${productNames}` : `${name}'s revenue dashboard`;
+  const description = `${fmtMrr(metrics.totalMrrCents)} MRR across ${ranked.length} product${ranked.length !== 1 ? "s" : ""}. Live stats powered by Compound.`;
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary", title, description },
+  };
 }
 
 export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -23,6 +49,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
   if (!data) notFound();
 
   const { settings, metrics } = data;
+
   const ranked = [...metrics.products].sort((a, b) => b.mrrCents - a.mrrCents);
   const top = ranked[0]?.mrrCents ?? 1;
 

@@ -29,12 +29,16 @@ export function GlobalTopBar() {
           </svg>
           Feedback
         </button>
-        <button className="text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="8" cy="8" r="2.5"/>
-            <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.05 1.05M11.85 11.85l1.05 1.05M12.9 3.1l-1.05 1.05M4.15 11.85l-1.05 1.05"/>
+        <a
+          href="/app/billing"
+          className="flex items-center gap-1 rounded-sm px-2.5 py-1 text-[11px] font-semibold transition-colors"
+          style={{ background: "rgba(94,106,210,0.10)", color: "#5e6ad2", border: "1px solid rgba(94,106,210,0.2)" }}
+        >
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+            <path d="M6 0l1.2 4.8L12 6l-4.8 1.2L6 12 4.8 7.2 0 6l4.8-1.2z" />
           </svg>
-        </button>
+          Upgrade
+        </a>
       </div>
     </div>
   );

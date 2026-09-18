@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { CompoundMark } from "../compound-logo";
 
 type Segment = { label: string; href?: string };
@@ -44,6 +45,14 @@ export function MiniHeader() {
   const searchParams = useSearchParams();
   const segments = resolveSegments(pathname, searchParams);
   const isOverview = pathname === "/app";
+  const [isPro, setIsPro] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch("/api/billing/status")
+      .then((r) => r.ok ? r.json() : { isPro: false })
+      .then((d) => setIsPro(d.isPro))
+      .catch(() => setIsPro(false));
+  }, []);
 
   function triggerBriefing() {
     window.dispatchEvent(new CustomEvent("compound:brief"));
@@ -57,7 +66,17 @@ export function MiniHeader() {
       {/* Workspace identity */}
       <Link href="/app" className="flex shrink-0 items-center gap-2">
         <CompoundMark size={20} theme="light" />
-        <span className="text-[13px] font-medium text-lx-text">compound</span>
+        <div className="flex flex-col leading-none">
+          <span className="text-[13px] font-medium text-lx-text">compound</span>
+          {isPro !== null && (
+            <span
+              className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.08em]"
+              style={{ color: isPro ? "#5e6ad2" : "#f59e0b" }}
+            >
+              {isPro ? "Pro" : "Free Trial"}
+            </span>
+          )}
+        </div>
       </Link>
 
       {/* Breadcrumb */}

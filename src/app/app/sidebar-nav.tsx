@@ -15,8 +15,8 @@ const NAV_MORE = [
 ];
 
 const NAV_BOTTOM = [
-  { href: "/app/settings", label: "Settings",   icon: SettingsIcon },
-  { href: "/login",        label: "What's new", icon: WhatsNewIcon },
+  { href: "/app/settings", label: "Settings", icon: SettingsIcon },
+  { href: "/app/billing",  label: "Billing",  icon: BillingIcon },
 ];
 
 const PRODUCT_TABS = [
@@ -25,6 +25,7 @@ const PRODUCT_TABS = [
   { tab: "cohorts",   label: "Cohorts",   icon: CohortsIcon },
   { tab: "segments",  label: "Segments",  icon: SegmentsIcon },
   { tab: "tracking",  label: "Tracking",  icon: TrackingIcon },
+  { tab: "settings",  label: "Settings",  icon: SettingsIcon },
 ];
 
 function NavContent() {
@@ -185,13 +186,12 @@ function SettingsIcon() {
     </svg>
   );
 }
-function WhatsNewIcon() {
+function BillingIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="1.5" width="12" height="13" rx="1.5" />
-      <line x1="5" y1="5.5" x2="11" y2="5.5" />
-      <line x1="5" y1="8" x2="11" y2="8" />
-      <line x1="5" y1="10.5" x2="8.5" y2="10.5" />
+      <rect x="1.5" y="4" width="13" height="9" rx="1.5" />
+      <path d="M1.5 7h13" />
+      <path d="M5 11h2" />
     </svg>
   );
 }

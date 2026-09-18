@@ -20,6 +20,7 @@ import { IconMrr, IconArr, IconSubs, IconTrend, IconArpa, IconLtv, IconChurn, Ic
 import { TrackingTab } from "./tracking-tab";
 import { AllCustomersTable } from "./customers-table";
 import { AnalyticsNudgeBanner } from "@/app/app/analytics-nudge";
+import { ProductSettingsTab } from "./settings-tab";
 
 export default async function ProductPage({
   params,
@@ -47,7 +48,7 @@ export default async function ProductPage({
   const [{ value: eventCount }] = await db.select({ value: count() }).from(analyticsEvents).where(eq(analyticsEvents.connectionId, id));
   const showNudge = Number(eventCount) === 0;
 
-  const icon = productIcon(p.label, p.provider, p.websiteUrl);
+  const icon = productIcon(p.label, p.provider, p.websiteUrl, p.iconUrl);
   const color = p.color || "#5e6ad2";
   const up = p.mrrChange30d > 0;
   const down = p.mrrChange30d < 0;
@@ -140,6 +141,16 @@ export default async function ProductPage({
 
         {tab === "tracking" && (
           <TrackingTab connectionId={id} productLabel={p.label} />
+        )}
+
+        {tab === "settings" && (
+          <ProductSettingsTab
+            connectionId={id}
+            label={p.label}
+            websiteUrl={p.websiteUrl}
+            iconUrl={p.iconUrl}
+            provider={p.provider}
+          />
         )}
     </div>
   );
