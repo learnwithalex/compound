@@ -9,56 +9,46 @@ interface Token {
   lastUsedAt: string | null;
 }
 
+function LogoImg({ domain, alt }: { domain: string; alt: string }) {
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+      alt={alt}
+      width={24}
+      height={24}
+      className="h-6 w-6 rounded-sm object-contain"
+    />
+  );
+}
+
 const AGENTS = [
   {
     id: "claude",
     label: "Claude",
     sub: "Desktop or Code",
     defaultName: "claude",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="11" fill="#D97757" />
-        <path d="M8.5 16L12 8l3.5 8" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9.5 13.5h5" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <LogoImg domain="claude.ai" alt="Claude" />,
   },
   {
     id: "cursor",
     label: "Cursor",
     sub: "via .cursorrules",
     defaultName: "cursor",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect width="24" height="24" rx="5" fill="#1a1a1a" />
-        <path d="M7 17L12 7l5 10" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8.5 14h7" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <LogoImg domain="cursor.com" alt="Cursor" />,
   },
   {
     id: "chatgpt",
     label: "ChatGPT",
     sub: "Custom instruction",
     defaultName: "chatgpt",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="11" fill="#10a37f" />
-        <path d="M12 6.5C9 6.5 7 8.5 7 11c0 1.2.5 2.3 1.3 3l-.3 2.5 2.3-1C10.8 15.8 11.4 16 12 16c3 0 5-2 5-4.5S15 6.5 12 6.5z" fill="white" />
-      </svg>
-    ),
+    icon: <LogoImg domain="chatgpt.com" alt="ChatGPT" />,
   },
   {
     id: "windsurf",
     label: "Windsurf",
     sub: "via .windsurfrules",
     defaultName: "windsurf",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect width="24" height="24" rx="5" fill="#5b5bd6" />
-        <path d="M7 17c2-4 4-7 5-10 1 3 3 6 5 10" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
+    icon: <LogoImg domain="windsurf.com" alt="Windsurf" />,
   },
   {
     id: "script",
