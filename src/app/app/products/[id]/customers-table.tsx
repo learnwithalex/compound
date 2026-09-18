@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Avatar } from "@/app/app/avatar";
 import { planTint, CountryMark } from "@/app/app/segment-icons";
-import { fmtMrr } from "@/lib/metrics";
+import { fmtMrr } from "@/lib/format";
 import type { TopCustomer } from "@/lib/analytics";
 
 type SortKey = "mrr" | "mrr_asc" | "tenure" | "billed" | "name";
