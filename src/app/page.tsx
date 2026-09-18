@@ -193,10 +193,10 @@ function Hero() {
               exactly why your numbers moved.
             </p>
 
-            {/* primary CTA + quiet agent link — one line */}
-            <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+            {/* primary CTA + agent onboard — always one line */}
+            <div className="mb-6 flex items-center gap-5">
               <Link href="/app"
-                className="inline-flex h-11 items-center gap-2 rounded-lg border-2 border-[#1a1a1a] bg-[#1a1a1a] px-5 text-[14px] font-semibold text-white shadow-[3px_3px_0_#1a1a1a] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#1a1a1a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#1a1a1a]">
+                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg border-2 border-[#1a1a1a] bg-[#1a1a1a] px-5 text-[14px] font-semibold text-white shadow-[3px_3px_0_#1a1a1a] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#1a1a1a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#1a1a1a]">
                 Get started <ArrowRight className="h-4 w-4" />
               </Link>
               <AgentPillLink />
