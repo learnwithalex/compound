@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 const NAV_MAIN = [
   { href: "/app",           label: "Overview",  icon: HomeIcon },
@@ -17,31 +18,86 @@ const NAV_BOTTOM = [
   { href: "/login",        label: "What's new", icon: WhatsNewIcon },
 ];
 
-export function SidebarNav() {
+const PRODUCT_TABS = [
+  { tab: "overview",  label: "Overview",  icon: HomeIcon },
+  { tab: "customers", label: "Customers", icon: CustomersIcon },
+  { tab: "cohorts",   label: "Cohorts",   icon: CohortsIcon },
+  { tab: "segments",  label: "Segments",  icon: SegmentsIcon },
+  { tab: "tracking",  label: "Tracking",  icon: TrackingIcon },
+];
+
+function NavContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Detect product context: /app/products/<id>
+  const productMatch = pathname.match(/^\/app\/products\/([^/]+)/);
+  const productId = productMatch?.[1] ?? null;
+  const productName = searchParams.get("name") ?? "Product";
+  const activeTab = searchParams.get("tab") ?? "overview";
+
   function isActive(href: string) {
     if (href === "/app") return pathname === "/app";
     return pathname.startsWith(href);
   }
 
+  if (productId) {
+    return (
+      <nav className="flex-1 overflow-y-auto py-3 pl-3 pr-3 md:pl-16 lg:pl-40">
+        {/* Back to main nav */}
+        <Link
+          href="/app"
+          className="mb-3 flex items-center gap-2 pl-3 text-[12px] font-medium text-[#a0a0a0] hover:text-[#565656]"
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
+          All products
+        </Link>
+
+        <p className="mb-1 pl-3 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[#b8b8b8] truncate">
+          {productName}
+        </p>
+
+        {PRODUCT_TABS.map(({ tab, label, icon: Icon }) => {
+          const href = tab === "overview"
+            ? `/app/products/${productId}?name=${encodeURIComponent(productName)}`
+            : `/app/products/${productId}?tab=${tab}&name=${encodeURIComponent(productName)}`;
+          const active = activeTab === tab;
+          return (
+            <Item key={tab} href={href} label={label} Icon={Icon} active={active} />
+          );
+        })}
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="flex-1 overflow-y-auto py-3 pl-3 pr-3 md:pl-16 lg:pl-40">
+      {NAV_MAIN.map(({ href, label, icon: Icon }) => (
+        <Item key={href} href={href} label={label} Icon={Icon} active={isActive(href)} />
+      ))}
+
+      <p className="mb-1 mt-5 pl-3 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[#b8b8b8]">
+        More
+      </p>
+
+      {NAV_MORE.map(({ href, label, icon: Icon, badge }) => (
+        <Item key={href} href={href} label={label} Icon={Icon} active={isActive(href)} badge={badge} />
+      ))}
+    </nav>
+  );
+}
+
+export function SidebarNav() {
   return (
     <aside
       className="flex w-[200px] shrink-0 flex-col bg-white md:w-[280px] lg:w-[380px]"
       style={{ borderRight: "1px solid #ebebeb" }}
     >
-      <nav className="flex-1 overflow-y-auto py-3 pl-3 pr-3 md:pl-16 lg:pl-40">
-        {NAV_MAIN.map(({ href, label, icon: Icon }) => (
-          <Item key={href} href={href} label={label} Icon={Icon} active={isActive(href)} />
-        ))}
-
-        <p className="mb-1 mt-5 pl-3 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[#b8b8b8]">
-          More
-        </p>
-
-        {NAV_MORE.map(({ href, label, icon: Icon, badge }) => (
-          <Item key={href} href={href} label={label} Icon={Icon} active={isActive(href)} badge={badge} />
-        ))}
-      </nav>
+      <Suspense fallback={<div className="flex-1" />}>
+        <NavContent />
+      </Suspense>
 
       <div className="pb-3 pl-3 pr-3 pt-2 md:pl-16 lg:pl-40" style={{ borderTop: "1px solid #ebebeb" }}>
         {NAV_BOTTOM.map(({ href, label, icon: Icon }) => (
@@ -155,6 +211,41 @@ function SignOutIcon() {
       <path d="M6 3H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3" />
       <path d="M11 11l3-3-3-3" />
       <path d="M14 8H7" />
+    </svg>
+  );
+}
+function CustomersIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="5" r="3" />
+      <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+    </svg>
+  );
+}
+function CohortsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1.5" y="1.5" width="5" height="5" rx="0.5" />
+      <rect x="9.5" y="1.5" width="5" height="5" rx="0.5" />
+      <rect x="1.5" y="9.5" width="5" height="5" rx="0.5" />
+      <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" />
+    </svg>
+  );
+}
+function SegmentsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6" />
+      <path d="M8 2v6l4 4" />
+    </svg>
+  );
+}
+function TrackingIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="4,6 2,8 4,10" />
+      <polyline points="12,6 14,8 12,10" />
+      <line x1="9" y1="4" x2="7" y2="12" />
     </svg>
   );
 }

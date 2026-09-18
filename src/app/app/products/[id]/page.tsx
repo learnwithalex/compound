@@ -18,7 +18,6 @@ import { CohortGrid } from "@/app/app/cohort-grid";
 import { SegmentCard, FunnelCard } from "@/app/app/report-cards";
 import { planTint, CountryMark } from "@/app/app/segment-icons";
 import { IconMrr, IconArr, IconSubs, IconTrend, IconArpa, IconLtv, IconChurn, IconQuick } from "@/app/app/stat-icons";
-import { ProductSidebar } from "./product-sidebar";
 import { TrackingTab } from "./tracking-tab";
 
 export default async function ProductPage({
@@ -60,12 +59,7 @@ export default async function ProductPage({
   const health = radarSignals([p])[0];
 
   return (
-    <div className="flex min-h-0 gap-0 pb-20" style={{ marginLeft: "-3.5rem", marginRight: "-10rem" }}>
-      {/* Product-scoped sidebar */}
-      <ProductSidebar id={id} productName={p.label} />
-
-      {/* Main content */}
-      <div className="min-w-0 flex-1 overflow-y-auto px-10 pb-20 pt-1">
+    <div className="pb-20">
         {/* Header */}
         <div className="mb-8 flex flex-wrap items-center gap-4">
           <img
@@ -130,7 +124,6 @@ export default async function ProductPage({
         {tab === "tracking" && (
           <TrackingTab connectionId={id} productLabel={p.label} />
         )}
-      </div>
     </div>
   );
 }
