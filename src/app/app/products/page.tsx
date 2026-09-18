@@ -35,14 +35,6 @@ export default async function ProductsPage() {
         </div>
       )}
 
-      {/* Add product CTA */}
-      <a
-        href="/app/connect"
-        className="flex w-full items-center justify-center gap-2 rounded-sm py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
-        style={{ background: "#5e6ad2" }}
-      >
-        + Add a product
-      </a>
     </div>
   );
 }
