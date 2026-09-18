@@ -341,17 +341,18 @@ function HeroFlowDiagram() {
 /* ========================================================= stats strip */
 function StatsStrip() {
   return (
-    <div className="border-t border-[#e7e3db] bg-[#0f0f14]">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-white/10 md:grid-cols-4">
+    <div className="border-y border-[#e7e3db] bg-white">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-[#e7e3db] md:grid-cols-4">
         {[
-          { value: "5", label: "Payment providers" },
-          { value: "30s", label: "Auto-sync interval" },
-          { value: "∞", label: "Products on Pro" },
-          { value: "$9", label: "Per month, Pro plan" },
+          { value: "5", label: "Payment providers", accent: "#5e6ad2" },
+          { value: "30s", label: "Auto-sync interval", accent: "#10b981" },
+          { value: "∞", label: "Products on Pro", accent: "#f97316" },
+          { value: "$9", label: "Per month, Pro plan", accent: "#5e6ad2" },
         ].map((s) => (
-          <div key={s.label} className="px-8 py-10 text-center">
-            <div className="mb-1 text-[48px] font-black leading-none tracking-tight text-white">{s.value}</div>
-            <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-white/40">{s.label}</div>
+          <div key={s.label} className="group px-8 py-10 text-center transition-colors hover:bg-[#fafaf8]">
+            <div className="mb-1 text-[52px] font-black leading-none tracking-tight text-[#1a1a1a]" style={{ fontVariantNumeric: "tabular-nums" }}>{s.value}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">{s.label}</div>
+            <div className="mx-auto mt-3 h-0.5 w-8 rounded-full transition-all group-hover:w-12" style={{ background: s.accent }} />
           </div>
         ))}
       </div>
@@ -362,86 +363,97 @@ function StatsStrip() {
 /* ===================================================== portfolio showcase */
 function PortfolioShowcase() {
   const products = [
-    { name: "Scarlet DB", provider: "Stripe",        icon: "https://cdn.simpleicons.org/stripe/635bff",                 mrr: "$8,430",  subs: 680,  pct: 60, change: "+12.4%", up: true,  color: "#5e6ad2" },
-    { name: "NotePad Pro", provider: "Lemon Squeezy", icon: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d",           mrr: "$3,200",  subs: 210,  pct: 23, change: "+4.1%",  up: true,  color: "#f97316" },
-    { name: "FormKit",    provider: "Polar",          icon: "/polar-icon.svg",                                           mrr: "$2,270",  subs: 63,   pct: 17, change: "−1.8%",  up: false, color: "#10b981" },
+    { name: "Scarlet DB",   provider: "Stripe",        icon: "https://cdn.simpleicons.org/stripe/635bff",       mrr: "$8,430", subs: 680, pct: 60, change: "+12.4%", up: true,  color: "#5e6ad2" },
+    { name: "NotePad Pro",  provider: "Lemon Squeezy", icon: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d", mrr: "$3,200", subs: 210, pct: 23, change: "+4.1%",  up: true,  color: "#f97316" },
+    { name: "FormKit",      provider: "Polar",          icon: "/polar-icon.svg",                                 mrr: "$2,270", subs: 63,  pct: 17, change: "−1.8%",  up: false, color: "#10b981" },
   ];
 
   return (
-    <section className="bg-[#0f0f14] px-6 pb-24 pt-4">
+    <section className="bg-[#f3f1ec] px-6 pb-24 pt-12">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 flex items-end justify-between">
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#5e6ad2]">Portfolio</p>
-            <h2 className="text-[38px] font-black leading-none tracking-tight text-white">
+            <h2 className="text-[38px] font-black leading-none tracking-tight text-[#1a1a1a]">
               Every product.<br />One number.
             </h2>
           </div>
-          <p className="hidden max-w-[260px] text-right text-[13px] leading-6 text-white/40 md:block">
+          <p className="hidden max-w-[260px] text-right text-[13px] leading-6 text-[#9c9894] md:block">
             Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack — Compound unifies everything.
           </p>
         </div>
 
         {/* Dashboard mockup */}
-        <div className="overflow-hidden rounded-xl border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
-          {/* Top bar */}
-          <div className="flex items-center justify-between border-b border-white/10 px-6 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+        <div className="overflow-hidden rounded-2xl border border-[#e0ddd6] bg-white shadow-2xl shadow-[#1a1a1a]/10">
+          {/* Top bar — macOS-style chrome */}
+          <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#fafaf8] px-6 py-3.5">
             <div className="flex items-center gap-3">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span className="text-[13px] font-semibold text-white">Portfolio Overview</span>
+              <div className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+              </div>
+              <span className="ml-1 text-[12px] font-semibold text-[#1a1a1a]">Portfolio Overview</span>
+              <span className="h-1 w-1 rounded-full bg-[#d0cdc8]" />
+              <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-600 border border-emerald-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live
+              </span>
             </div>
-            <div className="flex items-center gap-4 text-[11px] text-white/30">
-              <span>Overview</span><span>Products</span><span>Customers</span><span>Analytics</span>
+            <div className="flex items-center gap-4 text-[11px] text-[#9c9894]">
+              <span className="font-medium text-[#1a1a1a]">Overview</span><span>Products</span><span>Customers</span><span>Analytics</span>
             </div>
           </div>
 
           {/* Total MRR hero row */}
-          <div className="flex items-center justify-between border-b border-white/10 px-6 py-6">
+          <div className="flex items-center justify-between border-b border-[#f0ede6] px-6 py-7">
             <div>
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30">Total MRR</p>
-              <p className="text-[52px] font-black leading-none tracking-tight text-white">$13,900</p>
-              <p className="mt-2 flex items-center gap-2 text-[13px] text-emerald-400">
-                <span>↑ +8.7% this month</span>
-                <span className="text-white/20">·</span>
-                <span className="text-white/40">953 active subscribers</span>
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">Total MRR</p>
+              <p className="text-[52px] font-black leading-none tracking-tight text-[#1a1a1a]">$13,900</p>
+              <p className="mt-2.5 flex items-center gap-2 text-[13px]">
+                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700 border border-emerald-200">↑ +8.7% this month</span>
+                <span className="text-[#9c9894]">953 active subscribers</span>
               </p>
             </div>
-            <div className="hidden gap-6 md:flex">
+            <div className="hidden gap-8 md:flex">
               {[{ l: "ARR", v: "$166,800" }, { l: "Net New MRR", v: "+$1,120" }, { l: "Churn MRR", v: "$240" }].map(s => (
                 <div key={s.l} className="text-right">
-                  <p className="text-[11px] uppercase tracking-[0.1em] text-white/30">{s.l}</p>
-                  <p className="text-[20px] font-bold text-white">{s.v}</p>
+                  <p className="mb-0.5 text-[10px] uppercase tracking-[0.1em] text-[#9c9894]">{s.l}</p>
+                  <p className="text-[22px] font-bold text-[#1a1a1a]">{s.v}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Product rows */}
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-[#f0ede6]">
             {products.map((p) => (
-              <div key={p.name} className="flex items-center gap-4 px-6 py-4">
-                <img src={p.icon} alt={p.provider} className="h-8 w-8 shrink-0 rounded-lg object-contain" style={{ background: "rgba(255,255,255,0.08)", padding: 6 }} />
-                <div className="flex-1 min-w-0">
-                  <div className="mb-1.5 flex items-center gap-2">
-                    <span className="text-[13px] font-semibold text-white">{p.name}</span>
-                    <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/40" style={{ background: "rgba(255,255,255,0.06)" }}>{p.provider}</span>
+              <div key={p.name} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-[#fafaf8]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#f0ede6] bg-white p-2 shadow-sm">
+                  <img src={p.icon} alt={p.provider} className="h-full w-full object-contain" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="text-[13px] font-semibold text-[#1a1a1a]">{p.name}</span>
+                    <span className="rounded-full border border-[#e7e3db] bg-[#f3f1ec] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#9c9894]">{p.provider}</span>
+                    <span className="text-[10px] text-[#9c9894]">{p.subs} subs</span>
                   </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f0ede6]">
                     <div className="h-full rounded-full transition-all" style={{ width: `${p.pct}%`, background: p.color }} />
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[15px] font-bold tabular-nums text-white">{p.mrr}</p>
-                  <p className="text-[11px] font-medium tabular-nums" style={{ color: p.up ? "#34d399" : "#f87171" }}>{p.change}</p>
+                  <p className="text-[15px] font-bold tabular-nums text-[#1a1a1a]">{p.mrr}</p>
+                  <p className="mt-0.5 text-[11px] font-semibold tabular-nums" style={{ color: p.up ? "#059669" : "#dc2626" }}>{p.change}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Bottom bar */}
-          <div className="flex items-center justify-between border-t border-white/10 px-6 py-3" style={{ background: "rgba(255,255,255,0.02)" }}>
-            <span className="text-[11px] text-white/20">Last synced 18 seconds ago</span>
-            <span className="flex items-center gap-1.5 text-[11px] text-white/20">
+          <div className="flex items-center justify-between border-t border-[#f0ede6] bg-[#fafaf8] px-6 py-3">
+            <span className="text-[11px] text-[#9c9894]">Last synced 18 seconds ago</span>
+            <span className="flex items-center gap-1.5 text-[11px] text-[#9c9894]">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Auto-sync every 30s
             </span>
           </div>
@@ -454,9 +466,9 @@ function PortfolioShowcase() {
 /* ================================================= AI briefing showcase */
 function AIBriefingShowcase() {
   return (
-    <section className="overflow-hidden bg-[#f3f1ec] px-6 py-24">
+    <section className="overflow-hidden bg-white px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <div className="grid gap-16 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+        <div className="grid gap-16 lg:grid-cols-[1fr_1.2fr] lg:items-center">
           <div>
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">AI briefings</p>
             <h2 className="mb-5 text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
@@ -466,45 +478,54 @@ function AIBriefingShowcase() {
               Hit the briefing button — Compound feeds your full portfolio into Claude. You get plain English: what moved, why, and the one thing to act on.
             </p>
             <div className="space-y-3">
-              {["MRR, ARR, churn — all in context", "Which product is carrying the portfolio", "One clear action, not a chart dump"].map(f => (
-                <div key={f} className="flex items-center gap-2.5 text-[13px] text-[#5c5856]">
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[9px] text-white">✓</span>
-                  {f}
+              {[
+                { text: "MRR, ARR, churn — all in context", color: "#5e6ad2" },
+                { text: "Which product is carrying the portfolio", color: "#10b981" },
+                { text: "One clear action, not a chart dump", color: "#f97316" },
+              ].map(f => (
+                <div key={f.text} className="flex items-center gap-3 text-[13px] text-[#5c5856]">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: f.color }}>✓</span>
+                  {f.text}
                 </div>
               ))}
             </div>
           </div>
 
           {/* Briefing card mockup */}
-          <div className="rounded-xl border border-[#e0ddd6] bg-white shadow-xl shadow-[#1a1a1a]/5">
-            <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3.5 rounded-t-xl">
+          <div className="rounded-2xl border border-[#e0ddd6] bg-white shadow-2xl shadow-[#1a1a1a]/8">
+            <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3.5 rounded-t-2xl">
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1a1a2e]">
-                  <SparklesIcon className="h-3 w-3 text-white" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#1a1a2e] shadow-sm">
+                  <SparklesIcon className="h-3.5 w-3.5 text-white" />
                 </div>
-                <span className="text-[12px] font-semibold text-[#1a1a1a]">AI Briefing · Today 9:04 AM</span>
+                <div>
+                  <span className="text-[12px] font-semibold text-[#1a1a1a]">AI Briefing</span>
+                  <span className="ml-1.5 text-[11px] text-[#9c9894]">· Today 9:04 AM</span>
+                </div>
               </div>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-600 border border-emerald-200">Done</span>
+              <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Done
+              </span>
             </div>
             <div className="p-5">
-              <p className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">Good morning, Alex. Here's what moved overnight.</p>
+              <p className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">Good morning, Alex. Here&apos;s what moved overnight.</p>
               <div className="space-y-3 text-[13px] leading-[1.75] text-[#4a4845]">
-                <p>Your portfolio hit <span className="rounded bg-[#1a1a2e] px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">$13,900 MRR</span> — up <span className="font-semibold text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subscribers at an average of $12.40/mo.</p>
-                <p><span className="font-medium text-[#1a1a1a]">FormKit</span> is the one to watch — it's down 3 subs this week. Not alarming yet, but at this rate it'll be net-negative by end of month.</p>
+                <p>Your portfolio hit <span className="rounded-md border border-[#1a1a2e]/20 bg-[#1a1a2e] px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">$13,900 MRR</span> — up <span className="font-semibold text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subscribers at an average of $12.40/mo.</p>
+                <p><span className="font-medium text-[#1a1a1a]">FormKit</span> is the one to watch — it&apos;s down 3 subs this week. Not alarming yet, but at this rate it&apos;ll be net-negative by end of month.</p>
               </div>
-              <div className="mt-4 rounded-lg border border-[#5e6ad2]/20 bg-[#5e6ad2]/5 px-4 py-3">
-                <p className="text-[12px] text-[#4a4845]"><span className="font-semibold text-[#5e6ad2]">Action: </span>Check FormKit's last 10 churned users — a single exit-survey email could tell you exactly what to fix.</p>
+              <div className="mt-4 rounded-xl border border-[#5e6ad2]/25 bg-[#eff0fb] px-4 py-3.5">
+                <p className="text-[12px] leading-5 text-[#3d4494]"><span className="font-bold text-[#5e6ad2]">→ Action: </span>Check FormKit&apos;s last 10 churned users — a single exit-survey email could tell you exactly what to fix.</p>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {[
-                  { l: "Fastest grower", v: "Scarlet DB", s: "+14 subs" },
-                  { l: "Needs attention", v: "FormKit", s: "−3 subs" },
-                  { l: "New MRR", v: "+$560", s: "across 3 products" },
-                  { l: "Churn risk", v: "1 flagged", s: "FormKit trend" },
+                  { l: "Fastest grower", v: "Scarlet DB", s: "+14 subs", accent: "#059669" },
+                  { l: "Needs attention", v: "FormKit", s: "−3 subs", accent: "#dc2626" },
+                  { l: "New MRR", v: "+$560", s: "across 3 products", accent: "#5e6ad2" },
+                  { l: "Churn risk", v: "1 flagged", s: "FormKit trend", accent: "#d97706" },
                 ].map(c => (
-                  <div key={c.l} className="rounded-lg border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5">
+                  <div key={c.l} className="rounded-xl border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5">
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9c9894]">{c.l}</p>
-                    <p className="mt-0.5 text-[13px] font-semibold text-[#1a1a1a]">{c.v}</p>
+                    <p className="mt-0.5 text-[13px] font-semibold" style={{ color: c.accent }}>{c.v}</p>
                     <p className="text-[10px] text-[#9c9894]">{c.s}</p>
                   </div>
                 ))}
@@ -520,137 +541,164 @@ function AIBriefingShowcase() {
 /* ===================================================== feature grid */
 function FeatureGrid() {
   return (
-    <section className="bg-[#0f0f14] px-6 py-24">
+    <section className="bg-white px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <div className="mb-14 max-w-lg">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#5e6ad2]">Everything included</p>
-          <h2 className="text-[38px] font-black leading-[1.05] tracking-tight text-white">
+          <h2 className="text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
             The full picture,<br />not just MRR.
           </h2>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Customer profiles */}
-          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="mb-1 text-[15px] font-bold text-white">Customer profiles</p>
-            <p className="mb-5 text-[12px] leading-5 text-white/40">See every subscriber — plan, MRR, status, and risk.</p>
+          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5e6ad2]/10 text-[13px]">👤</span>
+              <p className="text-[14px] font-bold text-[#1a1a1a]">Customer profiles</p>
+            </div>
+            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">See every subscriber — plan, MRR, status, and risk.</p>
             <div className="space-y-2">
               {[
-                { name: "sarah@acme.com",  plan: "Pro Annual",   mrr: "$39", badge: "active",   dot: "bg-emerald-400" },
-                { name: "john@startup.io", plan: "Starter",      mrr: "$9",  badge: "past_due",  dot: "bg-amber-400" },
-                { name: "team@corp.com",   plan: "Team Monthly", mrr: "$99", badge: "active",   dot: "bg-emerald-400" },
+                { name: "sarah@acme.com",  plan: "Pro Annual",   mrr: "$39", dot: "bg-emerald-400" },
+                { name: "john@startup.io", plan: "Starter",      mrr: "$9",  dot: "bg-amber-400" },
+                { name: "team@corp.com",   plan: "Team Monthly", mrr: "$99", dot: "bg-emerald-400" },
               ].map(r => (
-                <div key={r.name} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <div key={r.name} className="flex items-center gap-3 rounded-lg border border-[#f0ede6] bg-[#fafaf8] px-3 py-2">
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${r.dot}`} />
-                  <span className="flex-1 truncate text-[11px] text-white/60">{r.name}</span>
-                  <span className="text-[10px] text-white/30">{r.plan}</span>
-                  <span className="text-[11px] font-bold text-white">{r.mrr}</span>
+                  <span className="flex-1 truncate text-[11px] text-[#5c5856]">{r.name}</span>
+                  <span className="text-[10px] text-[#9c9894]">{r.plan}</span>
+                  <span className="text-[11px] font-bold text-[#1a1a1a]">{r.mrr}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Real-time alerts */}
-          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="mb-1 text-[15px] font-bold text-white">Real-time alerts</p>
-            <p className="mb-5 text-[12px] leading-5 text-white/40">Email the moment a sub is created, churns, or upgrades.</p>
+          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#f97316]/10 text-[13px]">🔔</span>
+              <p className="text-[14px] font-bold text-[#1a1a1a]">Real-time alerts</p>
+            </div>
+            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Email the moment a sub is created, churns, or upgrades.</p>
             <div className="space-y-2">
               {[
-                { icon: "↑", label: "New subscription", sub: "sarah@acme.com · Pro Annual", color: "#34d399", t: "just now" },
-                { icon: "↗", label: "Upgrade",          sub: "john@corp.com → Team plan",   color: "#818cf8", t: "4m ago" },
-                { icon: "↓", label: "Churn",            sub: "mike@free.io · Starter",      color: "#f87171", t: "1h ago" },
+                { icon: "↑", label: "New subscription", sub: "sarah@acme.com · Pro Annual", color: "#059669", bg: "#f0fdf4", border: "#bbf7d0", t: "just now" },
+                { icon: "↗", label: "Upgrade",          sub: "john@corp.com → Team plan",   color: "#5e6ad2", bg: "#f0f0ff", border: "#c7d2fe", t: "4m ago" },
+                { icon: "↓", label: "Churn",            sub: "mike@free.io · Starter",      color: "#dc2626", bg: "#fef2f2", border: "#fecaca", t: "1h ago" },
               ].map(r => (
-                <div key={r.label} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.05)" }}>
-                  <span className="text-[13px]" style={{ color: r.color }}>{r.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold text-white">{r.label}</p>
-                    <p className="truncate text-[10px] text-white/30">{r.sub}</p>
+                <div key={r.label} className="flex items-center gap-3 rounded-lg border px-3 py-2" style={{ background: r.bg, borderColor: r.border }}>
+                  <span className="text-[13px] font-bold" style={{ color: r.color }}>{r.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold text-[#1a1a1a]">{r.label}</p>
+                    <p className="truncate text-[10px] text-[#9c9894]">{r.sub}</p>
                   </div>
-                  <span className="shrink-0 text-[10px] text-white/20">{r.t}</span>
+                  <span className="shrink-0 text-[10px] text-[#9c9894]">{r.t}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Public page */}
-          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="mb-1 text-[15px] font-bold text-white">Public revenue page</p>
-            <p className="mb-5 text-[12px] leading-5 text-white/40">Share a live stats page — show what you want, hide the rest.</p>
-            <div className="overflow-hidden rounded-lg border border-white/10" style={{ background: "#f5f5f4" }}>
-              <div className="h-6 w-full" style={{ background: "linear-gradient(135deg, #5e6ad2, #4a54c0)" }} />
-              <div className="px-3 py-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-[#5e6ad2] flex items-center justify-center text-[9px] font-bold text-white -mt-4 border-2 border-white">A</div>
+          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#10b981]/10 text-[13px]">🌐</span>
+              <p className="text-[14px] font-bold text-[#1a1a1a]">Public revenue page</p>
+            </div>
+            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Share a live stats page — show what you want, hide the rest.</p>
+            <div className="overflow-hidden rounded-xl border border-[#e7e3db] shadow-sm">
+              <div className="h-7 w-full" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #7c86e8 100%)" }} />
+              <div className="bg-white px-3.5 pb-3 pt-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="-mt-4 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#5e6ad2] text-[10px] font-bold text-white shadow-sm">A</div>
                   <div className="-mt-1">
-                    <p className="text-[10px] font-bold text-[#1a1a1a]">Alex</p>
-                    <p className="text-[9px] text-[#9c9894]">@heisalexie</p>
+                    <p className="text-[11px] font-bold text-[#1a1a1a]">Alex</p>
+                    <p className="text-[10px] text-[#9c9894]">@heisalexie</p>
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-[18px] font-black text-[#1a1a1a]">$13,900</span>
-                  <span className="text-[10px] text-[#9c9894]">MRR</span>
+                <div className="mt-2.5 flex items-baseline gap-1.5">
+                  <span className="text-[22px] font-black text-[#1a1a1a]">$13,900</span>
+                  <span className="text-[11px] font-medium text-[#9c9894]">MRR</span>
+                  <span className="ml-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 border border-emerald-200">↑ live</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Goals & streaks */}
-          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="mb-1 text-[15px] font-bold text-white">Goals & streaks</p>
-            <p className="mb-5 text-[12px] leading-5 text-white/40">Set MRR milestones. Compound tracks the pace.</p>
+          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#fbbf24]/10 text-[13px]">🎯</span>
+              <p className="text-[14px] font-bold text-[#1a1a1a]">Goals & streaks</p>
+            </div>
+            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Set MRR milestones. Compound tracks the pace.</p>
             <div className="space-y-3">
-              <div>
-                <div className="mb-1.5 flex items-center justify-between text-[11px]">
-                  <span className="text-white/50">Goal: $20k MRR by Dec</span>
-                  <span className="font-bold text-white">70%</span>
+              <div className="rounded-xl border border-[#f0ede6] bg-[#fafaf8] p-3">
+                <div className="mb-2 flex items-center justify-between text-[11px]">
+                  <span className="font-medium text-[#5c5856]">Goal: $20k MRR by Dec</span>
+                  <span className="font-bold text-[#5e6ad2]">70%</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <div className="h-2 overflow-hidden rounded-full bg-[#e7e3db]">
                   <div className="h-full rounded-full bg-[#5e6ad2]" style={{ width: "70%" }} />
                 </div>
+                <p className="mt-1.5 text-[10px] text-[#9c9894]">$13,900 of $20,000</p>
               </div>
-              <div className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.05)" }}>
-                <span className="text-[18px]">🔥</span>
+              <div className="flex items-center gap-3 rounded-xl border border-[#fde68a] bg-[#fffbeb] px-3 py-2.5">
+                <span className="text-[20px]">🔥</span>
                 <div>
-                  <p className="text-[12px] font-bold text-white">14-day streak</p>
-                  <p className="text-[10px] text-white/30">Logged in every day this month</p>
+                  <p className="text-[12px] font-bold text-[#92400e]">14-day streak</p>
+                  <p className="text-[10px] text-[#b45309]">Logged in every day this month</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Analytics */}
-          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="mb-1 text-[15px] font-bold text-white">Product analytics</p>
-            <p className="mb-5 text-[12px] leading-5 text-white/40">Embed a snippet. See pageviews, events, and funnels.</p>
-            <div className="space-y-1.5">
+          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5e6ad2]/10 text-[13px]">📊</span>
+              <p className="text-[14px] font-bold text-[#1a1a1a]">Product analytics</p>
+            </div>
+            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Embed a snippet. See pageviews, events, and funnels.</p>
+            <div className="space-y-2">
               {[
-                { page: "/pricing",  views: "1,240", bar: 100 },
-                { page: "/features", views: "844",   bar: 68 },
-                { page: "/docs",     views: "512",   bar: 41 },
-                { page: "/blog",     views: "231",   bar: 19 },
+                { page: "/pricing",  views: "1,240", bar: 100, color: "#5e6ad2" },
+                { page: "/features", views: "844",   bar: 68,  color: "#818cf8" },
+                { page: "/docs",     views: "512",   bar: 41,  color: "#a5b4fc" },
+                { page: "/blog",     views: "231",   bar: 19,  color: "#c7d2fe" },
               ].map(r => (
-                <div key={r.page} className="flex items-center gap-2">
-                  <span className="w-20 truncate text-[10px] text-white/30">{r.page}</span>
-                  <div className="flex-1 h-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
-                    <div className="h-full rounded-full bg-[#5e6ad2]/70" style={{ width: `${r.bar}%` }} />
+                <div key={r.page} className="flex items-center gap-2.5">
+                  <span className="w-20 truncate text-[10px] font-medium text-[#5c5856]">{r.page}</span>
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#f0ede6]">
+                    <div className="h-full rounded-full" style={{ width: `${r.bar}%`, background: r.color }} />
                   </div>
-                  <span className="w-10 text-right text-[10px] font-semibold text-white">{r.views}</span>
+                  <span className="w-10 text-right text-[10px] font-semibold text-[#1a1a1a]">{r.views}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Weekly digest */}
-          <div className="group overflow-hidden rounded-xl border border-white/10 p-5 transition-all hover:border-white/20" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="mb-1 text-[15px] font-bold text-white">Weekly digest email</p>
-            <p className="mb-5 text-[12px] leading-5 text-white/40">AI-written summary hits your inbox every Monday.</p>
-            <div className="overflow-hidden rounded-lg border border-white/10 p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
-              <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-white/20">Mon, Sep 15 · Weekly Digest</p>
-              <p className="mb-2 text-[11px] font-semibold text-white">Your week: +$1,120 net new MRR</p>
-              <p className="text-[10px] leading-4 text-white/40">Scarlet DB led growth with 44 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
-              <div className="mt-3 flex items-center gap-1.5">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[9px] text-white/20">Delivered every Monday · AI-written</span>
+          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#10b981]/10 text-[13px]">✉️</span>
+              <p className="text-[14px] font-bold text-[#1a1a1a]">Weekly digest email</p>
+            </div>
+            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">AI-written summary hits your inbox every Monday.</p>
+            <div className="overflow-hidden rounded-xl border border-[#e7e3db] bg-[#fafaf8]">
+              <div className="border-b border-[#f0ede6] bg-white px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9c9894]">Mon, Sep 15 · Weekly Digest</p>
+                  <span className="rounded-full bg-[#eff0fb] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#5e6ad2]">AI</span>
+                </div>
+              </div>
+              <div className="p-3">
+                <p className="mb-1.5 text-[11px] font-semibold text-[#1a1a1a]">Your week: +$1,120 net new MRR</p>
+                <p className="text-[10px] leading-4 text-[#5c5856]">Scarlet DB led growth with 44 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
+                <div className="mt-3 flex items-center gap-1.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="text-[9px] text-[#9c9894]">Delivered every Monday · AI-written</span>
+                </div>
               </div>
             </div>
           </div>
@@ -666,29 +714,57 @@ function AgentSection() {
     <section className="bg-[#f3f1ec] px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-16 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-          {/* Code mockup */}
-          <div className="overflow-hidden rounded-xl border border-[#e0ddd6] bg-[#0f0f14] shadow-xl">
-            <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3.5" style={{ background: "rgba(255,255,255,0.03)" }}>
+          {/* Code mockup — light mode */}
+          <div className="overflow-hidden rounded-2xl border border-[#e0ddd6] bg-white shadow-xl shadow-[#1a1a1a]/8">
+            {/* macOS chrome */}
+            <div className="flex items-center gap-2 border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3.5">
               <div className="flex gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
                 <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
                 <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
               </div>
-              <span className="ml-2 text-[11px] text-white/30">claude — agent prompt</span>
+              <span className="ml-2 text-[11px] font-medium text-[#9c9894]">Agent memory · Revenue access</span>
             </div>
-            <div className="p-5 font-mono text-[12px] leading-6">
-              <p className="text-white/30"># Compound revenue access</p>
-              <p className="mt-2"><span className="text-[#818cf8]">GET</span> <span className="text-[#34d399]">https://usecompound.xyz/api/portfolio</span></p>
-              <p><span className="text-[#818cf8]">Authorization:</span> <span className="text-white/50">Bearer</span> <span className="text-[#fbbf24]">cpd_live_••••••••</span></p>
-              <div className="mt-4 rounded-lg border border-white/10 p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
-                <p className="text-[#5e6ad2]">{"{"}</p>
-                <p className="pl-4"><span className="text-[#34d399]">"totalMrrCents"</span><span className="text-white/40">: </span><span className="text-[#fbbf24]">1390000</span><span className="text-white/40">,</span></p>
-                <p className="pl-4"><span className="text-[#34d399]">"totalActiveSubscriptions"</span><span className="text-white/40">: </span><span className="text-[#fbbf24]">953</span><span className="text-white/40">,</span></p>
-                <p className="pl-4"><span className="text-[#34d399]">"netNewMrrCents"</span><span className="text-white/40">: </span><span className="text-[#fbbf24]">56000</span></p>
-                <p className="text-[#5e6ad2]">{"}"}</p>
+            {/* Code body */}
+            <div className="p-5 font-mono text-[12px] leading-7">
+              <p className="text-[#9c9894]"># Compound revenue access</p>
+              <div className="mt-3 rounded-xl border border-[#e7e3db] bg-[#fafaf8] p-4">
+                <p>
+                  <span className="font-bold text-[#5e6ad2]">GET</span>{" "}
+                  <span className="text-[#059669]">https://usecompound.xyz/api/portfolio</span>
+                </p>
+                <p className="mt-1">
+                  <span className="text-[#5c5856]">Authorization:</span>{" "}
+                  <span className="text-[#9c9894]">Bearer</span>{" "}
+                  <span className="rounded bg-[#fef3c7] px-1 font-semibold text-[#d97706]">cpd_live_••••••••</span>
+                </p>
+              </div>
+              <div className="mt-3 rounded-xl border border-[#e7e3db] bg-[#fafaf8] p-4">
+                <p className="text-[#9c9894]">// Response</p>
+                <p className="mt-1 text-[#5c5856]">{"{"}</p>
+                <p className="pl-4">
+                  <span className="text-[#059669]">"totalMrrCents"</span>
+                  <span className="text-[#9c9894]">: </span>
+                  <span className="text-[#d97706]">1390000</span>
+                  <span className="text-[#9c9894]">,</span>
+                </p>
+                <p className="pl-4">
+                  <span className="text-[#059669]">"totalActiveSubscriptions"</span>
+                  <span className="text-[#9c9894]">: </span>
+                  <span className="text-[#d97706]">953</span>
+                  <span className="text-[#9c9894]">,</span>
+                </p>
+                <p className="pl-4">
+                  <span className="text-[#059669]">"netNewMrrCents"</span>
+                  <span className="text-[#9c9894]">: </span>
+                  <span className="text-[#d97706]">56000</span>
+                </p>
+                <p className="text-[#5c5856]">{"}"}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 border-t border-white/10 px-5 py-3" style={{ background: "rgba(255,255,255,0.02)" }}>
+            {/* Footer with agent logos */}
+            <div className="flex items-center gap-4 border-t border-[#ece9e3] bg-[#fafaf8] px-5 py-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9c9894]">Works with</span>
               {[
                 { src: "https://www.google.com/s2/favicons?domain=claude.ai&sz=32", label: "Claude" },
                 { src: "https://www.google.com/s2/favicons?domain=cursor.com&sz=32", label: "Cursor" },
@@ -696,8 +772,8 @@ function AgentSection() {
                 { src: "https://www.google.com/s2/favicons?domain=opencode.ai&sz=32", label: "Opencode" },
               ].map(a => (
                 <div key={a.label} className="flex items-center gap-1.5">
-                  <img src={a.src} alt={a.label} width={14} height={14} className="h-3.5 w-3.5 rounded-sm opacity-60" />
-                  <span className="text-[10px] text-white/30">{a.label}</span>
+                  <img src={a.src} alt={a.label} width={14} height={14} className="h-3.5 w-3.5 rounded-sm" />
+                  <span className="text-[10px] font-medium text-[#5c5856]">{a.label}</span>
                 </div>
               ))}
             </div>
@@ -709,11 +785,11 @@ function AgentSection() {
               Give your AI live<br />revenue access.
             </h2>
             <p className="mb-8 text-[15px] leading-[1.75] text-[#5c5856]">
-              Create a read-only token. Point Claude, Cursor, Windsurf, or Opencode at <code className="rounded bg-[#1a1a2e]/10 px-1.5 py-0.5 font-mono text-[13px] text-[#1a1a2e]">/api/portfolio</code>. Your agent can now answer revenue questions, spot churn, and brief you — automatically.
+              Create a read-only token. Point Claude, Cursor, Windsurf, or Opencode at <code className="rounded border border-[#e7e3db] bg-[#f3f1ec] px-1.5 py-0.5 font-mono text-[13px] text-[#1a1a2e]">/api/portfolio</code>. Your agent can now answer revenue questions, spot churn, and brief you — automatically.
             </p>
             <Link
               href="/onboard"
-              className="inline-flex items-center gap-2 rounded-lg border-2 border-[#1a1a2e] bg-[#1a1a2e] px-5 py-3 text-[14px] font-semibold text-white shadow-[3px_3px_0_#1a1a2e] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#1a1a2e]"
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-[#1a1a2e] bg-[#1a1a2e] px-5 py-3 text-[14px] font-semibold text-white shadow-[3px_3px_0_#c8c4bc] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#c8c4bc]"
             >
               Onboard your agent <ArrowRight className="h-4 w-4" />
             </Link>
