@@ -44,17 +44,6 @@ function NavContent() {
   if (productId) {
     return (
       <nav className="flex-1 overflow-y-auto py-3 pl-3 pr-3 md:pl-16 lg:pl-40">
-        {/* Back to main nav */}
-        <Link
-          href="/app"
-          className="mb-3 flex items-center gap-2 pl-3 text-[12px] font-medium text-[#a0a0a0] hover:text-[#565656]"
-        >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10 3L5 8l5 5" />
-          </svg>
-          All products
-        </Link>
-
         <p className="mb-1 pl-3 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[#b8b8b8] truncate">
           {productName}
         </p>
