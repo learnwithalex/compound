@@ -51,6 +51,13 @@ const AGENTS = [
     icon: <LogoImg domain="windsurf.com" alt="Windsurf" />,
   },
   {
+    id: "opencode",
+    label: "Opencode",
+    sub: "via AGENTS.md rules",
+    defaultName: "opencode",
+    icon: <LogoImg domain="opencode.ai" alt="Opencode" />,
+  },
+  {
     id: "script",
     label: "Script / API",
     sub: "cURL, Python, any HTTP",
@@ -179,6 +186,32 @@ Fetch this when the user asks about revenue, MRR, customers, or business metrics
     };
   }
 
+  if (agentId === "opencode") {
+    return {
+      steps: [
+        {
+          title: "Add to AGENTS.md in your project root",
+          description: "Opencode reads AGENTS.md as persistent AI context on every session.",
+          copy: `# Revenue context
+Live MRR and subscription data is available at ${url}
+Authorization: Bearer ${token}
+
+When the user asks about revenue, MRR, ARR, subscribers, or business metrics,
+fetch this endpoint and use the data to answer accurately.`,
+          lang: "text",
+        },
+        {
+          title: "Or set an environment variable",
+          description: "Opencode can read tokens from your shell environment.",
+          copy: `export COMPOUND_TOKEN="${token}"
+# Then reference it in AGENTS.md:
+# Authorization: Bearer $COMPOUND_TOKEN`,
+          lang: "bash",
+        },
+      ],
+    };
+  }
+
   // script
   return {
     steps: [
@@ -285,9 +318,9 @@ export default function AgentsPage() {
         </p>
       </div>
 
-      <div className="flex gap-10 items-start">
+      <div>
         {/* Main flow */}
-        <div className="flex-1 max-w-[540px]">
+        <div className="max-w-[540px]">
 
           {/* Step breadcrumb */}
           <div className="mb-6 flex items-center gap-2">
@@ -435,34 +468,49 @@ export default function AgentsPage() {
           )}
         </div>
 
-        {/* Right: active tokens */}
+      </div>
+
+      {/* Tokens table — always visible */}
+      <div className="mt-10 max-w-[600px]">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Your tokens</p>
+          {tokens.length === 0 && <span className="text-[12px] text-lx-faint">No tokens yet</span>}
+        </div>
+
         {tokens.length > 0 && (
-          <div className="w-[240px] shrink-0 sticky top-6">
-            <div className="rounded-sm bg-white overflow-hidden" style={{ border: "1px solid #ebebeb" }}>
-              <div className="px-4 py-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Active tokens</p>
-              </div>
-              <div className="divide-y divide-[#f0f0f0]">
-                {tokens.map((t) => (
-                  <div key={t.id} className="px-4 py-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-[12px] font-medium text-lx-text">{t.name}</p>
-                        <p className="font-mono text-[10px] text-lx-faint">{t.tokenPrefix}…</p>
-                      </div>
-                      <button
-                        onClick={() => revoke(t.id)}
-                        className="shrink-0 text-[11px] text-[#e3493c] opacity-60 hover:opacity-100 transition-opacity"
-                      >
-                        Revoke
-                      </button>
-                    </div>
-                    <p className="mt-0.5 text-[10px] text-lx-faint">
-                      {t.lastUsedAt ? `Used ${new Date(t.lastUsedAt).toLocaleDateString()}` : "Never used"}
-                    </p>
+          <div className="rounded-sm bg-white overflow-hidden" style={{ border: "1px solid #ebebeb" }}>
+            {/* Header */}
+            <div className="grid grid-cols-[1fr_120px_120px_80px] gap-4 px-5 py-2.5" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Name</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Created</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-lx-faint">Last used</span>
+              <span />
+            </div>
+
+            <div className="divide-y divide-[#f5f5f5]">
+              {tokens.map((t) => (
+                <div key={t.id} className="grid grid-cols-[1fr_120px_120px_80px] items-center gap-4 px-5 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium text-lx-text">{t.name}</p>
+                    <p className="font-mono text-[10px] text-lx-faint">{t.tokenPrefix}…</p>
                   </div>
-                ))}
-              </div>
+                  <p className="text-[12px] text-lx-faint">{new Date(t.createdAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}</p>
+                  <p className="text-[12px]" style={{ color: t.lastUsedAt ? "#1a1a1a" : "#c0c0c0" }}>
+                    {t.lastUsedAt
+                      ? new Date(t.lastUsedAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })
+                      : "Never"}
+                  </p>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => revoke(t.id)}
+                      className="rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors hover:bg-[#fff0ef]"
+                      style={{ color: "#e3493c", border: "1px solid #f5d0cd" }}
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
