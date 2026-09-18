@@ -11,14 +11,14 @@ import { milestoneFor, radarSignals } from "@/lib/insights";
 import {
   loadSubs, coreMetrics, cohortRetention, lifecycleFunnel, topCustomers, recentActivity,
   segmentByPlan, segmentByCountry, segmentBySource,
-  type TopCustomer, type ActivityItem,
+  type ActivityItem,
 } from "@/lib/analytics";
 import { ChartCard } from "@/app/app/trend-chart";
 import { CohortGrid } from "@/app/app/cohort-grid";
 import { SegmentCard, FunnelCard } from "@/app/app/report-cards";
-import { planTint, CountryMark } from "@/app/app/segment-icons";
 import { IconMrr, IconArr, IconSubs, IconTrend, IconArpa, IconLtv, IconChurn, IconQuick } from "@/app/app/stat-icons";
 import { TrackingTab } from "./tracking-tab";
+import { AllCustomersTable } from "./customers-table";
 
 export default async function ProductPage({
   params,
@@ -239,15 +239,15 @@ async function CustomersTab({ subs, connectionId, productLabel }: {
   productLabel: string;
 }) {
   const [customers, activity] = await Promise.all([
-    topCustomers(subs, 20),
-    recentActivity(connectionId, 20),
+    topCustomers(subs, 500),
+    recentActivity(connectionId, 15),
   ]);
   return (
-    <div className="grid gap-4 lg:grid-cols-5">
+    <div className="grid gap-4 lg:grid-cols-4">
       <div className="lg:col-span-3">
-        <TopCustomersCard customers={customers} connectionId={connectionId} productLabel={productLabel} />
+        <AllCustomersTable customers={customers} connectionId={connectionId} productLabel={productLabel} />
       </div>
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-1">
         <ActivityCard items={activity} />
       </div>
     </div>
@@ -281,78 +281,6 @@ async function SegmentsTab({ subs, color }: { subs: Awaited<ReturnType<typeof lo
 }
 
 /* ============================================================ shared cards */
-
-function Pill({ label, tint }: { label: string; tint: string }) {
-  return (
-    <span className="inline-flex items-center rounded-sm px-2 py-[3px] text-[11px] font-semibold" style={{ color: tint, background: `${tint}14`, border: `1px solid ${tint}2e` }}>
-      {label}
-    </span>
-  );
-}
-
-function TopCustomersCard({ customers, connectionId, productLabel }: { customers: TopCustomer[]; connectionId: string; productLabel: string }) {
-  const top = customers[0]?.mrrCents ?? 1;
-  return (
-    <section className="h-full overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
-      <div className="flex items-center justify-between px-7 pb-4 pt-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Top customers</p>
-        <a href="/api/export/customers" download className="text-[11px] font-medium text-[#5e6ad2] hover:opacity-70">Export CSV ↓</a>
-      </div>
-      {customers.length === 0 ? (
-        <p className="px-7 pb-7 text-[13px] text-lx-faint">No active customers yet.</p>
-      ) : (
-        <div className="overflow-x-auto px-7 pb-7">
-          <table className="w-full">
-            <thead>
-              <tr className="text-[10px] font-semibold uppercase tracking-wider text-lx-faint">
-                <th className="pb-2 text-left">Customer</th>
-                <th className="pb-2 text-left">Plan</th>
-                <th className="pb-2 text-right">Tenure</th>
-                <th className="pb-2 text-right">Billed</th>
-                <th className="pb-2 text-right">MRR</th>
-              </tr>
-            </thead>
-            <tbody>
-              {customers.map((c, i) => (
-                <tr key={i} className="group transition-colors hover:bg-lx-sidebar" style={{ borderTop: "1px solid #f0f0f0" }}>
-                  <td className="max-w-[220px] py-2.5 pr-3">
-                    <div className="flex items-center gap-2.5">
-                      <Avatar name={c.name} size={34} />
-                      <div className="min-w-0">
-                        {c.customerId ? (
-                          <Link href={`/app/customers/${c.customerId}?connection=${connectionId}&name=${encodeURIComponent(c.name)}&pname=${encodeURIComponent(productLabel)}`} className="block truncate text-[13px] font-medium text-lx-text hover:text-lx-purple hover:underline">
-                            {c.name}
-                          </Link>
-                        ) : (
-                          <p className="truncate text-[13px] font-medium text-lx-text">{c.name}</p>
-                        )}
-                        <p className="flex items-center gap-1.5 truncate text-[11px] text-lx-faint">
-                          {c.country && <CountryMark code={c.country} />}
-                          {c.country ?? "—"}{c.source ? ` · ${c.source}` : ""}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-2.5 pr-3">
-                    {c.planName ? <Pill label={c.planName} tint={planTint(c.planName)} /> : <span className="text-[12px] text-lx-faint">—</span>}
-                  </td>
-                  <td className="py-2.5 text-right text-[12px] tabular-nums text-lx-muted">{c.tenureMonths.toFixed(0)} mo</td>
-                  <td className="py-2.5 text-right text-[12px] tabular-nums text-lx-muted">{fmtMrr(c.ltdCents)}</td>
-                  <td className="py-2.5 pl-3 text-right">
-                    <p className="text-[13px] font-semibold tabular-nums text-lx-text">{fmtMrr(c.mrrCents)}</p>
-                    <div className="ml-auto mt-1 h-[3px] w-14 overflow-hidden rounded-full" style={{ background: "#f0f0f0" }}>
-                      <div className="h-full rounded-full" style={{ width: `${(c.mrrCents / top) * 100}%`, background: planTint(c.planName) }} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
 
 const EVENT_STYLE: Record<string, { color: string; verb: string; glyph: string; sign: string }> = {
   new: { color: "#10b981", verb: "subscribed", glyph: "+", sign: "+" },
