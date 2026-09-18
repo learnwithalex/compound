@@ -16,7 +16,6 @@ export const metadata = {
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#f3f1ec] font-sans text-[#1a1a1a] antialiased">
-      <AnnouncementBar />
       <SiteNav />
       <Hero />
       <StatsStrip />
@@ -120,18 +119,6 @@ function StatusBadge({ label, color }: { label: string; color: "green" | "blue" 
 }
 
 /* ===================================================== announcement bar */
-function AnnouncementBar() {
-  return (
-    <div className="flex items-center justify-center gap-3 bg-[#1a1a2e] px-4 py-2.5 text-[13px] text-white">
-      <span className="rounded bg-[#5e6ad2] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">NEW</span>
-      <span className="text-white/80">Now with Polar, DodoPayments &amp; Paystack — 5 providers live</span>
-      <a href={GITHUB} className="flex items-center gap-1 font-medium underline underline-offset-2 hover:text-white/80">
-        View on GitHub <ArrowRight className="h-3.5 w-3.5" />
-      </a>
-    </div>
-  );
-}
-
 /* ======================================================================= nav */
 
 function SiteNav() {
