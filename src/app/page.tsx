@@ -1,9 +1,11 @@
-import { Instrument_Serif } from "next/font/google";
+import { Lora, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import { AgentPillLink } from "./agent-pill";
-import { CompoundMark, CompoundWordmark } from "./compound-logo";
+import { CompoundWordmark } from "./compound-logo";
 
-const instrumentSerif = Instrument_Serif({ subsets: ["latin"], weight: "400" });
+const lora = Lora({ subsets: ["latin"], weight: ["400", "500", "600"] });
+const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500"] });
+const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400"] });
 
 const GITHUB = "https://github.com/learnwithalex/compound";
 
@@ -15,7 +17,7 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#f3f1ec] font-sans text-[#1a1a1a] antialiased">
+    <div className={`${plex.className} min-h-screen bg-[#f5f7f7] text-[#222528] antialiased`}>
       <SiteNav />
       <Hero />
       <StatsStrip />
@@ -25,12 +27,13 @@ export default function Home() {
       <AgentSection />
       <PricingSection />
       <FAQSection />
+      <DarkCTA />
       <SiteFooter />
     </div>
   );
 }
 
-/* ================================================================ shared */
+/* ================================================================ icons */
 
 function Icon({ children, className = "h-5 w-5" }: { children: React.ReactNode; className?: string }) {
   return (
@@ -55,165 +58,126 @@ const ArrowRight = ({ className }: { className?: string }) => (
   <Icon className={className}><path d="M5 12h14M13 6l6 6-6 6" /></Icon>
 );
 
-/* Corner-bracketed box — the core sent.dm visual language */
-function CornerBox({
+/* Brimble-style CTA arrow SVG — 1.5px stroke, not emoji */
+function ArrowSVG({ stroke = "#FAFAFA" }: { stroke?: string }) {
+  return (
+    <svg viewBox="0 0 12.99 7.98" className="size-3 shrink-0" fill="none" aria-hidden>
+      <path d="M0 3.99H12" stroke={stroke} strokeWidth="1.5" />
+      <path d="M9 0.49L12 3.99L9 7.49" stroke={stroke} strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+/* ================================================================ shared button */
+
+function CTAButton({
+  href,
   children,
-  variant = "gray",
-  className = "",
+  variant = "dark",
 }: {
+  href: string;
   children: React.ReactNode;
-  variant?: "orange" | "blue" | "gray";
-  className?: string;
+  variant?: "dark" | "light";
 }) {
-  const cfg = {
-    orange: { border: "border-orange-400/70", corner: "#fb923c", dashed: true },
-    blue:   { border: "border-blue-500/60",   corner: "#3b82f6", dashed: true },
-    gray:   { border: "border-[#c8c4bc]",     corner: "#a8a49c", dashed: false },
-  }[variant];
-
-  const dash = cfg.dashed ? "border-dashed" : "";
-
+  const base =
+    "inline-flex cursor-pointer items-center justify-center gap-2 h-8 rounded-md px-3 font-medium text-sm shadow-[0px_0.646px_1.292px_#1212170d] transition-transform duration-150 hover:scale-[1.01] active:scale-[0.98]";
+  const dark =
+    "bg-gradient-to-b from-[rgba(34,37,40,0.69)] via-[rgba(34,37,40,0.81)] to-[#222528] border border-[#222528] text-[#fafafa] hover:opacity-90";
+  const light =
+    "bg-[#fafafa] text-[#222528] hover:opacity-90";
   return (
-    <div className={`relative border ${cfg.border} ${dash} bg-white ${className}`}>
-      {/* TL */}
-      <svg className="absolute -left-[2px] -top-[2px] z-10" width="12" height="12" viewBox="0 0 12 12">
-        <path d="M0 8 L0 0 L8 0" fill="none" stroke={cfg.corner} strokeWidth="2" />
-      </svg>
-      {/* TR */}
-      <svg className="absolute -right-[2px] -top-[2px] z-10" width="12" height="12" viewBox="0 0 12 12">
-        <path d="M4 0 L12 0 L12 8" fill="none" stroke={cfg.corner} strokeWidth="2" />
-      </svg>
-      {/* BL */}
-      <svg className="absolute -bottom-[2px] -left-[2px] z-10" width="12" height="12" viewBox="0 0 12 12">
-        <path d="M0 4 L0 12 L8 12" fill="none" stroke={cfg.corner} strokeWidth="2" />
-      </svg>
-      {/* BR */}
-      <svg className="absolute -bottom-[2px] -right-[2px] z-10" width="12" height="12" viewBox="0 0 12 12">
-        <path d="M4 12 L12 12 L12 4" fill="none" stroke={cfg.corner} strokeWidth="2" />
-      </svg>
+    <Link href={href} className={`${base} ${variant === "dark" ? dark : light}`}>
       {children}
-    </div>
+      <ArrowSVG stroke={variant === "dark" ? "#FAFAFA" : "#222528"} />
+    </Link>
   );
 }
 
-function StatusBadge({ label, color }: { label: string; color: "green" | "blue" | "teal" | "purple" }) {
-  const styles = {
-    green:  "text-emerald-700 bg-emerald-50 border-emerald-200",
-    blue:   "text-blue-700 bg-blue-50 border-blue-200",
-    teal:   "text-teal-700 bg-teal-50 border-teal-200",
-    purple: "text-violet-700 bg-violet-50 border-violet-200",
-  }[color];
-  const dots = {
-    green:  "bg-emerald-500",
-    blue:   "bg-blue-500",
-    teal:   "bg-teal-500",
-    purple: "bg-violet-500",
-  }[color];
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${styles}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${dots}`} />
-      {label}
-    </span>
-  );
-}
-
-/* ===================================================== announcement bar */
-/* ======================================================================= nav */
+/* ================================================================ nav */
 
 function SiteNav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-[#e7e3db] bg-[#f3f1ec]/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3.5">
-        <Link href="/" className="flex items-center gap-2" aria-label="Compound home">
+    <header className="sticky top-0 z-50 w-full border-b border-[rgba(152,157,164,0.2)] bg-[#f5f7f7]/80 backdrop-blur-xl">
+      <nav className="mx-auto flex max-w-[1120px] items-center gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <Link href="/" aria-label="Compound home">
           <CompoundWordmark height={24} />
         </Link>
 
-        <nav className="hidden items-center gap-0 md:flex">
-          {[["Features", "#abstraction"], ["How it works", "#how"], ["Pricing", "#pricing"]].map(([label, href]) => (
+        <div className="ml-2 hidden items-center gap-0 md:flex">
+          {[["Features", "#features"], ["How it works", "#agent"], ["Pricing", "#pricing"]].map(([label, href]) => (
             <a key={label} href={href}
-              className="flex items-center gap-0.5 rounded px-3 py-1.5 text-[13px] text-[#5c5856] transition-colors hover:text-[#1a1a1a]">
+              className="relative inline-flex shrink-0 items-center whitespace-nowrap rounded px-2 py-1 text-sm font-medium text-[#222528]/50 transition-colors duration-150 hover:bg-[#fafafa] hover:text-[#222528]">
               {label}
             </a>
           ))}
-        </nav>
+        </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <a href={GITHUB}
-            className="hidden text-[13px] text-[#5c5856] transition-colors hover:text-[#1a1a1a] sm:block">
+        <div className="ml-auto flex items-center gap-4">
+          <a href={GITHUB} className="hidden text-sm text-[#222528]/50 transition-colors hover:text-[#222528] sm:block">
             GitHub
           </a>
-          <Link href="/login"
-            className="text-[13px] text-[#5c5856] transition-colors hover:text-[#1a1a1a]">
+          <Link href="/login" className="text-sm text-[#222528]/50 transition-colors hover:text-[#222528]">
             Sign in
           </Link>
-          <Link href="/app"
-            className="flex h-8 items-center gap-1.5 rounded-md bg-[#1a1a2e] px-3 text-[13px] font-semibold text-white transition-opacity hover:opacity-85">
-            Get started <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          <CTAButton href="/app">Get started</CTAButton>
         </div>
-      </div>
+      </nav>
     </header>
   );
 }
 
-/* ========================================================================= hero */
+/* ================================================================ hero */
+
 function Hero() {
   return (
-    <section
-      className="relative overflow-hidden pb-0 pt-16"
-      style={{
-        backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 14px, rgba(0,0,0,0.028) 14px, rgba(0,0,0,0.028) 15px)`,
-      }}
-    >
-      <div className="mx-auto max-w-6xl px-8">
+    <section className="relative overflow-hidden px-6 pb-0 pt-16">
+      <div className="mx-auto max-w-[1120px]">
         <div className="grid min-h-[640px] items-center gap-16 lg:grid-cols-2">
 
-          {/* ── Left col ── */}
+          {/* Left */}
           <div className="py-16">
-            <h1 className={`${instrumentSerif.className} mb-4 text-[76px] leading-[1.0] tracking-[-0.01em] text-[#1a1a1a]`}>
-              One dashboard.<br /><em className="italic">Every product.</em>
-            </h1>
-            <p className="mb-7 text-[16px] leading-[1.65] text-[#5c5856]">
-              Connect all your payment accounts. Compound shows
-              total revenue across your whole portfolio, with AI that explains
-              exactly why your numbers moved.
+            <p className={`${mono.className} mb-6 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>
+              Revenue OS
             </p>
 
-            {/* primary CTA + agent onboard — always one line */}
-            <div className="mb-6 flex items-center gap-5">
-              <Link href="/app"
-                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg border-2 border-[#1a1a1a] bg-[#1a1a1a] px-5 text-[14px] font-semibold text-white shadow-[3px_3px_0_#1a1a1a] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#1a1a1a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#1a1a1a]">
-                Get started <ArrowRight className="h-4 w-4" />
-              </Link>
+            <h1 className={`${lora.className} mb-5 text-[52px] font-medium leading-[58px] tracking-[-0.576px] text-[#222528]`}>
+              One dashboard.<br />Every product.
+            </h1>
+
+            <p className="mb-8 max-w-[440px] text-pretty text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
+              Connect all your payment accounts. Compound shows total revenue
+              across your whole portfolio, with AI that explains exactly why
+              your numbers moved.
+            </p>
+
+            <div className="mb-8 flex items-center gap-3">
+              <CTAButton href="/app">Connect your revenue</CTAButton>
               <AgentPillLink />
             </div>
 
-            {/* connect bar */}
-            <div className="mb-5 flex items-center overflow-hidden rounded-lg border border-[#e7e3db] bg-white">
-              <div className="flex shrink-0 items-center gap-1.5 border-r border-[#e7e3db] px-3 py-3">
-                <img src="https://cdn.simpleicons.org/stripe/635bff" alt="Stripe" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
-                <img src="https://cdn.simpleicons.org/lemonsqueezy/e5a00d" alt="Lemon Squeezy" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
-                <img src="/polar-icon.svg" alt="Polar" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
-                <img src="/dodopayments-icon.svg" alt="DodoPayments" className="h-5 w-5 rounded bg-[#1a1a1a]" width={20} height={20} loading="eager" />
-                <img src="/paystack-icon.png" alt="Paystack" className="h-5 w-5 rounded" width={20} height={20} loading="eager" />
-                <span className="flex h-5 w-5 items-center justify-center rounded border border-[#e5e7eb] text-[9px] font-semibold text-[#9c9894]">+</span>
+            {/* Provider strip */}
+            <div className="flex items-center gap-3">
+              <p className={`${mono.className} text-xs uppercase tracking-[1.2px] text-[#222528]/40`}>
+                Works with
+              </p>
+              <div className="flex items-center gap-2">
+                {[
+                  { src: "https://cdn.simpleicons.org/stripe/635bff", alt: "Stripe" },
+                  { src: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d", alt: "Lemon Squeezy" },
+                  { src: "/polar-icon.svg", alt: "Polar" },
+                  { src: "/dodopayments-icon.svg", alt: "DodoPayments" },
+                  { src: "/paystack-icon.png", alt: "Paystack" },
+                ].map((p) => (
+                  <img key={p.alt} src={p.src} alt={p.alt}
+                    className="h-5 w-5 rounded object-contain"
+                    width={20} height={20} loading="eager" />
+                ))}
               </div>
-              <div className="flex flex-1 items-center gap-1.5 px-3 py-3">
-                <span className="text-[12px] text-[#9c9894]">Paste your API key → connected in seconds</span>
-              </div>
+              <span className="text-sm text-[#222528]/40">& more</span>
             </div>
-
-            <p className="text-[13px] text-[#5c5856]">
-              <span className="font-bold text-[#1a1a1a]">Free to start</span>
-              {" · replaces "}
-              <a href="#pricing" className="text-blue-600 hover:underline">Baremetrics, ChartMogul &amp; MultiMMR</a>
-              {" · "}
-              <Link href="/api/auth/demo" className="text-[#9c9894] hover:text-[#5c5856] hover:underline">or explore the demo →</Link>
-            </p>
           </div>
 
-          {/* ── Right col ── */}
+          {/* Right */}
           <div className="flex items-center justify-center">
             <HeroFlowDiagram />
           </div>
@@ -223,123 +187,121 @@ function Hero() {
   );
 }
 
-/* Compact flow diagram that fits its grid column */
 function HeroFlowDiagram() {
   return (
     <div className="w-full max-w-[420px] select-none">
 
-      {/* ── 1. Three product inputs (fragmented revenue in) ── */}
+      {/* Product inputs */}
       <div className="grid grid-cols-3 gap-2">
         {([
           { img: "/event-organizer-icon.svg", provider: "Stripe", label: "Event Organizer", sub: "$129.8k" },
           { img: "/betterflow-icon.png", provider: "Stripe", label: "BetterFlow", sub: "$8.4k" },
-          { img: "/obsidian-sync-icon.jpg", provider: "Lemon Squeezy", label: "Obsidian Sync Free", sub: "$2.3k" },
+          { img: "/obsidian-sync-icon.jpg", provider: "Lemon Squeezy", label: "Obsidian Sync", sub: "$2.3k" },
         ] as const).map((p) => (
-          <CornerBox key={p.label} variant="gray" className="rounded-none">
-            <div className="flex flex-col items-center gap-1 px-2 py-3">
-              <span className="font-mono text-[9px] uppercase tracking-wider text-[#9c9894]">{p.provider}</span>
-              <img src={p.img} alt={p.label} className="h-6 w-6 rounded object-contain" width={24} height={24} loading="eager" />
-              <span className="text-[11px] font-semibold text-[#1a1a1a]">{p.label}</span>
-              <span className="text-[11px] font-bold tabular-nums text-[#5c5856]">{p.sub}</span>
-            </div>
-          </CornerBox>
+          <div key={p.label}
+            className="flex flex-col items-center gap-1 rounded-2xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] px-2 py-3 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+            <span className={`${mono.className} text-[9px] uppercase tracking-wider text-[#222528]/40`}>{p.provider}</span>
+            <img src={p.img} alt={p.label} className="h-6 w-6 rounded object-contain" width={24} height={24} loading="eager" />
+            <span className="text-[11px] font-medium text-[#222528]">{p.label}</span>
+            <span className="text-[11px] tabular-nums text-[#222528]/60">{p.sub}</span>
+          </div>
         ))}
       </div>
 
-      {/* connector: three drops → horizontal bar → single stem (funnel in) */}
+      {/* Funnel connectors */}
       <div className="relative h-9">
-        <div className="absolute top-0 h-[18px] w-px bg-[#f97316]" style={{ left: "calc(16.5% - 0.5px)" }} />
-        <div className="absolute left-1/2 top-0 h-[18px] w-px -translate-x-px bg-[#f97316]" />
-        <div className="absolute top-0 h-[18px] w-px bg-[#f97316]" style={{ right: "calc(16.5% - 0.5px)" }} />
-        <div className="absolute left-[16.5%] right-[16.5%] top-[18px] h-px bg-[#f97316]" />
-        <div className="absolute bottom-0 left-1/2 top-[18px] w-px -translate-x-px bg-[#f97316]" />
+        <div className="absolute top-0 h-[18px] w-px bg-[#5e6ad2]/50" style={{ left: "calc(16.5% - 0.5px)" }} />
+        <div className="absolute left-1/2 top-0 h-[18px] w-px -translate-x-px bg-[#5e6ad2]/50" />
+        <div className="absolute top-0 h-[18px] w-px bg-[#5e6ad2]/50" style={{ right: "calc(16.5% - 0.5px)" }} />
+        <div className="absolute left-[16.5%] right-[16.5%] top-[18px] h-px bg-[#5e6ad2]/50" />
+        <div className="absolute bottom-0 left-1/2 top-[18px] w-px -translate-x-px bg-[#5e6ad2]/50" />
       </div>
 
-      {/* ── 2. Clearing house: messy raw in → refined brief out ── */}
+      {/* Raw → Brief */}
       <div className="flex items-stretch justify-center gap-2">
-        {/* raw pile — dashed, gray, unfinished */}
-        <div className="flex-1 rounded-md border border-dashed border-[#d8d4cc] bg-[#fafaf8] px-3 py-2.5">
-          <div className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-[#9c9894]">Raw</div>
-          <div className="space-y-1 font-mono text-[10px] leading-4 text-[#9c9894]">
+        <div className="flex-1 rounded-xl border border-dashed border-[rgba(152,157,164,0.4)] bg-[#fafafa]/60 px-3 py-2.5">
+          <div className={`${mono.className} mb-1.5 text-[9px] uppercase tracking-widest text-[#222528]/40`}>Raw</div>
+          <div className={`${mono.className} space-y-1 text-[10px] leading-4 text-[#222528]/40`}>
             <div className="truncate">$468/yr · $49/mo · $1,188…</div>
             <div className="truncate">evt_8H2k · webhook · csv…</div>
-            <div className="truncate line-through opacity-70">2,104 rows uncounted</div>
+            <div className="truncate line-through opacity-50">2,104 rows uncounted</div>
           </div>
         </div>
-        <div className="flex items-center">
-          <ArrowRight className="h-4 w-4 shrink-0 text-[#f97316]" />
+        <div className="flex items-center px-1">
+          <ArrowRight className="h-4 w-4 shrink-0 text-[#5e6ad2]" />
         </div>
-        {/* refined brief — solid, shadowed, checked off */}
-        <div className="flex-1 rounded-md border-2 border-[#1a1a1a] bg-white px-3 py-2.5 shadow-[2px_2px_0_#1a1a1a]">
-          <div className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-[#5c5856]">Brief</div>
-          <div className="space-y-1 text-[11px] font-medium leading-4 text-[#1a1a1a]">
-            <div className="flex items-center gap-1.5">
-              <CheckIcon className="h-3 w-3 shrink-0 text-emerald-500" /> $140.5k total
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckIcon className="h-3 w-3 shrink-0 text-emerald-500" /> +2.1% this month
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckIcon className="h-3 w-3 shrink-0 text-emerald-500" /> BetterFlow leads
-            </div>
+        <div className="flex-1 rounded-xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] px-3 py-2.5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+          <div className={`${mono.className} mb-1.5 text-[9px] uppercase tracking-widest text-[#222528]/50`}>Brief</div>
+          <div className="space-y-1 text-[11px] font-medium leading-4 text-[#222528]">
+            {["$140.5k total", "+2.1% this month", "BetterFlow leads"].map((t) => (
+              <div key={t} className="flex items-center gap-1.5">
+                <CheckIcon className="h-3 w-3 shrink-0 text-emerald-500" /> {t}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* connector: single vertical */}
+      {/* Single stem down */}
       <div className="flex justify-center">
-        <div className="h-8 w-px bg-[#f97316]" />
+        <div className="h-8 w-px bg-[#5e6ad2]/50" />
       </div>
 
-      {/* ── 3. One portfolio out — the payoff ── */}
-      <CornerBox variant="orange" className="rounded-none">
-        <div className="flex items-center justify-between border-b border-[#f0ede6] bg-[#fafaf8] px-4 py-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c5856]">
+      {/* Portfolio output */}
+      <div className="overflow-hidden rounded-2xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+        <div className="flex items-center justify-between border-b border-[rgba(152,157,164,0.2)] px-4 py-2.5">
+          <span className={`${mono.className} text-[10px] uppercase tracking-[1.2px] text-[#222528]/50`}>
             Your portfolio
           </span>
-          <StatusBadge label="LIVE" color="green" />
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-600">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Live
+          </span>
         </div>
         <div className="flex items-end justify-between px-5 py-4">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-[#9c9894]">Total MRR</div>
-            <div className="text-[28px] font-bold tabular-nums leading-tight text-[#1a1a1a]">$140.5k</div>
+            <div className={`${mono.className} text-[10px] uppercase tracking-[1.2px] text-[#222528]/40`}>Total MRR</div>
+            <div className={`${lora.className} text-[28px] font-medium leading-tight text-[#222528]`}>$140.5k</div>
           </div>
           <div className="flex items-center gap-1 pb-1">
-            <img src="/event-organizer-icon.svg" alt="Event Organizer" className="h-5 w-5 rounded object-contain" width={20} height={20} loading="eager" />
-            <img src="/betterflow-icon.png" alt="BetterFlow" className="h-5 w-5 rounded object-contain" width={20} height={20} loading="eager" />
-            <img src="/obsidian-sync-icon.jpg" alt="Obsidian Sync Free" className="h-5 w-5 rounded object-contain" width={20} height={20} loading="eager" />
+            {["/event-organizer-icon.svg", "/betterflow-icon.png", "/obsidian-sync-icon.jpg"].map((src, i) => (
+              <img key={i} src={src} alt="" className="h-5 w-5 rounded object-contain" width={20} height={20} loading="eager" />
+            ))}
           </div>
         </div>
-        <div className="border-t border-[#f0ede6] px-5 py-3 font-mono text-[12px] leading-5 text-[#9c9894]">
-          <span className="text-[#5c5856]">GET</span>
-          {" "}
-          <span className="text-[#1a6fba]">/api/portfolio</span>
+        <div className={`${mono.className} border-t border-[rgba(152,157,164,0.2)] px-5 py-3 text-[11px] leading-5`}>
+          <span className="text-[#222528]/60">GET</span>{" "}
+          <span className="text-[#5e6ad2]">/api/portfolio</span>
           {" · "}
-          <span className="text-[#7c3aed]">Bearer</span>
-          {" "}
-          <span className="text-[#b45309]">&lt;token&gt;</span>
+          <span className="text-[#222528]/40">Bearer</span>{" "}
+          <span className="text-[#d97706]">&lt;token&gt;</span>
         </div>
-      </CornerBox>
+      </div>
     </div>
   );
 }
 
+/* ================================================================ stats */
 
-/* ========================================================= stats strip */
 function StatsStrip() {
   return (
-    <div className="border-y border-[#e7e3db] bg-white">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-[#e7e3db] md:grid-cols-4">
+    <div className="border-y border-[rgba(152,157,164,0.3)]">
+      <div className="mx-auto grid max-w-[1120px] grid-cols-2 sm:grid-cols-4">
         {[
-          { value: "5", label: "Payment providers", accent: "#5e6ad2" },
-          { value: "30s", label: "Auto-sync interval", accent: "#10b981" },
-          { value: "∞", label: "Products on Pro", accent: "#f97316" },
-          { value: "$9", label: "Per month, Pro plan", accent: "#5e6ad2" },
-        ].map((s) => (
-          <div key={s.label} className="group px-8 py-10 text-center transition-colors hover:bg-[#fafaf8]">
-            <div className="mb-1 text-[52px] font-black leading-none tracking-tight text-[#1a1a1a]" style={{ fontVariantNumeric: "tabular-nums" }}>{s.value}</div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">{s.label}</div>
-            <div className="mx-auto mt-3 h-0.5 w-8 rounded-full transition-all group-hover:w-12" style={{ background: s.accent }} />
+          { value: "5", label: "Payment providers" },
+          { value: "30s", label: "Auto-sync interval" },
+          { value: "∞", label: "Products on Pro" },
+          { value: "$9", label: "Per month on Pro" },
+        ].map((s, i) => (
+          <div key={s.label}
+            className={`flex flex-col gap-3 px-8 py-12 ${i > 0 ? "border-l border-[rgba(152,157,164,0.3)]" : ""}`}>
+            <span className={`${lora.className} font-medium leading-none tabular-nums text-[#222528]`}
+              style={{ fontSize: "clamp(2.5rem,5vw,64px)", letterSpacing: "-3.2px" }}>
+              {s.value}
+            </span>
+            <span className={`${mono.className} uppercase tracking-[1.6px] text-[#5e6ad2]`}
+              style={{ fontSize: "13px" }}>
+              {s.label}
+            </span>
           </div>
         ))}
       </div>
@@ -347,101 +309,116 @@ function StatsStrip() {
   );
 }
 
-/* ===================================================== portfolio showcase */
+/* ================================================================ portfolio showcase */
+
 function PortfolioShowcase() {
   const products = [
-    { name: "Scarlet DB",   provider: "Stripe",        icon: "https://cdn.simpleicons.org/stripe/635bff",       mrr: "$8,430", subs: 680, pct: 60, change: "+12.4%", up: true,  color: "#5e6ad2" },
-    { name: "NotePad Pro",  provider: "Lemon Squeezy", icon: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d", mrr: "$3,200", subs: 210, pct: 23, change: "+4.1%",  up: true,  color: "#f97316" },
-    { name: "FormKit",      provider: "Polar",          icon: "/polar-icon.svg",                                 mrr: "$2,270", subs: 63,  pct: 17, change: "−1.8%",  up: false, color: "#10b981" },
+    { name: "Scarlet DB",   provider: "Stripe",        icon: "https://cdn.simpleicons.org/stripe/635bff",       mrr: "$8,430", subs: 680, pct: 60, change: "+12.4%", up: true  },
+    { name: "NotePad Pro",  provider: "Lemon Squeezy", icon: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d", mrr: "$3,200", subs: 210, pct: 23, change: "+4.1%",  up: true  },
+    { name: "FormKit",      provider: "Polar",         icon: "/polar-icon.svg",                                  mrr: "$2,270", subs: 63,  pct: 17, change: "−1.8%",  up: false },
   ];
 
   return (
-    <section className="bg-[#f3f1ec] px-6 pb-24 pt-12">
-      <div className="mx-auto max-w-6xl">
+    <section className="px-6 pb-24 pt-16">
+      <div className="mx-auto max-w-[1120px]">
         <div className="mb-10 flex items-end justify-between">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#5e6ad2]">Portfolio</p>
-            <h2 className="text-[38px] font-black leading-none tracking-tight text-[#1a1a1a]">
+            <p className={`${mono.className} mb-3 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Portfolio</p>
+            <h2 className={`${lora.className} text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
               Every product.<br />One number.
             </h2>
           </div>
-          <p className="hidden max-w-[260px] text-right text-[13px] leading-6 text-[#9c9894] md:block">
+          <p className="hidden max-w-[260px] text-right text-[13px] leading-6 text-[#222528]/50 md:block">
             Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack — Compound unifies everything.
           </p>
         </div>
 
         {/* Dashboard mockup */}
-        <div className="overflow-hidden rounded-2xl border border-[#e0ddd6] bg-white shadow-2xl shadow-[#1a1a1a]/10">
-          {/* Top bar — macOS-style chrome */}
-          <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#fafaf8] px-6 py-3.5">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+        <div className="overflow-hidden rounded-[13.25px] border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+          {/* macOS chrome */}
+          <div className="relative bg-[#fafafa] px-5 pt-3 pb-0">
+            <div className="flex items-center gap-3 pb-3">
+              <div className="flex gap-[6.6px]">
+                <span className="size-[10px] rounded-full bg-[#ff5f57]" />
+                <span className="size-[10px] rounded-full bg-[#febc2e]" />
+                <span className="size-[10px] rounded-full bg-[#28c840]" />
               </div>
-              <span className="ml-1 text-[12px] font-semibold text-[#1a1a1a]">Portfolio Overview</span>
-              <span className="h-1 w-1 rounded-full bg-[#d0cdc8]" />
-              <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-600 border border-emerald-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live
+              <span className="text-[12px] font-medium text-[#222528]/60">Portfolio Overview</span>
+              <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-600 border border-emerald-100">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Live
               </span>
+              <div className="ml-auto flex items-center gap-4 text-[11px] text-[#222528]/40">
+                <span className="font-medium text-[#222528]">Overview</span>
+                <span>Products</span><span>Customers</span><span>Analytics</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-[11px] text-[#9c9894]">
-              <span className="font-medium text-[#1a1a1a]">Overview</span><span>Products</span><span>Customers</span><span>Analytics</span>
+            {/* Triple separator */}
+            <div className="flex flex-col">
+              <div className="h-[0.83px] w-full bg-[rgba(152,157,164,0.25)]" />
+              <div className="h-[0.83px] w-full bg-[rgba(152,157,164,0.12)]" />
+              <div className="h-[0.83px] w-full bg-[rgba(152,157,164,0.06)]" />
             </div>
           </div>
 
-          {/* Total MRR hero row */}
-          <div className="flex items-center justify-between border-b border-[#f0ede6] px-6 py-7">
+          {/* Total MRR row */}
+          <div className="flex items-center justify-between border-b border-[rgba(152,157,164,0.2)] px-6 py-7">
             <div>
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">Total MRR</p>
-              <p className="text-[52px] font-black leading-none tracking-tight text-[#1a1a1a]">$13,900</p>
+              <p className={`${mono.className} mb-1 text-[10px] uppercase tracking-[1.2px] text-[#222528]/40`}>Total MRR</p>
+              <p className={`${lora.className} text-[52px] font-medium leading-none tracking-[-2px] text-[#222528]`}>$13,900</p>
               <p className="mt-2.5 flex items-center gap-2 text-[13px]">
-                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700 border border-emerald-200">↑ +8.7% this month</span>
-                <span className="text-[#9c9894]">953 active subscribers</span>
+                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700">
+                  ↑ +8.7% this month
+                </span>
+                <span className="text-[#222528]/40">953 active subscribers</span>
               </p>
             </div>
             <div className="hidden gap-8 md:flex">
-              {[{ l: "ARR", v: "$166,800" }, { l: "Net New MRR", v: "+$1,120" }, { l: "Churn MRR", v: "$240" }].map(s => (
+              {[{ l: "ARR", v: "$166,800" }, { l: "Net New MRR", v: "+$1,120" }, { l: "Churn MRR", v: "$240" }].map((s) => (
                 <div key={s.l} className="text-right">
-                  <p className="mb-0.5 text-[10px] uppercase tracking-[0.1em] text-[#9c9894]">{s.l}</p>
-                  <p className="text-[22px] font-bold text-[#1a1a1a]">{s.v}</p>
+                  <p className={`${mono.className} mb-0.5 text-[10px] uppercase tracking-[1.2px] text-[#222528]/40`}>{s.l}</p>
+                  <p className={`${lora.className} text-[22px] font-medium text-[#222528]`}>{s.v}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Product rows */}
-          <div className="divide-y divide-[#f0ede6]">
+          <div className="divide-y divide-[rgba(152,157,164,0.2)]">
             {products.map((p) => (
-              <div key={p.name} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-[#fafaf8]">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#f0ede6] bg-white p-2 shadow-sm">
+              <div key={p.name} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-[#fafafa]/60">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[rgba(152,157,164,0.2)] bg-white p-2">
                   <img src={p.icon} alt={p.provider} className="h-full w-full object-contain" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex items-center gap-2">
-                    <span className="text-[13px] font-semibold text-[#1a1a1a]">{p.name}</span>
-                    <span className="rounded-full border border-[#e7e3db] bg-[#f3f1ec] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#9c9894]">{p.provider}</span>
-                    <span className="text-[10px] text-[#9c9894]">{p.subs} subs</span>
+                    <span className="text-[13px] font-medium text-[#222528]">{p.name}</span>
+                    <span className={`${mono.className} rounded-full border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7] px-2 py-0.5 text-[9px] uppercase tracking-[1px] text-[#222528]/50`}>
+                      {p.provider}
+                    </span>
+                    <span className="text-[10px] text-[#222528]/40">{p.subs} subs</span>
                   </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f0ede6]">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${p.pct}%`, background: p.color }} />
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[rgba(152,157,164,0.2)]">
+                    <div className="h-full rounded-full bg-[#5e6ad2]" style={{ width: `${p.pct}%` }} />
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[15px] font-bold tabular-nums text-[#1a1a1a]">{p.mrr}</p>
-                  <p className="mt-0.5 text-[11px] font-semibold tabular-nums" style={{ color: p.up ? "#059669" : "#dc2626" }}>{p.change}</p>
+                  <p className={`${lora.className} text-[15px] font-medium tabular-nums text-[#222528]`}>{p.mrr}</p>
+                  <p className="mt-0.5 text-[11px] font-medium tabular-nums"
+                    style={{ color: p.up ? "#059669" : "#dc2626" }}>
+                    {p.change}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Bottom bar */}
-          <div className="flex items-center justify-between border-t border-[#f0ede6] bg-[#fafaf8] px-6 py-3">
-            <span className="text-[11px] text-[#9c9894]">Last synced 18 seconds ago</span>
-            <span className="flex items-center gap-1.5 text-[11px] text-[#9c9894]">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Auto-sync every 30s
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t border-[rgba(152,157,164,0.2)] bg-[#f5f7f7] px-6 py-3">
+            <span className={`${mono.className} text-[10px] uppercase tracking-[1px] text-[#222528]/40`}>
+              Last synced 18 seconds ago
+            </span>
+            <span className="flex items-center gap-1.5 text-[11px] text-[#222528]/40">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Auto-sync every 30s
             </span>
           </div>
         </div>
@@ -450,70 +427,74 @@ function PortfolioShowcase() {
   );
 }
 
-/* ================================================= AI briefing showcase */
+/* ================================================================ AI briefing */
+
 function AIBriefingShowcase() {
   return (
-    <section className="overflow-hidden bg-white px-6 py-24">
-      <div className="mx-auto max-w-6xl">
+    <section className="overflow-hidden border-t border-[rgba(152,157,164,0.3)] px-6 py-24">
+      <div className="mx-auto max-w-[1120px]">
         <div className="grid gap-16 lg:grid-cols-[1fr_1.2fr] lg:items-center">
           <div>
-            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">AI briefings</p>
-            <h2 className="mb-5 text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
+            <p className={`${mono.className} mb-4 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>AI briefings</p>
+            <h2 className={`${lora.className} mb-5 text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
               One click.<br />Claude reads<br />everything.
             </h2>
-            <p className="mb-8 text-[15px] leading-[1.75] text-[#5c5856]">
+            <p className="mb-8 text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
               Hit the briefing button — Compound feeds your full portfolio into Claude. You get plain English: what moved, why, and the one thing to act on.
             </p>
             <div className="space-y-3">
               {[
-                { text: "MRR, ARR, churn — all in context", color: "#5e6ad2" },
-                { text: "Which product is carrying the portfolio", color: "#10b981" },
-                { text: "One clear action, not a chart dump", color: "#f97316" },
-              ].map(f => (
-                <div key={f.text} className="flex items-center gap-3 text-[13px] text-[#5c5856]">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: f.color }}>✓</span>
-                  {f.text}
+                "MRR, ARR, churn — all in context",
+                "Which product is carrying the portfolio",
+                "One clear action, not a chart dump",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-3 text-[13px] text-[#222528]/60">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#5e6ad2] text-[10px] font-bold text-white">✓</span>
+                  {f}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Briefing card mockup */}
-          <div className="rounded-2xl border border-[#e0ddd6] bg-white shadow-2xl shadow-[#1a1a1a]/8">
-            <div className="flex items-center justify-between border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3.5 rounded-t-2xl">
+          {/* Briefing card */}
+          <div className="overflow-hidden rounded-[13.25px] border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+            <div className="flex items-center justify-between border-b border-[rgba(152,157,164,0.2)] bg-[#f5f7f7] px-5 py-3.5">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#1a1a2e] shadow-sm">
+                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#222528]">
                   <SparklesIcon className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div>
-                  <span className="text-[12px] font-semibold text-[#1a1a1a]">AI Briefing</span>
-                  <span className="ml-1.5 text-[11px] text-[#9c9894]">· Today 9:04 AM</span>
+                  <span className="text-[12px] font-medium text-[#222528]">AI Briefing</span>
+                  <span className={`${mono.className} ml-2 text-[10px] uppercase tracking-[1px] text-[#222528]/40`}>Today 9:04 AM</span>
                 </div>
               </div>
-              <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Done
+              <span className="flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-medium text-emerald-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Done
               </span>
             </div>
             <div className="p-5">
-              <p className="mb-4 text-[13px] font-semibold text-[#1a1a1a]">Good morning, Alex. Here&apos;s what moved overnight.</p>
-              <div className="space-y-3 text-[13px] leading-[1.75] text-[#4a4845]">
-                <p>Your portfolio hit <span className="rounded-md border border-[#1a1a2e]/20 bg-[#1a1a2e] px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">$13,900 MRR</span> — up <span className="font-semibold text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subscribers at an average of $12.40/mo.</p>
-                <p><span className="font-medium text-[#1a1a1a]">FormKit</span> is the one to watch — it&apos;s down 3 subs this week. Not alarming yet, but at this rate it&apos;ll be net-negative by end of month.</p>
+              <p className="mb-4 text-[13px] font-medium text-[#222528]">Good morning, Alex. Here&apos;s what moved overnight.</p>
+              <div className="space-y-3 text-[13px] leading-[1.75] tracking-[-0.16px] text-[#222528]/70">
+                <p>Your portfolio hit <span className="rounded border border-[#222528]/20 bg-[#222528] px-1.5 py-0.5 font-mono text-[11px] font-medium text-white">$13,900 MRR</span> — up <span className="font-medium text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subscribers at an average of $12.40/mo.</p>
+                <p><span className="font-medium text-[#222528]">FormKit</span> is the one to watch — it&apos;s down 3 subs this week. Not alarming yet, but at this rate it&apos;ll be net-negative by end of month.</p>
               </div>
-              <div className="mt-4 rounded-xl border border-[#5e6ad2]/25 bg-[#eff0fb] px-4 py-3.5">
-                <p className="text-[12px] leading-5 text-[#3d4494]"><span className="font-bold text-[#5e6ad2]">→ Action: </span>Check FormKit&apos;s last 10 churned users — a single exit-survey email could tell you exactly what to fix.</p>
+              <div className="mt-4 rounded-xl border border-[#5e6ad2]/20 bg-[#eff0fb] px-4 py-3.5">
+                <p className="text-[12px] leading-5 text-[#3d4494]">
+                  <span className="font-medium text-[#5e6ad2]">→ Action: </span>
+                  Check FormKit&apos;s last 10 churned users — a single exit-survey email could tell you exactly what to fix.
+                </p>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {[
-                  { l: "Fastest grower", v: "Scarlet DB", s: "+14 subs", accent: "#059669" },
-                  { l: "Needs attention", v: "FormKit", s: "−3 subs", accent: "#dc2626" },
-                  { l: "New MRR", v: "+$560", s: "across 3 products", accent: "#5e6ad2" },
-                  { l: "Churn risk", v: "1 flagged", s: "FormKit trend", accent: "#d97706" },
-                ].map(c => (
-                  <div key={c.l} className="rounded-xl border border-[#ece9e3] bg-[#fafaf8] px-3 py-2.5">
-                    <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9c9894]">{c.l}</p>
-                    <p className="mt-0.5 text-[13px] font-semibold" style={{ color: c.accent }}>{c.v}</p>
-                    <p className="text-[10px] text-[#9c9894]">{c.s}</p>
+                  { l: "Fastest grower", v: "Scarlet DB",  s: "+14 subs",      accent: "#059669" },
+                  { l: "Needs attention", v: "FormKit",    s: "−3 subs",       accent: "#dc2626" },
+                  { l: "New MRR",         v: "+$560",      s: "across 3 products", accent: "#5e6ad2" },
+                  { l: "Churn risk",      v: "1 flagged",  s: "FormKit trend", accent: "#d97706" },
+                ].map((c) => (
+                  <div key={c.l} className="rounded-xl border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7] px-3 py-2.5">
+                    <p className={`${mono.className} text-[9px] uppercase tracking-wider text-[#222528]/40`}>{c.l}</p>
+                    <p className="mt-0.5 text-[13px] font-medium" style={{ color: c.accent }}>{c.v}</p>
+                    <p className="text-[10px] text-[#222528]/40">{c.s}</p>
                   </div>
                 ))}
               </div>
@@ -525,115 +506,110 @@ function AIBriefingShowcase() {
   );
 }
 
-/* ===================================================== feature grid */
+/* ================================================================ feature grid */
+
 function FeatureGrid() {
   return (
-    <section className="bg-white px-6 py-24">
-      <div className="mx-auto max-w-6xl">
+    <section id="features" className="border-t border-[rgba(152,157,164,0.3)] px-6 py-24">
+      <div className="mx-auto max-w-[1120px]">
         <div className="mb-14 max-w-lg">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#5e6ad2]">Everything included</p>
-          <h2 className="text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
+          <p className={`${mono.className} mb-3 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Everything included</p>
+          <h2 className={`${lora.className} text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
             The full picture,<br />not just MRR.
           </h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
           {/* Customer profiles */}
-          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5e6ad2]/10 text-[13px]">👤</span>
-              <p className="text-[14px] font-bold text-[#1a1a1a]">Customer profiles</p>
-            </div>
-            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">See every subscriber — plan, MRR, status, and risk.</p>
+          <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
+            <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Customers</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Customer profiles</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">See every subscriber — plan, MRR, status, and risk.</p>
             <div className="space-y-2">
               {[
                 { name: "sarah@acme.com",  plan: "Pro Annual",   mrr: "$39", dot: "bg-emerald-400" },
                 { name: "john@startup.io", plan: "Starter",      mrr: "$9",  dot: "bg-amber-400" },
                 { name: "team@corp.com",   plan: "Team Monthly", mrr: "$99", dot: "bg-emerald-400" },
-              ].map(r => (
-                <div key={r.name} className="flex items-center gap-3 rounded-lg border border-[#f0ede6] bg-[#fafaf8] px-3 py-2">
+              ].map((r) => (
+                <div key={r.name} className="flex items-center gap-3 rounded-xl border border-[rgba(152,157,164,0.2)] bg-[#f5f7f7] px-3 py-2">
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${r.dot}`} />
-                  <span className="flex-1 truncate text-[11px] text-[#5c5856]">{r.name}</span>
-                  <span className="text-[10px] text-[#9c9894]">{r.plan}</span>
-                  <span className="text-[11px] font-bold text-[#1a1a1a]">{r.mrr}</span>
+                  <span className="flex-1 truncate text-[11px] text-[#222528]/60">{r.name}</span>
+                  <span className={`${mono.className} text-[10px] text-[#222528]/40`}>{r.plan}</span>
+                  <span className="text-[11px] font-medium text-[#222528]">{r.mrr}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Real-time alerts */}
-          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#f97316]/10 text-[13px]">🔔</span>
-              <p className="text-[14px] font-bold text-[#1a1a1a]">Real-time alerts</p>
-            </div>
-            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Email the moment a sub is created, churns, or upgrades.</p>
+          <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
+            <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Alerts</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Real-time alerts</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Email the moment a sub is created, churns, or upgrades.</p>
             <div className="space-y-2">
               {[
-                { icon: "↑", label: "New subscription", sub: "sarah@acme.com · Pro Annual", color: "#059669", bg: "#f0fdf4", border: "#bbf7d0", t: "just now" },
-                { icon: "↗", label: "Upgrade",          sub: "john@corp.com → Team plan",   color: "#5e6ad2", bg: "#f0f0ff", border: "#c7d2fe", t: "4m ago" },
-                { icon: "↓", label: "Churn",            sub: "mike@free.io · Starter",      color: "#dc2626", bg: "#fef2f2", border: "#fecaca", t: "1h ago" },
-              ].map(r => (
-                <div key={r.label} className="flex items-center gap-3 rounded-lg border px-3 py-2" style={{ background: r.bg, borderColor: r.border }}>
-                  <span className="text-[13px] font-bold" style={{ color: r.color }}>{r.icon}</span>
+                { icon: "↑", label: "New subscription", sub: "sarah@acme.com · Pro Annual", color: "#059669", bg: "#f0fdf4", border: "rgba(52,211,153,0.3)", t: "just now" },
+                { icon: "↗", label: "Upgrade",          sub: "john@corp.com → Team plan",   color: "#5e6ad2", bg: "#eff0fb", border: "rgba(94,106,210,0.2)",  t: "4m ago" },
+                { icon: "↓", label: "Churn",            sub: "mike@free.io · Starter",      color: "#dc2626", bg: "#fef2f2", border: "rgba(220,38,38,0.2)",   t: "1h ago" },
+              ].map((r) => (
+                <div key={r.label} className="flex items-center gap-3 rounded-xl border px-3 py-2"
+                  style={{ background: r.bg, borderColor: r.border }}>
+                  <span className="text-[13px] font-medium" style={{ color: r.color }}>{r.icon}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold text-[#1a1a1a]">{r.label}</p>
-                    <p className="truncate text-[10px] text-[#9c9894]">{r.sub}</p>
+                    <p className="text-[11px] font-medium text-[#222528]">{r.label}</p>
+                    <p className="truncate text-[10px] text-[#222528]/40">{r.sub}</p>
                   </div>
-                  <span className="shrink-0 text-[10px] text-[#9c9894]">{r.t}</span>
+                  <span className={`${mono.className} shrink-0 text-[10px] text-[#222528]/40`}>{r.t}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Public page */}
-          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#10b981]/10 text-[13px]">🌐</span>
-              <p className="text-[14px] font-bold text-[#1a1a1a]">Public revenue page</p>
-            </div>
-            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Share a live stats page — show what you want, hide the rest.</p>
-            <div className="overflow-hidden rounded-xl border border-[#e7e3db] shadow-sm">
-              <div className="h-7 w-full" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #7c86e8 100%)" }} />
-              <div className="bg-white px-3.5 pb-3 pt-1">
+          <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
+            <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Public</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Public revenue page</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Share a live stats page — show what you want, hide the rest.</p>
+            <div className="overflow-hidden rounded-xl border border-[rgba(152,157,164,0.3)]">
+              <div className="h-7 w-full rounded-t-xl" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #818cf8 100%)" }} />
+              <div className="bg-[#f5f7f7] px-3.5 pb-3 pt-1">
                 <div className="flex items-center gap-2.5">
-                  <div className="-mt-4 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#5e6ad2] text-[10px] font-bold text-white shadow-sm">A</div>
+                  <div className="-mt-4 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#f5f7f7] bg-[#5e6ad2] text-[10px] font-bold text-white shadow-sm">A</div>
                   <div className="-mt-1">
-                    <p className="text-[11px] font-bold text-[#1a1a1a]">Alex</p>
-                    <p className="text-[10px] text-[#9c9894]">@heisalexie</p>
+                    <p className="text-[11px] font-medium text-[#222528]">Alex</p>
+                    <p className={`${mono.className} text-[10px] text-[#222528]/40`}>@heisalexie</p>
                   </div>
                 </div>
                 <div className="mt-2.5 flex items-baseline gap-1.5">
-                  <span className="text-[22px] font-black text-[#1a1a1a]">$13,900</span>
-                  <span className="text-[11px] font-medium text-[#9c9894]">MRR</span>
-                  <span className="ml-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 border border-emerald-200">↑ live</span>
+                  <span className={`${lora.className} text-[22px] font-medium text-[#222528]`}>$13,900</span>
+                  <span className="text-[11px] text-[#222528]/40">MRR</span>
+                  <span className="ml-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-medium text-emerald-600">↑ live</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Goals & streaks */}
-          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#fbbf24]/10 text-[13px]">🎯</span>
-              <p className="text-[14px] font-bold text-[#1a1a1a]">Goals & streaks</p>
-            </div>
-            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Set MRR milestones. Compound tracks the pace.</p>
+          {/* Goals */}
+          <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
+            <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Goals</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Goals & streaks</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Set MRR milestones. Compound tracks the pace.</p>
             <div className="space-y-3">
-              <div className="rounded-xl border border-[#f0ede6] bg-[#fafaf8] p-3">
+              <div className="rounded-xl border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7] p-3">
                 <div className="mb-2 flex items-center justify-between text-[11px]">
-                  <span className="font-medium text-[#5c5856]">Goal: $20k MRR by Dec</span>
-                  <span className="font-bold text-[#5e6ad2]">70%</span>
+                  <span className="font-medium text-[#222528]/60">Goal: $20k MRR by Dec</span>
+                  <span className="font-medium text-[#5e6ad2]">70%</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#e7e3db]">
+                <div className="h-2 overflow-hidden rounded-full bg-[rgba(152,157,164,0.2)]">
                   <div className="h-full rounded-full bg-[#5e6ad2]" style={{ width: "70%" }} />
                 </div>
-                <p className="mt-1.5 text-[10px] text-[#9c9894]">$13,900 of $20,000</p>
+                <p className="mt-1.5 text-[10px] text-[#222528]/40">$13,900 of $20,000</p>
               </div>
-              <div className="flex items-center gap-3 rounded-xl border border-[#fde68a] bg-[#fffbeb] px-3 py-2.5">
+              <div className="flex items-center gap-3 rounded-xl border border-[rgba(251,191,36,0.4)] bg-[#fffbeb] px-3 py-2.5">
                 <span className="text-[20px]">🔥</span>
                 <div>
-                  <p className="text-[12px] font-bold text-[#92400e]">14-day streak</p>
+                  <p className="text-[12px] font-medium text-[#92400e]">14-day streak</p>
                   <p className="text-[10px] text-[#b45309]">Logged in every day this month</p>
                 </div>
               </div>
@@ -641,51 +617,43 @@ function FeatureGrid() {
           </div>
 
           {/* Analytics */}
-          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5e6ad2]/10 text-[13px]">📊</span>
-              <p className="text-[14px] font-bold text-[#1a1a1a]">Product analytics</p>
-            </div>
-            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">Embed a snippet. See pageviews, events, and funnels.</p>
+          <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
+            <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Analytics</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Product analytics</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Embed a snippet. See pageviews, events, and funnels.</p>
             <div className="space-y-2">
               {[
-                { page: "/pricing",  views: "1,240", bar: 100, color: "#5e6ad2" },
-                { page: "/features", views: "844",   bar: 68,  color: "#818cf8" },
-                { page: "/docs",     views: "512",   bar: 41,  color: "#a5b4fc" },
-                { page: "/blog",     views: "231",   bar: 19,  color: "#c7d2fe" },
-              ].map(r => (
+                { page: "/pricing",  views: "1,240", bar: 100 },
+                { page: "/features", views: "844",   bar: 68  },
+                { page: "/docs",     views: "512",   bar: 41  },
+                { page: "/blog",     views: "231",   bar: 19  },
+              ].map((r) => (
                 <div key={r.page} className="flex items-center gap-2.5">
-                  <span className="w-20 truncate text-[10px] font-medium text-[#5c5856]">{r.page}</span>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#f0ede6]">
-                    <div className="h-full rounded-full" style={{ width: `${r.bar}%`, background: r.color }} />
+                  <span className={`${mono.className} w-20 truncate text-[10px] text-[#222528]/50`}>{r.page}</span>
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[rgba(152,157,164,0.2)]">
+                    <div className="h-full rounded-full bg-[#5e6ad2]" style={{ width: `${r.bar}%` }} />
                   </div>
-                  <span className="w-10 text-right text-[10px] font-semibold text-[#1a1a1a]">{r.views}</span>
+                  <span className="w-10 text-right text-[10px] font-medium text-[#222528]">{r.views}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Weekly digest */}
-          <div className="group overflow-hidden rounded-2xl border border-[#e7e3db] bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#10b981]/10 text-[13px]">✉️</span>
-              <p className="text-[14px] font-bold text-[#1a1a1a]">Weekly digest email</p>
-            </div>
-            <p className="mb-5 text-[12px] leading-5 text-[#9c9894]">AI-written summary hits your inbox every Monday.</p>
-            <div className="overflow-hidden rounded-xl border border-[#e7e3db] bg-[#fafaf8]">
-              <div className="border-b border-[#f0ede6] bg-white px-3 py-2.5">
+          <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
+            <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Digest</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Weekly digest email</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">AI-written summary hits your inbox every Monday.</p>
+            <div className="overflow-hidden rounded-xl border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7]">
+              <div className="border-b border-[rgba(152,157,164,0.2)] bg-[#fafafa] px-3 py-2.5">
                 <div className="flex items-center justify-between">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9c9894]">Mon, Sep 15 · Weekly Digest</p>
-                  <span className="rounded-full bg-[#eff0fb] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#5e6ad2]">AI</span>
+                  <p className={`${mono.className} text-[9px] uppercase tracking-wider text-[#222528]/40`}>Mon, Sep 15 · Weekly Digest</p>
+                  <span className="rounded-full bg-[#eff0fb] px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-[#5e6ad2]">AI</span>
                 </div>
               </div>
               <div className="p-3">
-                <p className="mb-1.5 text-[11px] font-semibold text-[#1a1a1a]">Your week: +$1,120 net new MRR</p>
-                <p className="text-[10px] leading-4 text-[#5c5856]">Scarlet DB led growth with 44 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
-                <div className="mt-3 flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-[9px] text-[#9c9894]">Delivered every Monday · AI-written</span>
-                </div>
+                <p className="mb-1.5 text-[11px] font-medium text-[#222528]">Your week: +$1,120 net new MRR</p>
+                <p className="text-[10px] leading-4 tracking-[-0.16px] text-[#222528]/50">Scarlet DB led growth with 44 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
               </div>
             </div>
           </div>
@@ -695,91 +663,109 @@ function FeatureGrid() {
   );
 }
 
-/* ====================================================== agent section */
+/* ================================================================ agent section */
+
 function AgentSection() {
   return (
-    <section className="bg-[#f3f1ec] px-6 py-24">
-      <div className="mx-auto max-w-6xl">
+    <section id="agent" className="border-t border-[rgba(152,157,164,0.3)] px-6 py-24">
+      <div className="mx-auto max-w-[1120px]">
         <div className="grid gap-16 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-          {/* Code mockup — light mode */}
-          <div className="overflow-hidden rounded-2xl border border-[#e0ddd6] bg-white shadow-xl shadow-[#1a1a1a]/8">
-            {/* macOS chrome */}
-            <div className="flex items-center gap-2 border-b border-[#ece9e3] bg-[#fafaf8] px-5 py-3.5">
-              <div className="flex gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+
+          {/* Dark terminal card */}
+          <div className="overflow-hidden rounded-[13.25px] bg-[#222528] shadow-[0px_1px_1px_#00000040,_0px_8.3px_21.8px_-2.5px_#0000008c,_0px_2.5px_3.3px_#00000040]">
+            {/* Traffic lights */}
+            <div className="relative h-[29px] bg-[#222528] px-3 pt-2">
+              <div className="flex gap-[6.6px]">
+                <span className="size-[10px] rounded-full bg-[#ff5f57]" />
+                <span className="size-[10px] rounded-full bg-[#febc2e]" />
+                <span className="size-[10px] rounded-full bg-[#28c840]" />
               </div>
-              <span className="ml-2 text-[11px] font-medium text-[#9c9894]">Agent memory · Revenue access</span>
+              <div className="absolute bottom-0 left-0 right-0 flex flex-col">
+                <div className="h-[0.83px] w-full bg-[#282c2f]" />
+                <div className="h-[0.83px] w-full bg-[#0c0b10]" />
+                <div className="h-[0.83px] w-full bg-[#2f3338]" />
+              </div>
             </div>
+
             {/* Code body */}
-            <div className="p-5 font-mono text-[12px] leading-7">
-              <p className="text-[#9c9894]"># Compound revenue access</p>
-              <div className="mt-3 rounded-xl border border-[#e7e3db] bg-[#fafaf8] p-4">
-                <p>
-                  <span className="font-bold text-[#5e6ad2]">GET</span>{" "}
-                  <span className="text-[#059669]">https://usecompound.xyz/api/portfolio</span>
+            <div className="border-t border-[#31363a] px-5 pb-5 pt-4">
+              <p className={`${mono.className} text-xs leading-5 tracking-[-0.02px] text-white/40`}># Compound revenue access</p>
+
+              <div className="mt-3 rounded-xl border border-[#31363a] bg-white/[0.04] p-4">
+                <p className={`${mono.className} text-xs leading-5 text-white/60`}>
+                  <span className="text-[#28c840]">GET</span>{" "}
+                  <span className="text-[#5e6ad2]">https://usecompound.xyz/api/portfolio</span>
                 </p>
-                <p className="mt-1">
-                  <span className="text-[#5c5856]">Authorization:</span>{" "}
-                  <span className="text-[#9c9894]">Bearer</span>{" "}
-                  <span className="rounded bg-[#fef3c7] px-1 font-semibold text-[#d97706]">cpd_live_••••••••</span>
+                <p className={`${mono.className} mt-1 text-xs leading-5 text-white/40`}>
+                  Authorization: Bearer{" "}
+                  <span className="rounded bg-[#d97706]/20 px-1 text-[#d97706]">cpd_live_••••••••</span>
                 </p>
               </div>
-              <div className="mt-3 rounded-xl border border-[#e7e3db] bg-[#fafaf8] p-4">
-                <p className="text-[#9c9894]">// Response</p>
-                <p className="mt-1 text-[#5c5856]">{"{"}</p>
-                <p className="pl-4">
-                  <span className="text-[#059669]">"totalMrrCents"</span>
-                  <span className="text-[#9c9894]">: </span>
+
+              <div className="mt-3 rounded-xl border border-[#31363a] bg-white/[0.04] p-4">
+                <p className={`${mono.className} text-xs leading-5 text-white/35`}>// Response</p>
+                <p className={`${mono.className} mt-1 text-xs leading-5 text-white/40`}>{"{"}</p>
+                <p className={`${mono.className} pl-4 text-xs leading-5`}>
+                  <span className="text-[#28c840]">&quot;totalMrrCents&quot;</span>
+                  <span className="text-white/35">: </span>
                   <span className="text-[#d97706]">1390000</span>
-                  <span className="text-[#9c9894]">,</span>
+                  <span className="text-white/35">,</span>
                 </p>
-                <p className="pl-4">
-                  <span className="text-[#059669]">"totalActiveSubscriptions"</span>
-                  <span className="text-[#9c9894]">: </span>
+                <p className={`${mono.className} pl-4 text-xs leading-5`}>
+                  <span className="text-[#28c840]">&quot;activeSubscriptions&quot;</span>
+                  <span className="text-white/35">: </span>
                   <span className="text-[#d97706]">953</span>
-                  <span className="text-[#9c9894]">,</span>
+                  <span className="text-white/35">,</span>
                 </p>
-                <p className="pl-4">
-                  <span className="text-[#059669]">"netNewMrrCents"</span>
-                  <span className="text-[#9c9894]">: </span>
+                <p className={`${mono.className} pl-4 text-xs leading-5`}>
+                  <span className="text-[#28c840]">&quot;netNewMrrCents&quot;</span>
+                  <span className="text-white/35">: </span>
                   <span className="text-[#d97706]">56000</span>
                 </p>
-                <p className="text-[#5c5856]">{"}"}</p>
+                <p className={`${mono.className} text-xs leading-5 text-white/40`}>{"}"}</p>
               </div>
+
+              {/* Success line */}
+              <div className="mt-3 flex items-center gap-1.5">
+                <span className="inline-flex size-[14px] items-center justify-center rounded-full bg-[#28c840]/20">
+                  <span className="text-[8px] leading-none text-[#28c840]">✓</span>
+                </span>
+                <p className={`${mono.className} text-xs leading-5 text-[#28c840]`}>
+                  Connected → usecompound.xyz
+                </p>
+              </div>
+              <span className="mt-1 inline-block h-[13px] w-[7px] rounded-[1px] bg-white/50" />
             </div>
-            {/* Footer with agent logos */}
-            <div className="flex items-center gap-4 border-t border-[#ece9e3] bg-[#fafaf8] px-5 py-3">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9c9894]">Works with</span>
+
+            {/* Agent logos */}
+            <div className="flex items-center gap-4 border-t border-[#31363a] px-5 py-3">
+              <span className={`${mono.className} text-[10px] uppercase tracking-[1.2px] text-white/35`}>Works with</span>
               {[
                 { src: "https://www.google.com/s2/favicons?domain=claude.ai&sz=32", label: "Claude" },
                 { src: "https://www.google.com/s2/favicons?domain=cursor.com&sz=32", label: "Cursor" },
                 { src: "https://www.google.com/s2/favicons?domain=windsurf.com&sz=32", label: "Windsurf" },
-                { src: "https://www.google.com/s2/favicons?domain=opencode.ai&sz=32", label: "Opencode" },
-              ].map(a => (
+              ].map((a) => (
                 <div key={a.label} className="flex items-center gap-1.5">
-                  <img src={a.src} alt={a.label} width={14} height={14} className="h-3.5 w-3.5 rounded-sm" />
-                  <span className="text-[10px] font-medium text-[#5c5856]">{a.label}</span>
+                  <img src={a.src} alt={a.label} width={14} height={14} className="h-3.5 w-3.5 rounded-sm opacity-70" />
+                  <span className={`${mono.className} text-[10px] text-white/40`}>{a.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Agent API</p>
-            <h2 className="mb-5 text-[38px] font-black leading-[1.05] tracking-tight text-[#1a1a1a]">
+            <p className={`${mono.className} mb-4 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Agent API</p>
+            <h2 className={`${lora.className} mb-5 text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
               Give your AI live<br />revenue access.
             </h2>
-            <p className="mb-8 text-[15px] leading-[1.75] text-[#5c5856]">
-              Create a read-only token. Point Claude, Cursor, Windsurf, or Opencode at <code className="rounded border border-[#e7e3db] bg-[#f3f1ec] px-1.5 py-0.5 font-mono text-[13px] text-[#1a1a2e]">/api/portfolio</code>. Your agent can now answer revenue questions, spot churn, and brief you — automatically.
+            <p className="mb-8 text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
+              Create a read-only token. Point Claude, Cursor, Windsurf, or Opencode at{" "}
+              <code className={`${mono.className} rounded border border-[rgba(152,157,164,0.4)] bg-[#fafafa] px-1.5 py-0.5 text-[13px] text-[#222528]`}>
+                /api/portfolio
+              </code>
+              . Your agent can now answer revenue questions, spot churn, and brief you — automatically.
             </p>
-            <Link
-              href="/onboard"
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-[#1a1a2e] bg-[#1a1a2e] px-5 py-3 text-[14px] font-semibold text-white shadow-[3px_3px_0_#c8c4bc] transition-all hover:-translate-y-px hover:shadow-[4px_4px_0_#c8c4bc]"
-            >
-              Onboard your agent <ArrowRight className="h-4 w-4" />
-            </Link>
+            <CTAButton href="/onboard">Onboard your agent</CTAButton>
           </div>
         </div>
       </div>
@@ -787,116 +773,97 @@ function AgentSection() {
   );
 }
 
+/* ================================================================ pricing */
+
 function PricingSection() {
   return (
-    <section id="pricing" className="scroll-mt-20 border-t border-[#e7e3db] bg-white px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Pricing</p>
-        <h2 className="mb-4 text-[36px] font-[680] tracking-[-0.025em] text-[#1a1a1a]">
+    <section id="pricing" className="scroll-mt-20 border-t border-[rgba(152,157,164,0.3)] px-6 py-28">
+      <div className="mx-auto max-w-[1120px]">
+        <p className={`${mono.className} mb-3 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Pricing</p>
+        <h2 className={`${lora.className} mb-4 text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
           Simple, honest pricing.
         </h2>
-        <p className="mb-14 max-w-lg text-[16px] leading-[1.7] text-[#5c5856]">
+        <p className="mb-14 max-w-lg text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
           Try it free. Upgrade to Pro when you&apos;re ready for the full picture.
         </p>
 
-        <div className="mb-10 grid gap-6 sm:grid-cols-2">
-          {/* Free Trial */}
-          <CornerBox variant="gray" className="rounded-sm">
-            <div className="p-7">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9c9894]">Free trial</p>
-              <div className="mb-1 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-[#1a1a1a]">Free</span>
-              </div>
-              <p className="mb-6 text-[13px] text-[#9c9894]">No credit card required</p>
-              <ul className="mb-8 space-y-3">
-                {[
-                  "1 product",
-                  "30-day history",
-                  "Basic analytics",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-[13px] text-[#5c5856]">
-                    <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/app"
-                className="block rounded border border-[#1a1a2e] py-2.5 text-center text-[13px] font-semibold text-[#1a1a2e] transition-colors hover:bg-[#1a1a2e] hover:text-white">
-                Get started free
-              </Link>
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
+          {/* Free */}
+          <div className="rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-7 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+            <p className={`${mono.className} mb-2 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Free trial</p>
+            <div className="mb-1 flex items-baseline gap-1">
+              <span className={`${lora.className} text-4xl font-medium tracking-tight text-[#222528]`}>Free</span>
             </div>
-          </CornerBox>
+            <p className="mb-6 text-[13px] text-[#222528]/40">No credit card required</p>
+            <ul className="mb-8 space-y-3">
+              {["1 product", "30-day history", "Basic analytics"].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-[13px] text-[#222528]/60">
+                  <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" /> {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/app"
+              className="block rounded-md border border-[rgba(152,157,164,0.4)] py-2.5 text-center text-[13px] font-medium text-[#222528] transition-colors hover:bg-[#f5f7f7]">
+              Get started free
+            </Link>
+          </div>
 
           {/* Pro */}
-          <CornerBox variant="orange" className="rounded-sm">
-            <div className="p-7">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#f97316]">Pro</p>
-              <div className="mb-1 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-[#1a1a1a]">$9</span>
-                <span className="text-[14px] text-[#9c9894]">/month</span>
-              </div>
-              <p className="mb-6 text-[13px] text-[#9c9894]">Via DodoPayments</p>
-              <ul className="mb-8 space-y-3">
-                {[
-                  "Unlimited products",
-                  "Full history & trend charts",
-                  "AI briefings & weekly digest",
-                  "Goals, streaks & milestones",
-                  "Auto-sync every 30s",
-                  "Customer profiles & cohorts",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-[13px] text-[#5c5856]">
-                    <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/app"
-                className="block rounded bg-[#1a1a2e] py-2.5 text-center text-[13px] font-semibold text-white transition-opacity hover:opacity-85">
-                Upgrade to Pro
-              </Link>
+          <div className="rounded-3xl border border-[#5e6ad2]/30 bg-[#fafafa] p-7 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+            <p className={`${mono.className} mb-2 text-xs uppercase tracking-[1.2px] text-[#5e6ad2]`}>Pro</p>
+            <div className="mb-1 flex items-baseline gap-1">
+              <span className={`${lora.className} text-4xl font-medium tracking-tight text-[#222528]`}>$9</span>
+              <span className="text-[14px] text-[#222528]/40">/month</span>
             </div>
-          </CornerBox>
+            <p className="mb-6 text-[13px] text-[#222528]/40">Via DodoPayments</p>
+            <ul className="mb-8 space-y-3">
+              {[
+                "Unlimited products",
+                "Full history & trend charts",
+                "AI briefings & weekly digest",
+                "Goals, streaks & milestones",
+                "Auto-sync every 30s",
+                "Customer profiles & cohorts",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-[13px] text-[#222528]/60">
+                  <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#5e6ad2]" /> {f}
+                </li>
+              ))}
+            </ul>
+            <CTAButton href="/app">Upgrade to Pro</CTAButton>
+          </div>
         </div>
 
         {/* Always free */}
-        <CornerBox variant="gray" className="rounded-sm">
-          <div className="border-b border-[#ece9e3] bg-[#fafaf8] px-6 py-4">
-            <span className="text-[13px] font-semibold text-[#1a1a1a]">Included at every level — always free</span>
+        <div className="rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+          <div className="border-b border-[rgba(152,157,164,0.2)] px-6 py-4">
+            <span className="text-[13px] font-medium text-[#222528]">Included at every level — always free</span>
           </div>
-          <div className="grid gap-4 p-6 sm:grid-cols-3">
+          <div className="grid gap-6 p-6 sm:grid-cols-3">
             {[
-              {
-                label: "Public revenue page",
-                desc: "Share your portfolio publicly at /u/[slug] with a shareable profile card.",
-              },
-              {
-                label: "Agent API tokens",
-                desc: "Create tokens so Claude, Cursor, ChatGPT, Windsurf, or Opencode can query your data live.",
-              },
-              {
-                label: "Open source",
-                desc: "Full source on GitHub, MIT licensed. Self-host on your own infra with your own Claude key.",
-              },
+              { label: "Public revenue page", desc: "Share your portfolio publicly at /u/[slug] with a shareable profile card." },
+              { label: "Agent API tokens",    desc: "Create tokens so Claude, Cursor, ChatGPT, or Windsurf can query your data live." },
+              { label: "Open source",         desc: "Full source on GitHub, MIT licensed. Self-host with your own Claude key." },
             ].map((item) => (
               <div key={item.label} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[#e7e3db] bg-white">
-                  <SparklesIcon className="h-3.5 w-3.5 text-[#f97316]" />
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7]">
+                  <SparklesIcon className="h-3.5 w-3.5 text-[#5e6ad2]" />
                 </div>
                 <div>
-                  <div className="mb-0.5 text-[13px] font-semibold text-[#1a1a1a]">{item.label}</div>
-                  <p className="text-[12px] leading-5 text-[#5c5856]">{item.desc}</p>
+                  <div className="mb-0.5 text-[13px] font-medium text-[#222528]">{item.label}</div>
+                  <p className="text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">{item.desc}</p>
                 </div>
               </div>
             ))}
           </div>
-        </CornerBox>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ==================================================== FAQ */
+/* ================================================================ FAQ */
+
 function FAQSection() {
   const faqs = [
     {
@@ -926,18 +893,22 @@ function FAQSection() {
   ];
 
   return (
-    <section className="border-t border-[#e7e3db] px-6 py-28">
-      <div className="mx-auto max-w-3xl">
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">FAQ</p>
-        <h2 className="mb-14 text-[32px] font-[680] tracking-[-0.022em] text-[#1a1a1a]">Common questions</h2>
-        <div className="divide-y divide-[#e7e3db]">
-          {faqs.map((f) => (
-            <details key={f.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                <span className="text-[15px] font-semibold text-[#1a1a1a]">{f.q}</span>
-                <ChevronDown className="h-4 w-4 shrink-0 text-[#9c9894] transition-transform group-open:rotate-180" />
+    <section className="border-t border-[rgba(152,157,164,0.3)] px-6 py-28">
+      <div className="mx-auto max-w-[720px]">
+        <p className={`${mono.className} mb-3 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>FAQ</p>
+        <h2 className={`${lora.className} mb-10 text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
+          Common questions
+        </h2>
+
+        <div className="overflow-hidden rounded-[4px] border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
+          {faqs.map((f, i) => (
+            <details key={f.q}
+              className={`group ${i < faqs.length - 1 ? "border-b border-[rgba(152,157,164,0.3)]" : ""} transition-colors duration-200 hover:bg-[#fafafa]`}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm px-5 py-4 transition-all duration-200 ease-out">
+                <span className="text-[15px] font-medium text-[#222528] group-hover:text-[#5e6ad2] transition-colors duration-200">{f.q}</span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-[#222528]/30 transition-all duration-200 group-hover:text-[#5e6ad2] group-open:rotate-180" />
               </summary>
-              <p className="mt-3 text-[14px] leading-6 text-[#5c5856]">{f.a}</p>
+              <p className="px-5 pb-5 pt-0 text-base leading-[20px] tracking-[0.16px] text-[#222528]/50">{f.a}</p>
             </details>
           ))}
         </div>
@@ -946,59 +917,67 @@ function FAQSection() {
   );
 }
 
-/* ==================================================== footer */
+/* ================================================================ dark CTA */
+
+function DarkCTA() {
+  return (
+    <section className="relative overflow-hidden bg-[#0d1117] px-6 py-[88px]">
+      <div className="relative z-10 mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
+        <p className={`${mono.className} text-xs uppercase tracking-[1.2px] text-white/30`}>Get started</p>
+        <h2 className={`${lora.className} text-[40px] font-medium leading-none tracking-[-0.576px] text-white`}>
+          Your revenue, always on.
+        </h2>
+        <p className="max-w-md text-base leading-[21px] tracking-[-0.32px] text-white/50">
+          Connect your first account in 60 seconds. Free to start, open source, always.
+        </p>
+        <div className="flex items-center gap-3 pt-2">
+          <CTAButton href="/app" variant="light">Get started free</CTAButton>
+          <a href={GITHUB}
+            className="inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-md px-3 text-sm font-medium text-white/70 transition-colors duration-150 hover:text-white">
+            View on GitHub
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================ footer */
+
 function SiteFooter() {
   return (
-    <footer className="border-t border-[#e7e3db] bg-white px-6 py-16">
-      <div className="mx-auto max-w-6xl">
-        {/* Newsletter strip */}
-        <div className="mb-14 flex flex-col items-start gap-4 rounded-lg border border-[#e7e3db] bg-[#f3f1ec] p-8 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="mb-1 text-[14px] font-semibold text-[#1a1a1a]">Stay updated</p>
-            <p className="text-[13px] text-[#9c9894]">New integrations, product updates, and indie hacker stories. No spam.</p>
-          </div>
-          <div className="flex w-full max-w-xs items-center gap-2">
-            <input
-              type="email"
-              placeholder="you@example.com"
-              className="flex-1 rounded border border-[#e7e3db] bg-white px-3 py-2 text-[13px] text-[#1a1a1a] placeholder:text-[#9c9894] focus:outline-none focus:ring-1 focus:ring-[#1a1a2e]"
-            />
-            <button className="rounded bg-[#1a1a2e] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-85">
-              Subscribe
-            </button>
-          </div>
-        </div>
-
+    <footer className="border-t border-[rgba(152,157,164,0.2)] bg-[#0d1117] px-6 py-16">
+      <div className="mx-auto max-w-[1120px]">
         <div className="mb-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <CompoundWordmark height={22} />
+            <div className="mb-4">
+              <CompoundWordmark height={22} theme="dark" />
             </div>
-            <p className="text-[12px] leading-relaxed text-[#9c9894]">
+            <p className="text-[12px] leading-relaxed text-white/30">
               Revenue OS for indie hackers.<br />Free forever, open source, MIT.
             </p>
           </div>
 
           <FooterCol title="Product" links={[
-            { label: "Features", href: "#abstraction" },
-            { label: "How it works", href: "#how" },
-            { label: "Pricing", href: "#pricing" },
+            { label: "Features", href: "#features" },
+            { label: "Agent API", href: "#agent" },
+            { label: "Pricing",  href: "#pricing" },
           ]} />
           <FooterCol title="Integrations" links={[
-            { label: "Stripe", href: "#" },
+            { label: "Stripe",        href: "#" },
             { label: "Lemon Squeezy", href: "#" },
-            { label: "Polar", href: "#" },
-            { label: "DodoPayments", href: "#" },
-            { label: "Paystack", href: "#" },
+            { label: "Polar",         href: "#" },
+            { label: "DodoPayments",  href: "#" },
+            { label: "Paystack",      href: "#" },
           ]} />
           <FooterCol title="Project" links={[
-            { label: "Source on GitHub", href: GITHUB },
-            { label: "The Build Games", href: "https://canivibecodeit.com/thebuildgames" },
-            { label: "Open demo", href: "/api/auth/demo" },
+            { label: "Source on GitHub",  href: GITHUB },
+            { label: "The Build Games",   href: "https://canivibecodeit.com/thebuildgames" },
+            { label: "Open demo",         href: "/api/auth/demo" },
           ]} />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e7e3db] pt-8 text-[12px] text-[#9c9894]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-8 text-[12px] text-white/30">
           <span>© 2026 Compound. MIT licensed.</span>
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -1014,11 +993,11 @@ function SiteFooter() {
 function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
     <div>
-      <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">{title}</div>
+      <div className={`${mono.className} mb-4 text-[10px] uppercase tracking-[1.2px] text-white/30`}>{title}</div>
       <ul className="space-y-2.5">
         {links.map((l) => (
           <li key={l.label}>
-            <a href={l.href} className="text-[13px] text-[#5c5856] transition-colors hover:text-[#1a1a1a]">{l.label}</a>
+            <a href={l.href} className="text-[13px] text-white/40 transition-colors hover:text-white/70">{l.label}</a>
           </li>
         ))}
       </ul>
