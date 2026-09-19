@@ -18,6 +18,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={dmSans.variable}>
+      <head>
+        {/* Compound analytics */}
+        <script dangerouslySetInnerHTML={{ __html: `!function(w){w._cmpd=w._cmpd||{_q:[]};['identify','track','page'].forEach(function(m){w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};})}(window);` }} />
+        <script async src="https://usecompound.xyz/t.js?k=cmpd_950f43e3335045e2810c10b3f5659a32" />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <NextTopLoader color="#5e6ad2" height={2} showSpinner={false} />
         {children}
