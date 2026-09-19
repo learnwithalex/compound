@@ -1,11 +1,13 @@
-import { Lora, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Lora, IBM_Plex_Sans, IBM_Plex_Mono, Inter } from "next/font/google";
 import Link from "next/link";
 import { AgentPillLink } from "./agent-pill";
-import { CompoundWordmark } from "./compound-logo";
+import { CompoundWordmark, CompoundMark } from "./compound-logo";
 
 const lora = Lora({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400"] });
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800", "900"] });
+const interBlack = Inter({ subsets: ["latin"], weight: ["700"], variable: "--font-inter-black" });
 
 const GITHUB = "https://github.com/learnwithalex/compound";
 
@@ -134,27 +136,19 @@ function Hero() {
           {/* Left */}
           <div className="py-16">
 
-            {/* Pill label */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#5e6ad2]/20 bg-[#eff0fb] px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5e6ad2]" />
-              <span className={`${mono.className} text-[11px] uppercase tracking-[1.4px] text-[#5e6ad2]`}>Revenue OS</span>
+            {/* Chip — light mode */}
+            <div className="mb-8 inline-flex items-center gap-2 rounded-xl border border-[rgba(0,0,0,0.1)] bg-white px-3 py-1.5 shadow-sm">
+              <CompoundMark size={14} />
+              <span className={`${mono.className} text-[11px] tracking-[0.3px] text-[#222528]/70`}>Revenue OS</span>
             </div>
 
-            {/* Heading — Lora bold, light bg */}
-            <h1 className={`${lora.className} mb-6 font-bold text-[#222528]`}>
-              <span className="block text-[76px] leading-[1.02] tracking-[-0.03em]">
-                Your whole
+            {/* Heading — Inter 700, 2 clean lines, inline accent */}
+            <h1 className={`${interBlack.className} mb-6 text-[#111111]`} style={{ fontWeight: 700 }}>
+              <span className="block text-[46px] leading-[1.08] tracking-[-0.02em]">
+                Connect and grow your
               </span>
-              <span className="block text-[76px] leading-[1.02] tracking-[-0.03em]">
-                portfolio,
-              </span>
-              <span className="block text-[76px] italic leading-[1.02] tracking-[-0.03em]"
-                style={{
-                  background: "linear-gradient(135deg, #5e6ad2 0%, #818cf8 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}>
-                finally clear.
+              <span className="block text-[46px] leading-[1.08] tracking-[-0.02em]">
+                revenue,{" "}<span className="text-[#5e6ad2]">effortlessly.</span>
               </span>
             </h1>
 

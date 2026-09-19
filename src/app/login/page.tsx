@@ -125,9 +125,9 @@ export default function LoginPage() {
             <div className="mt-6 pt-5" style={{ borderTop: "1px solid #f0ede8" }}>
               <p className="text-[12px] leading-relaxed text-[#b0aba3]">
                 By signing in, you agree to compound&apos;s{" "}
-                <a href="#" className="underline underline-offset-2 hover:text-[#6b6b6b]">Terms</a>{" "}
+                <a href="/terms" className="underline underline-offset-2 hover:text-[#6b6b6b]">Terms</a>{" "}
                 and{" "}
-                <a href="#" className="underline underline-offset-2 hover:text-[#6b6b6b]">Privacy Policy</a>.
+                <a href="/privacy" className="underline underline-offset-2 hover:text-[#6b6b6b]">Privacy Policy</a>.
               </p>
             </div>
           </div>
