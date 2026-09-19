@@ -67,52 +67,57 @@ export function ProductOverview({
     <div className="overflow-hidden rounded-xl bg-white" style={{ border: "1px solid #e5e7eb" }}>
 
       {/* ── filter bar ── */}
-      <div className="flex h-10 items-center gap-2 border-b border-[#f0f0f0] px-4">
-        {/* Site/product label */}
-        <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-semibold text-[#111] hover:bg-[#f5f5f5]">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="#f59e0b" aria-hidden>
-            <path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.8z"/>
-          </svg>
-          {productName}
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 4l4 4 4-4"/>
-          </svg>
-        </button>
+      <div className="flex h-10 items-center justify-between border-b border-[#f0f0f0] px-4">
+        {/* Left group */}
+        <div className="flex items-center gap-2">
+          {/* Site/product label */}
+          <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-semibold text-[#111] hover:bg-[#f5f5f5]">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="#f59e0b" aria-hidden>
+              <path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.8z"/>
+            </svg>
+            {productName}
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 4l4 4 4-4"/>
+            </svg>
+          </button>
 
-        {/* Settings */}
-        <button className="rounded-md p-1.5 text-[#9ca3af] hover:bg-[#f5f5f5] hover:text-[#555]">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="8" cy="8" r="2.2"/>
-            <path d="M8 1.5v1M8 13.5v1M1.5 8h1M13.5 8h1M3.4 3.4l.7.7M11.9 11.9l.7.7M12.6 3.4l-.7.7M4.1 11.9l-.7.7"/>
-          </svg>
-        </button>
+          {/* Settings */}
+          <button className="rounded-md p-1.5 text-[#9ca3af] hover:bg-[#f5f5f5] hover:text-[#555]">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="8" cy="8" r="2.2"/>
+              <path d="M8 1.5v1M8 13.5v1M1.5 8h1M13.5 8h1M3.4 3.4l.7.7M11.9 11.9l.7.7M12.6 3.4l-.7.7M4.1 11.9l-.7.7"/>
+            </svg>
+          </button>
 
-        {/* Prev / date range */}
-        <button className="rounded-md p-1.5 text-[#9ca3af] hover:bg-[#f5f5f5]">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M8 2L4 6l4 4"/>
-          </svg>
-        </button>
+          {/* Prev */}
+          <button className="rounded-md p-1.5 text-[#9ca3af] hover:bg-[#f5f5f5]">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 2L4 6l4 4"/>
+            </svg>
+          </button>
 
-        <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-[#555] hover:bg-[#f5f5f5]"
-          style={{ border: "1px solid #e5e7eb" }}>
-          Last {period.days} days
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 4l4 4 4-4"/>
-          </svg>
-        </button>
+          <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-[#555] hover:bg-[#f5f5f5]"
+            style={{ border: "1px solid #e5e7eb" }}>
+            Last {period.days} days
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 4l4 4 4-4"/>
+            </svg>
+          </button>
 
-        <div className="h-3.5 w-px bg-[#e5e7eb]" />
+          <div className="h-3.5 w-px bg-[#e5e7eb]" />
 
-        {/* Compare */}
-        <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-[#9ca3af] hover:bg-[#f5f5f5]">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="8" cy="8" r="6"/>
-            <path d="M8 5v3l2 2"/>
-          </svg>
-          Compare
-        </button>
+          {/* Compare */}
+          <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-[#9ca3af] hover:bg-[#f5f5f5]">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="8" cy="8" r="6"/>
+              <path d="M8 5v3l2 2"/>
+            </svg>
+            Compare
+          </button>
+        </div>
 
+        {/* Right group: period toggle + icons */}
+        <div className="flex items-center gap-2">
         {/* Period toggle */}
         <div className="flex items-center gap-0 overflow-hidden rounded-md bg-[#f3f4f6] p-0.5">
           {PERIODS.map((p, i) => (
@@ -144,6 +149,7 @@ export function ProductOverview({
             <path d="M13.5 3.5V8H9"/>
           </svg>
         </button>
+        </div>{/* end right group */}
       </div>
 
       {/* ── stats strip ── */}
