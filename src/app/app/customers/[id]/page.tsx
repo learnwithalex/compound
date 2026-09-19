@@ -9,13 +9,15 @@ import { db } from "@/db";
 import { analyticsEvents } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 
-const EVENT_STYLE: Record<string, { color: string; bg: string; glyph: string; label: string }> = {
+const REVENUE_EVENT_STYLE: Record<string, { color: string; bg: string; glyph: string; label: string }> = {
   new: { color: "#0f9b6c", bg: "#d4ffc9", glyph: "+", label: "Subscribed" },
   reactivation: { color: "#0f9b6c", bg: "#d4ffc9", glyph: "↻", label: "Reactivated" },
-  expansion: { color: "#5e6ad2", bg: "#c9f0ff", glyph: "↑", label: "Upgraded" },
+  expansion: { color: "#5e6ad2", bg: "#ede9ff", glyph: "↑", label: "Upgraded" },
   contraction: { color: "#8a6d1f", bg: "#fff2a8", glyph: "↓", label: "Downgraded" },
   churn: { color: "#c8392c", bg: "#ffc1b6", glyph: "×", label: "Canceled" },
 };
+
+type AnalyticsRow = typeof analyticsEvents.$inferSelect;
 
 export default async function CustomerPage({
   params,
@@ -33,11 +35,11 @@ export default async function CustomerPage({
   const j = await loadCustomerJourney(userId, connection, id);
   if (!j) redirect("/app");
 
-  const activity = j.customerEmail
+  const activity: AnalyticsRow[] = j.customerEmail
     ? await db.query.analyticsEvents.findMany({
         where: and(eq(analyticsEvents.connectionId, connection), eq(analyticsEvents.userId, j.customerEmail.toLowerCase())),
         orderBy: desc(analyticsEvents.occurredAt),
-        limit: 30,
+        limit: 100,
       })
     : [];
 
@@ -57,9 +59,9 @@ export default async function CustomerPage({
     ? new Date(Math.min(...earliest)).toLocaleDateString("en-US", { month: "short", year: "numeric" })
     : "—";
 
-  const trial = j.subs.some((s) => s.trialStartAt || s.trialEndAt);
   const active = j.subs.some((s) => ["active", "past_due"].includes(s.status));
   const churned = j.subs.length > 0 && !active;
+  const trial = j.subs.some((s) => s.trialStartAt || s.trialEndAt);
 
   return (
     <div className="pb-20">
@@ -108,30 +110,15 @@ export default async function CustomerPage({
 
       {/* Stats */}
       <div className="mb-6 grid grid-cols-3 gap-4">
-        <div className="rounded-sm bg-white px-5 py-4" style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}>
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-lx-faint">Current MRR</p>
-          <p className="text-[23px] font-extrabold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>
-            {fmtMrr(totalMrr)}
-          </p>
-        </div>
-        <div className="rounded-sm bg-white px-5 py-4" style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}>
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-lx-faint">Total billed</p>
-          <p className="text-[23px] font-extrabold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>
-            {fmtMrr(billed)}
-          </p>
-        </div>
-        <div className="rounded-sm bg-white px-5 py-4" style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}>
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-lx-faint">Status</p>
-          <p className="text-[23px] font-extrabold text-lx-text" style={{ letterSpacing: "-0.02em" }}>
-            {churned ? "Churned" : active ? "Active" : trial ? "Trial" : "Lead"}
-          </p>
-        </div>
+        <StatCard label="Current MRR" value={fmtMrr(totalMrr)} />
+        <StatCard label="Total billed" value={fmtMrr(billed)} />
+        <StatCard label="Status" value={churned ? "Churned" : active ? "Active" : trial ? "Trial" : "Lead"} />
       </div>
 
-      {/* Journey */}
+      {/* Unified journey timeline */}
       <section className="mb-6 rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
         <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">Customer journey</p>
-        <JourneyFlow j={j} />
+        <JourneyTimeline j={j} activity={activity} />
       </section>
 
       {/* Subscriptions */}
@@ -160,239 +147,306 @@ export default async function CustomerPage({
         </div>
       </section>
 
-      {/* Activity */}
-      <section className="rounded-sm bg-white p-7" style={{ border: "1px solid #ebebeb" }}>
-        <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">
-          Activity · {activity.length}
-          {activity.length === 0 && (
-            <span className="ml-2 font-normal normal-case text-lx-faint">
-              — install the <a href="/app/connect" className="underline underline-offset-2 hover:text-lx-text">tracking script</a> to see behavioral data
-            </span>
-          )}
-        </p>
-        {activity.length > 0 && (
-          <div className="space-y-1.5">
-            {activity.map((e) => {
-              const isPage = e.type === "page";
-              const isIdentify = e.type === "identify";
-              const icon = isIdentify ? "👤" : isPage ? "📄" : "⚡";
-              const label = isIdentify
-                ? `Identified as ${e.userId}`
-                : isPage
-                ? e.name || e.url || "Page view"
-                : e.name || "Event";
-              const fmtTime = e.occurredAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-              return (
-                <div key={e.id} className="flex items-start gap-3 rounded-sm px-3 py-2.5" style={{ background: "#fafafa", border: "1px solid #ebebeb" }}>
-                  <span className="mt-px shrink-0 text-[14px]">{icon}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-medium text-lx-text">{label}</span>
-                    {e.url && !isIdentify && (
-                      <span className="block truncate text-[11px] text-lx-faint">{e.url}</span>
-                    )}
-                  </span>
-                  <span className="shrink-0 text-[11px] text-lx-faint">{fmtTime}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
       {/* Notes */}
       <NotesSection customerId={j.customerId} />
     </div>
   );
 }
 
-function JourneyFlow({ j }: { j: NonNullable<Awaited<ReturnType<typeof loadCustomerJourney>>> }) {
-  const fmtDate = (d: Date) =>
-    d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+/* ─── stat card ─────────────────────────────────────────────────────────── */
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-sm bg-white px-5 py-4" style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}>
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-lx-faint">{label}</p>
+      <p className="text-[23px] font-extrabold tabular-nums text-lx-text" style={{ letterSpacing: "-0.02em" }}>{value}</p>
+    </div>
+  );
+}
 
-  const hasTrialEvent = j.events.some((e) => /trial/i.test(e.eventType));
-  const trialSub = j.subs.find((s) => s.trialStartAt || s.trialEndAt);
+/* ─── unified journey timeline ───────────────────────────────────────────── */
 
-  // Build ordered stages: lead → optional trial → paid plans (grouped) → churn (if any)
-  const paidPlans = [...new Set(j.events.filter((e) => e.planName).map((e) => e.planName!))];
-  if (paidPlans.length === 0) {
-    for (const s of j.subs) if (s.planName && !paidPlans.includes(s.planName)) paidPlans.push(s.planName);
+type RevenueEvt = NonNullable<Awaited<ReturnType<typeof loadCustomerJourney>>>["events"][0];
+type SubEvt = NonNullable<Awaited<ReturnType<typeof loadCustomerJourney>>>["subs"][0];
+
+type TimelineItem =
+  | { kind: "first-touch"; time: Date; url: string | null; referrer?: string | null }
+  | { kind: "session"; time: Date; endTime: Date; sessionId: string; pages: AnalyticsRow[]; tracks: AnalyticsRow[] }
+  | { kind: "identify"; time: Date; email: string }
+  | { kind: "subscription"; time: Date; sub: SubEvt; isNew: boolean }
+  | { kind: "revenue-event"; time: Date; evt: RevenueEvt };
+
+function buildTimeline(
+  j: NonNullable<Awaited<ReturnType<typeof loadCustomerJourney>>>,
+  activity: AnalyticsRow[],
+): TimelineItem[] {
+  const items: TimelineItem[] = [];
+  const chronological = [...activity].sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
+
+  // Group tracking events by session
+  const sessionMap = new Map<string, AnalyticsRow[]>();
+  for (const ev of chronological) {
+    const sid = ev.sessionId ?? "__anon__";
+    if (!sessionMap.has(sid)) sessionMap.set(sid, []);
+    sessionMap.get(sid)!.push(ev);
   }
 
-  const paidEvents = j.events.filter((e) => ["new", "reactivation", "expansion", "contraction", "churn"].includes(e.eventType));
-  const upgrades = paidEvents.filter((e) => e.eventType === "expansion" || e.eventType === "reactivation");
-  const churnEvent = [...paidEvents].reverse().find((e) => e.eventType === "churn");
+  let firstTouchAdded = false;
+  for (const [sid, evts] of sessionMap) {
+    const pages = evts.filter((e) => e.type === "page");
+    const tracks = evts.filter((e) => e.type === "track");
+    const identifies = evts.filter((e) => e.type === "identify");
+    const first = evts[0];
+    const last = evts[evts.length - 1];
 
-  const planMrr: Record<string, number> = {};
-  for (const s of j.subs) {
-    if (!s.planName) continue;
-    planMrr[s.planName] = Math.max(planMrr[s.planName] ?? 0, s.mrrCents);
+    if (!firstTouchAdded && pages.length > 0) {
+      items.push({ kind: "first-touch", time: first.occurredAt, url: first.url });
+      firstTouchAdded = true;
+      // Don't also add a session for this single first page if it's the only page
+      if (evts.length === 1) continue;
+      // Drop the first event from session so we don't double-count
+      const rest = evts.slice(1);
+      if (rest.length > 0) {
+        const restPages = rest.filter((e) => e.type === "page");
+        const restTracks = rest.filter((e) => e.type === "track");
+        if (restPages.length > 0 || restTracks.length > 0) {
+          items.push({ kind: "session", time: rest[0].occurredAt, endTime: last.occurredAt, sessionId: sid, pages: restPages, tracks: restTracks });
+        }
+      }
+    } else {
+      if (pages.length > 0 || tracks.length > 0) {
+        items.push({ kind: "session", time: first.occurredAt, endTime: last.occurredAt, sessionId: sid, pages, tracks });
+      }
+    }
+
+    for (const id of identifies) {
+      items.push({ kind: "identify", time: id.occurredAt, email: id.userId ?? "" });
+    }
   }
 
-  return (
-    <div className="overflow-x-auto pb-2">
-      <div className="flex min-w-[560px] flex-col items-stretch gap-0">
-        {/* Lead */}
-        <div className="flex justify-center">
-          <span className="rounded-sm bg-[#f0f0f0] px-2.5 py-1 text-[11px] font-semibold text-lx-muted">Lead</span>
-        </div>
-        <Connector />
+  // Revenue events (in chronological order)
+  for (const evt of j.events) {
+    items.push({ kind: "revenue-event", time: evt.occurredAt, evt });
+  }
 
-        {/* Trial */}
-        {(trialSub || hasTrialEvent) && (
-          <>
-            <NodeCard color="#0f9b6c" title="Free trial">
-              {trialSub?.planName && (
-                <NodeRow glyph="⌛" glyphBg="#e6f4ef" text={`Started free trial of ${trialSub.planName}`} amount={fmtMrr(0)} />
-              )}
-              {hasTrialEvent ? (
-                j.events.filter((e) => /trial/i.test(e.eventType)).slice(0, 2).map((e, i) => (
-                  <NodeRow key={i} glyph="⌛" glyphBg="#e6f4ef" text={e.eventType} amount={fmtMrr(e.amountCents)} sub={fmtDate(e.occurredAt)} />
-                ))
-              ) : (
-                <NodeRow glyph="⌛" glyphBg="#e6f4ef" text={`Ended trial${trialSub?.trialEndAt ? ` · ${fmtDate(trialSub.trialEndAt)}` : ""}`} amount={fmtMrr(0)} />
-              )}
-            </NodeCard>
-            <Connector color="#0f9b6c" />
-          </>
-        )}
+  // Subscriptions that have no corresponding revenue events
+  const coveredByEvents = new Set(j.events.map((e) => e.planName));
+  for (const sub of j.subs) {
+    if (sub.startedAt) {
+      const alreadyCovered = j.events.some((e) => e.eventType === "new" && e.planName === sub.planName);
+      if (!alreadyCovered) {
+        items.push({ kind: "subscription", time: sub.startedAt, sub, isNew: true });
+      }
+      if (sub.canceledAt) {
+        items.push({ kind: "subscription", time: sub.canceledAt, sub, isNew: false });
+      }
+    }
+  }
 
-        {/* Paid subscriptions */}
-        {paidPlans.length > 0 ? (
-          <div className={`grid gap-6 ${paidPlans.length > 1 ? "sm:grid-cols-2" : ""}`}>
-            {paidPlans.map((plan, i) => {
-              const planEvts = paidEvents.filter((e) => e.planName === plan).slice(0, 3);
-              const color = i === 0 ? "#5e6ad2" : "#0284c7";
-              return (
-                <NodeCard key={plan} color={color} title={i === 0 && paidPlans.length > 1 ? "Free subscription" : undefined}>
-                  <NodeRow
-                    glyph="★"
-                    glyphBg={i === 0 ? "#efe9ff" : "#e0f2fe"}
-                    glyphColor={color}
-                    text={`Subscribed to ${plan}`}
-                    amount={fmtMrr(planMrr[plan] ?? 0)}
-                    bold
-                  />
-                  {planEvts
-                    .filter((e) => e.eventType !== "new")
-                    .map((e, k) => {
-                      const st = EVENT_STYLE[e.eventType] ?? { color: "#9a9a9a", bg: "#f0f0f0", glyph: "•", label: e.eventType };
-                      return (
-                        <NodeRow
-                          key={k}
-                          glyph={st.glyph}
-                          glyphBg={st.bg}
-                          glyphColor={st.color}
-                          text={`${st.label}${e.planName && e.planName !== plan ? ` · ${e.planName}` : ""}`}
-                          amount={fmtMrr(e.amountCents)}
-                          sub={fmtDate(e.occurredAt)}
-                        />
-                      );
-                    })}
-                </NodeCard>
-              );
-            })}
-          </div>
-        ) : (
-          <NodeCard color="#9a9a9a">
-            <NodeRow glyph="•" glyphBg="#f0f0f0" text="No paid subscription yet" amount="" />
-          </NodeCard>
-        )}
-
-        {/* Upgrade path note */}
-        {upgrades.length > 0 && paidPlans.length > 1 && (
-          <div className="mt-4 flex justify-center">
-            <span className="rounded-sm bg-[#e0f2fe] px-2.5 py-1 text-[11px] font-semibold text-[#0284c7]">
-              Upgraded · {upgrades.length}×
-            </span>
-          </div>
-        )}
-
-        {/* Churn */}
-        {churnEvent && (
-          <>
-            <div className="mt-4 flex justify-center">
-              <span className="rounded-sm bg-[#ffc1b6] px-2.5 py-1 text-[11px] font-semibold text-[#c8392c]">
-                Churned · {fmtDate(churnEvent.occurredAt)}
-              </span>
-            </div>
-          </>
-        )}
-
-        {/* Raw timeline fallback when there are many events */}
-        {j.events.length > 6 && (
-          <div className="mt-6 border-t pt-4" style={{ borderColor: "#f0f0f0" }}>
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-lx-faint">All events</p>
-            <div className="space-y-1.5">
-              {j.events.map((e, i) => {
-                const st = EVENT_STYLE[e.eventType] ?? { color: "#9a9a9a", bg: "#f0f0f0", glyph: "•", label: e.eventType };
-                return (
-                  <div key={i} className="flex items-center gap-2.5 text-[12px]">
-                    <span
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold"
-                      style={{ background: st.bg, color: st.color }}
-                    >
-                      {st.glyph}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-lx-text">
-                      <span className="font-medium">{st.label}</span>
-                      {e.planName && <span className="text-lx-muted"> · {e.planName}</span>}
-                    </span>
-                    <span className="shrink-0 tabular-nums text-lx-muted">{fmtMrr(e.amountCents)}</span>
-                    <span className="shrink-0 text-[11px] text-lx-faint">{fmtDate(e.occurredAt)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return items.sort((a, b) => a.time.getTime() - b.time.getTime());
 }
 
-function Connector({ color = "#c9c4bb" }: { color?: string }) {
-  return (
-    <div className="flex justify-center" aria-hidden>
-      <div style={{ width: 2, height: 18, background: color }} />
-    </div>
-  );
+function fmtTime(d: Date) {
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-function NodeCard({ children, color, title }: { children: React.ReactNode; color: string; title?: string }) {
-  return (
-    <div>
-      {title && (
-        <div className="mb-1.5 flex justify-center sm:justify-start sm:pl-1">
-          <span className="rounded-sm px-2 py-0.5 text-[11px] font-semibold" style={{ color, background: `${color}14`, border: `1px solid ${color}33` }}>
-            {title}
-          </span>
-        </div>
-      )}
-      <div className="rounded-sm bg-white px-5 py-3.5" style={{ border: `1.5px solid ${color}`, boxShadow: `3px 3px 0 ${color}55` }}>
-        <div className="space-y-2.5">{children}</div>
-      </div>
-    </div>
-  );
+function fmtDuration(ms: number) {
+  if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
+  return `${Math.round(ms / 60_000)}m`;
 }
 
-function NodeRow({
-  glyph, glyphBg, glyphColor, text, amount, sub, bold,
+function prettyUrl(url: string | null | undefined) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.pathname === "/" ? u.hostname : u.pathname;
+  } catch {
+    return url;
+  }
+}
+
+function JourneyTimeline({
+  j,
+  activity,
 }: {
-  glyph: string; glyphBg: string; glyphColor?: string; text: string; amount: string; sub?: string; bold?: boolean;
+  j: NonNullable<Awaited<ReturnType<typeof loadCustomerJourney>>>;
+  activity: AnalyticsRow[];
+}) {
+  const items = buildTimeline(j, activity);
+
+  if (items.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-10 text-[13px] text-lx-faint">
+        No journey data yet — install the tracking script to capture behavioral events.
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative pl-7">
+      {/* Vertical rail */}
+      <div className="absolute left-[11px] top-2 bottom-2 w-px" style={{ background: "#e8e4de" }} aria-hidden />
+
+      <div className="space-y-5">
+        {items.map((item, i) => {
+          if (item.kind === "first-touch") {
+            return (
+              <TLRow
+                key={i}
+                dot={{ color: "#a8a3f8", bg: "#ede9ff" }}
+                glyph={
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
+                  </svg>
+                }
+                time={fmtTime(item.time)}
+                label="First touch"
+                meta={prettyUrl(item.url) ?? undefined}
+                badge={{ text: "Lead", color: "#a8a3f8", bg: "#ede9ff" }}
+              />
+            );
+          }
+
+          if (item.kind === "session") {
+            const duration = item.endTime.getTime() - item.time.getTime();
+            const uniquePages = [...new Set(item.pages.map((p) => prettyUrl(p.url)).filter(Boolean))];
+            const trackNames = [...new Set(item.tracks.map((t) => t.name).filter(Boolean))];
+            return (
+              <TLRow
+                key={i}
+                dot={{ color: "#9a9a9a", bg: "#f0f0f0" }}
+                glyph={
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                }
+                time={fmtTime(item.time)}
+                label={
+                  item.pages.length > 0
+                    ? `Browsed ${item.pages.length} page${item.pages.length !== 1 ? "s" : ""}`
+                    : `${item.tracks.length} event${item.tracks.length !== 1 ? "s" : ""}`
+                }
+                meta={
+                  uniquePages.length > 0
+                    ? uniquePages.slice(0, 3).join("  ·  ") + (uniquePages.length > 3 ? `  +${uniquePages.length - 3}` : "")
+                    : trackNames.slice(0, 3).join("  ·  ") || undefined
+                }
+                side={duration > 1000 ? fmtDuration(duration) : undefined}
+              />
+            );
+          }
+
+          if (item.kind === "identify") {
+            return (
+              <TLRow
+                key={i}
+                dot={{ color: "#5e6ad2", bg: "#ede9ff" }}
+                glyph={
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+                  </svg>
+                }
+                time={fmtTime(item.time)}
+                label="Identified"
+                meta={item.email}
+                badge={{ text: "Known", color: "#5e6ad2", bg: "#ede9ff" }}
+              />
+            );
+          }
+
+          if (item.kind === "subscription") {
+            return (
+              <TLRow
+                key={i}
+                dot={{ color: "#0f9b6c", bg: "#d4ffc9" }}
+                glyph={
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                }
+                time={fmtTime(item.time)}
+                label={item.isNew ? `Subscribed to ${item.sub.planName ?? "plan"}` : `Canceled ${item.sub.planName ?? "subscription"}`}
+                meta={item.isNew ? fmtMrr(item.sub.mrrCents) + (item.sub.interval ? ` / ${item.sub.interval}` : "") : undefined}
+                badge={item.isNew
+                  ? { text: "Converted", color: "#0f9b6c", bg: "#d4ffc9" }
+                  : { text: "Churned", color: "#c8392c", bg: "#ffc1b6" }}
+              />
+            );
+          }
+
+          if (item.kind === "revenue-event") {
+            const st = REVENUE_EVENT_STYLE[item.evt.eventType] ?? { color: "#9a9a9a", bg: "#f0f0f0", glyph: "•", label: item.evt.eventType };
+            return (
+              <TLRow
+                key={i}
+                dot={{ color: st.color, bg: st.bg }}
+                glyph={<span style={{ fontSize: 11, fontWeight: 700 }}>{st.glyph}</span>}
+                time={fmtTime(item.time)}
+                label={`${st.label}${item.evt.planName ? ` · ${item.evt.planName}` : ""}`}
+                meta={item.evt.amountCents ? fmtMrr(item.evt.amountCents) : undefined}
+              />
+            );
+          }
+
+          return null;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TLRow({
+  dot,
+  glyph,
+  time,
+  label,
+  meta,
+  badge,
+  side,
+}: {
+  dot: { color: string; bg: string };
+  glyph: React.ReactNode;
+  time: string;
+  label: string;
+  meta?: string;
+  badge?: { text: string; color: string; bg: string };
+  side?: string;
 }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="relative flex items-start gap-3">
+      {/* Dot */}
       <span
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[12px] font-bold"
-        style={{ background: glyphBg, color: glyphColor ?? "#5c5c5c" }}
+        className="relative z-10 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full"
+        style={{ background: dot.bg, color: dot.color, border: `1.5px solid ${dot.color}` }}
       >
         {glyph}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className={`block truncate text-[13px] text-lx-text ${bold ? "font-bold" : "font-medium"}`}>{text}</span>
-        {sub && <span className="block text-[11px] text-lx-faint">{sub}</span>}
-      </span>
-      <span className="shrink-0 text-[12px] tabular-nums text-lx-muted">{amount}</span>
+
+      {/* Content */}
+      <div className="min-w-0 flex-1 pt-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[13px] font-semibold text-lx-text">{label}</span>
+          {badge && (
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+              style={{ color: badge.color, background: badge.bg }}
+            >
+              {badge.text}
+            </span>
+          )}
+          {meta && !badge && (
+            <span className="text-[12px] font-medium text-lx-muted">{meta}</span>
+          )}
+        </div>
+        {meta && badge && (
+          <p className="mt-0.5 text-[12px] text-lx-faint truncate">{meta}</p>
+        )}
+      </div>
+
+      {/* Time + side */}
+      <div className="shrink-0 text-right">
+        <span className="text-[11px] text-lx-faint">{time}</span>
+        {side && <p className="text-[11px] text-lx-muted">{side}</p>}
+      </div>
     </div>
   );
 }

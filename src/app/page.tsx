@@ -15,6 +15,13 @@ export const metadata = {
   title: "Compound — Revenue OS for indie hackers",
   description:
     "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack account. One dashboard for your whole portfolio, with AI that explains why the numbers moved.",
+  alternates: { canonical: "https://usecompound.xyz" },
+  openGraph: {
+    title: "Compound — Revenue OS for indie hackers",
+    description: "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack account. One dashboard for your whole portfolio, with AI that explains why the numbers moved.",
+    url: "https://usecompound.xyz",
+    type: "website" as const,
+  },
 };
 
 export default function Home() {

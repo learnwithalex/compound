@@ -9,10 +9,55 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
+const APP_URL = "https://usecompound.xyz";
+
 export const metadata: Metadata = {
-  title: "Compound — Revenue OS for indie hackers",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: "Compound — Revenue OS for indie hackers",
+    template: "%s — Compound",
+  },
   description:
-    "Connect all your Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack accounts. Compound shows your total MRR across every product, with AI that explains why your numbers moved.",
+    "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack account. One dashboard for your whole portfolio, with AI that explains why your numbers moved.",
+  keywords: ["MRR dashboard", "indie hacker revenue", "Stripe MRR", "SaaS analytics", "revenue tracking", "Lemon Squeezy analytics", "Polar analytics"],
+  authors: [{ name: "Compound" }],
+  creator: "Compound",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: APP_URL,
+    siteName: "Compound",
+    title: "Compound — Revenue OS for indie hackers",
+    description:
+      "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack account. One dashboard for your whole portfolio, with AI that explains why your numbers moved.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Compound — Revenue OS for indie hackers",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Compound — Revenue OS for indie hackers",
+    description:
+      "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack account. One dashboard for your whole portfolio, with AI that explains why your numbers moved.",
+    images: ["/og-image.png"],
+    creator: "@usecompound",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
