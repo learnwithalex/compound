@@ -17,8 +17,6 @@ const NAV_MORE = [
 const NAV_BOTTOM = [
   { href: "/app/settings", label: "Settings", icon: SettingsIcon },
   { href: "/app/billing",  label: "Billing",  icon: BillingIcon },
-  { href: "/app/help",     label: "Help",     icon: HelpIcon },
-  { href: "/app/feedback", label: "Feedback", icon: FeedbackIcon },
 ];
 
 const PRODUCT_TABS = [
