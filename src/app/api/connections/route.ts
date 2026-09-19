@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const userId = await userIdFromSession();
+  const userId = await userIdFromSessionOrToken(req);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { id } = await req.json();
   await db.delete(connections).where(and(eq(connections.id, id), eq(connections.userId, userId)));
