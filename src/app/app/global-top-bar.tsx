@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function GlobalTopBar() {
   return (
     <div
@@ -15,20 +17,20 @@ export function GlobalTopBar() {
 
       {/* Right icons */}
       <div className="flex shrink-0 items-center gap-3">
-        <button className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
+        <Link href="/app/help" className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1z"/>
             <path d="M8 6v3"/>
             <circle cx="8" cy="11.5" r="0.6" fill="currentColor" stroke="none"/>
           </svg>
           Help
-        </button>
-        <button className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
+        </Link>
+        <Link href="/app/feedback" className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M13 7A6 6 0 0 1 2.11 10.26L1 15l4.74-1.11A6 6 0 1 1 13 7z"/>
           </svg>
           Feedback
-        </button>
+        </Link>
         <a
           href="/app/billing"
           className="flex items-center gap-1 rounded-sm px-2.5 py-1 text-[11px] font-semibold transition-colors"
