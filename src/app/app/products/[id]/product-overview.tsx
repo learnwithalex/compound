@@ -147,7 +147,7 @@ export function ProductOverview({
       </div>
 
       {/* ── stats strip ── */}
-      <div className="flex items-start gap-8 border-b border-[#f0f0f0] px-5 py-4">
+      <div className="flex items-start justify-between border-b border-[#f0f0f0] px-5 py-4">
         {stats.map((s) => {
           const up = (s.pct ?? 0) > 0;
           const down = (s.pct ?? 0) < 0;
