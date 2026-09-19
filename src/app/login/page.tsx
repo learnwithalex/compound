@@ -33,13 +33,6 @@ export default function LoginPage() {
         {/* Logo row */}
         <div className="mb-10 flex items-center justify-between">
           <CompoundWordmark theme="light" height={20} />
-          <button
-            onClick={() => { window.location.href = "/api/auth/demo"; }}
-            className="rounded-full px-4 py-1.5 text-[13px] font-medium text-[#3d3d3d] hover:bg-[#f5f5f4]"
-            style={{ border: "1px solid #dddad5" }}
-          >
-            Try demo
-          </button>
         </div>
 
         {state === "sent" ? (
