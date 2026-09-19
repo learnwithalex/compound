@@ -3,8 +3,8 @@ import Link from "next/link";
 import { AgentPillLink } from "./agent-pill";
 import { CompoundWordmark } from "./compound-logo";
 
-const lora = Lora({ subsets: ["latin"], weight: ["400", "500", "600"] });
-const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500"] });
+const lora = Lora({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400"] });
 
 const GITHUB = "https://github.com/learnwithalex/compound";
@@ -80,7 +80,7 @@ function CTAButton({
   variant?: "dark" | "light";
 }) {
   const base =
-    "inline-flex cursor-pointer items-center justify-center gap-2 h-8 rounded-md px-3 font-medium text-sm shadow-[0px_0.646px_1.292px_#1212170d] transition-transform duration-150 hover:scale-[1.01] active:scale-[0.98]";
+    "inline-flex cursor-pointer items-center justify-center gap-2 h-9 rounded-md px-4 font-medium text-sm whitespace-nowrap shadow-[0px_0.646px_1.292px_#1212170d] transition-transform duration-150 hover:scale-[1.01] active:scale-[0.98]";
   const dark =
     "bg-gradient-to-b from-[rgba(34,37,40,0.69)] via-[rgba(34,37,40,0.81)] to-[#222528] border border-[#222528] text-[#fafafa] hover:opacity-90";
   const light =
@@ -113,10 +113,7 @@ function SiteNav() {
         </div>
 
         <div className="ml-auto flex items-center gap-4">
-          <a href={GITHUB} className="hidden text-sm text-[#222528]/50 transition-colors hover:text-[#222528] sm:block">
-            GitHub
-          </a>
-          <Link href="/login" className="text-sm text-[#222528]/50 transition-colors hover:text-[#222528]">
+<Link href="/login" className="text-sm text-[#222528]/50 transition-colors hover:text-[#222528]">
             Sign in
           </Link>
           <CTAButton href="/app">Get started</CTAButton>
@@ -136,45 +133,64 @@ function Hero() {
 
           {/* Left */}
           <div className="py-16">
-            <p className={`${mono.className} mb-6 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>
-              Revenue OS
-            </p>
 
-            <h1 className={`${lora.className} mb-5 text-[52px] font-medium leading-[58px] tracking-[-0.576px] text-[#222528]`}>
-              One dashboard.<br />Every product.
+            {/* Pill label */}
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#5e6ad2]/20 bg-[#eff0fb] px-3 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#5e6ad2]" />
+              <span className={`${mono.className} text-[11px] uppercase tracking-[1.4px] text-[#5e6ad2]`}>Revenue OS</span>
+            </div>
+
+            {/* Heading — Lora bold, light bg */}
+            <h1 className={`${lora.className} mb-6 font-bold text-[#222528]`}>
+              <span className="block text-[76px] leading-[1.02] tracking-[-0.03em]">
+                Your whole
+              </span>
+              <span className="block text-[76px] leading-[1.02] tracking-[-0.03em]">
+                portfolio,
+              </span>
+              <span className="block text-[76px] italic leading-[1.02] tracking-[-0.03em]"
+                style={{
+                  background: "linear-gradient(135deg, #5e6ad2 0%, #818cf8 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}>
+                finally clear.
+              </span>
             </h1>
 
-            <p className="mb-8 max-w-[440px] text-pretty text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
-              Connect all your payment accounts. Compound shows total revenue
-              across your whole portfolio, with AI that explains exactly why
-              your numbers moved.
+            <p className="mb-8 max-w-[400px] text-[15px] leading-[1.7] tracking-[-0.16px] text-[#222528]/55">
+              Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack.
+              One number across your whole portfolio — with AI that explains exactly why it moved.
             </p>
 
-            <div className="mb-8 flex items-center gap-3">
+            {/* Micro stats */}
+            <div className="mb-8 flex items-center gap-4">
+              {[
+                { val: "5",   label: "providers"  },
+                { val: "30s", label: "auto-sync"  },
+                { val: "$9",  label: "per month"  },
+              ].map((s, i) => (
+                <div key={s.label} className={`flex items-baseline gap-1.5 ${i > 0 ? "border-l border-[#222528]/10 pl-4" : ""}`}>
+                  <span className={`${plex.className} text-[18px] font-semibold text-[#222528]`}>{s.val}</span>
+                  <span className={`${mono.className} text-[10px] uppercase tracking-[1px] text-[#222528]/40`}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mb-4 flex items-center gap-2">
               <CTAButton href="/app">Connect your revenue</CTAButton>
+              <a href={GITHUB}
+                className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border border-[rgba(152,157,164,0.35)] bg-white px-4 text-sm font-medium text-[#222528]/70 transition-all duration-150 hover:bg-[#f5f7f7] hover:text-[#222528]">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 fill-current" aria-hidden>
+                  <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+                Steal the code
+              </a>
+            </div>
+            <div className="mb-8">
               <AgentPillLink />
             </div>
 
-            {/* Provider strip */}
-            <div className="flex items-center gap-3">
-              <p className={`${mono.className} text-xs uppercase tracking-[1.2px] text-[#222528]/40`}>
-                Works with
-              </p>
-              <div className="flex items-center gap-2">
-                {[
-                  { src: "https://cdn.simpleicons.org/stripe/635bff", alt: "Stripe" },
-                  { src: "https://cdn.simpleicons.org/lemonsqueezy/e5a00d", alt: "Lemon Squeezy" },
-                  { src: "/polar-icon.svg", alt: "Polar" },
-                  { src: "/dodopayments-icon.svg", alt: "DodoPayments" },
-                  { src: "/paystack-icon.png", alt: "Paystack" },
-                ].map((p) => (
-                  <img key={p.alt} src={p.src} alt={p.alt}
-                    className="h-5 w-5 rounded object-contain"
-                    width={20} height={20} loading="eager" />
-                ))}
-              </div>
-              <span className="text-sm text-[#222528]/40">& more</span>
-            </div>
           </div>
 
           {/* Right */}
@@ -280,32 +296,122 @@ function HeroFlowDiagram() {
   );
 }
 
-/* ================================================================ stats */
+/* ================================================================ integrations grid */
 
 function StatsStrip() {
   return (
-    <div className="border-y border-[rgba(152,157,164,0.3)]">
-      <div className="mx-auto grid max-w-[1120px] grid-cols-2 sm:grid-cols-4">
-        {[
-          { value: "5", label: "Payment providers" },
-          { value: "30s", label: "Auto-sync interval" },
-          { value: "∞", label: "Products on Pro" },
-          { value: "$9", label: "Per month on Pro" },
-        ].map((s, i) => (
-          <div key={s.label}
-            className={`flex flex-col gap-3 px-8 py-12 ${i > 0 ? "border-l border-[rgba(152,157,164,0.3)]" : ""}`}>
-            <span className={`${lora.className} font-medium leading-none tabular-nums text-[#222528]`}
-              style={{ fontSize: "clamp(2.5rem,5vw,64px)", letterSpacing: "-3.2px" }}>
-              {s.value}
-            </span>
-            <span className={`${mono.className} uppercase tracking-[1.6px] text-[#5e6ad2]`}
-              style={{ fontSize: "13px" }}>
-              {s.label}
-            </span>
+    <section className="bg-[#5e6ad2] px-6 py-16">
+      <div className="mx-auto max-w-[1120px]">
+
+        {/* Heading */}
+        <p className="mb-10 text-center text-[15px] leading-[1.7] text-white/60">
+          Connect every payment stack you already use.{" "}
+          <span className="font-medium italic text-white">Built for portfolio builders.</span>
+        </p>
+
+        {/* Bento container */}
+        <div className="overflow-hidden rounded-[20px] bg-[#f5f7f7] p-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+
+            {/* Stripe — large logo */}
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-white px-6 py-8">
+              <img src="https://cdn.simpleicons.org/stripe/635bff" alt="Stripe" className="h-7 w-7" width={28} height={28} />
+              <span className="text-[20px] font-semibold tracking-tight text-[#635bff]">Stripe</span>
+            </div>
+
+            {/* Lemon Squeezy */}
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-white px-6 py-8">
+              <img src="https://cdn.simpleicons.org/lemonsqueezy/e5a00d" alt="Lemon Squeezy" className="h-7 w-7" width={28} height={28} />
+              <span className="text-[16px] font-semibold tracking-tight text-[#e5a00d]">Lemon Squeezy</span>
+            </div>
+
+            {/* Quote — spans 2 cols */}
+            <div className="col-span-2 flex flex-col justify-between rounded-2xl bg-white p-6">
+              <p className="text-[14px] italic leading-[1.7] text-[#222528]/60">
+                &ldquo;Finally replaced Baremetrics and ChartMogul with one tool that actually understands the indie hacker stack.&rdquo;
+              </p>
+              <p className={`${mono.className} mt-4 text-[11px] uppercase tracking-[1.2px] text-[#222528]/30`}>
+                — portfolio founder
+              </p>
+            </div>
+
+            {/* 30s stat */}
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
+              <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>30s</span>
+              <span className={`${mono.className} mt-3 text-[11px] uppercase tracking-[1.6px] text-[#5e6ad2]`}>Auto-sync</span>
+            </div>
+
+            {/* Polar */}
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-white px-6 py-8">
+              <img src="/polar-icon.svg" alt="Polar" className="h-7 w-7" width={28} height={28} />
+              <span className="text-[20px] font-semibold tracking-tight text-[#222528]">Polar</span>
+            </div>
+
+            {/* DodoPayments */}
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-white px-6 py-8">
+              <img src="/dodopayments-icon.svg" alt="DodoPayments" className="h-7 w-7 rounded bg-[#222528] p-0.5" width={28} height={28} />
+              <span className="text-[16px] font-semibold tracking-tight text-[#222528]">DodoPayments</span>
+            </div>
+
+            {/* Paystack */}
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-white px-6 py-8">
+              <img src="/paystack-icon.png" alt="Paystack" className="h-7 w-7 rounded" width={28} height={28} />
+              <span className="text-[20px] font-semibold tracking-tight text-[#00c3f7]">Paystack</span>
+            </div>
+
+            {/* AI Briefings feature — spans 2 cols */}
+            <div className="col-span-2 flex flex-col justify-between rounded-2xl bg-[#4a54b8] p-6">
+              <div>
+                <p className={`${mono.className} mb-2 text-[11px] uppercase tracking-[1.2px] text-white/35`}>AI Briefings</p>
+                <p className="text-[15px] font-medium leading-[1.5] text-white">
+                  Ask Claude what moved your MRR — across every provider, in plain English.
+                </p>
+              </div>
+              <div className="mt-5 flex items-center gap-2">
+                <img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=64" alt="Claude" className="h-5 w-5 rounded-md" width={20} height={20} />
+                <span className="text-[12px] text-white/50">Powered by Claude</span>
+              </div>
+            </div>
+
+            {/* 5 providers stat */}
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
+              <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>5</span>
+              <span className={`${mono.className} mt-3 text-[11px] uppercase tracking-[1.6px] text-[#5e6ad2]`}>Providers</span>
+            </div>
+
+            {/* Agent API feature */}
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
+              <div>
+                {/* Stacked agent logos */}
+                <div className="mb-4 flex items-center">
+                  {[
+                    { src: "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",     alt: "Claude"   },
+                    { src: "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",    alt: "Cursor"   },
+                    { src: "https://www.google.com/s2/favicons?domain=windsurf.com&sz=64",  alt: "Windsurf" },
+                    { src: "https://www.google.com/s2/favicons?domain=openai.com&sz=64",    alt: "ChatGPT"  },
+                  ].map((a, i) => (
+                    <img
+                      key={a.alt}
+                      src={a.src}
+                      alt={a.alt}
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 rounded-lg border-2 border-white object-contain shadow-sm"
+                      style={{ marginLeft: i === 0 ? 0 : -8 }}
+                    />
+                  ))}
+                </div>
+                <p className={`${mono.className} mb-2 text-[11px] uppercase tracking-[1.2px] text-[#222528]/40`}>Agent API</p>
+                <p className="text-[13px] leading-[1.5] text-[#222528]/70">
+                  Give Claude, Cursor & Windsurf live access to your revenue.
+                </p>
+              </div>
+            </div>
+
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -431,75 +537,108 @@ function PortfolioShowcase() {
 
 function AIBriefingShowcase() {
   return (
-    <section className="overflow-hidden border-t border-[rgba(152,157,164,0.3)] px-6 py-24">
-      <div className="mx-auto max-w-[1120px]">
-        <div className="grid gap-16 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-          <div>
-            <p className={`${mono.className} mb-4 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>AI briefings</p>
-            <h2 className={`${lora.className} mb-5 text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
-              One click.<br />Claude reads<br />everything.
-            </h2>
-            <p className="mb-8 text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
-              Hit the briefing button — Compound feeds your full portfolio into Claude. You get plain English: what moved, why, and the one thing to act on.
-            </p>
-            <div className="space-y-3">
-              {[
-                "MRR, ARR, churn — all in context",
-                "Which product is carrying the portfolio",
-                "One clear action, not a chart dump",
-              ].map((f) => (
-                <div key={f} className="flex items-center gap-3 text-[13px] text-[#222528]/60">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#5e6ad2] text-[10px] font-bold text-white">✓</span>
-                  {f}
+    <section className="overflow-hidden border-t border-[rgba(152,157,164,0.3)] px-6 py-6">
+      <div className="mx-auto max-w-[1120px] overflow-hidden rounded-3xl bg-[#f0f1fb]">
+        <div className="grid lg:grid-cols-[1fr_1.1fr]">
+
+          {/* Left: content */}
+          <div className="flex flex-col justify-between px-10 py-12">
+            <div>
+              {/* Pill label */}
+              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-[#5e6ad2]/10 px-3 py-1">
+                <img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=64" alt="Claude" className="h-3.5 w-3.5 rounded-sm" width={14} height={14} />
+                <span className={`${mono.className} text-[11px] uppercase tracking-[1.2px] text-[#5e6ad2]`}>AI Briefings</span>
+              </div>
+
+              {/* Two-tone heading */}
+              <h2 className={`${lora.className} mb-5 text-[44px] font-medium leading-[50px] tracking-[-0.576px] text-[#222528]`}>
+                One click.<br />Claude reads{" "}
+                <em className="not-italic text-[#5e6ad2]">everything.</em>
+              </h2>
+
+              <p className="mb-8 max-w-[380px] text-[15px] leading-[1.7] tracking-[-0.32px] text-[#222528]/60">
+                Hit the briefing button — Compound feeds your full portfolio into Claude. Plain English back: what moved, why, and the one thing to act on.
+              </p>
+            </div>
+
+            <div>
+              {/* Social proof */}
+              <div className="mb-6 flex items-start gap-3">
+                <div className="flex shrink-0 items-center">
+                  {[
+                    "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",
+                    "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",
+                    "https://www.google.com/s2/favicons?domain=windsurf.com&sz=64",
+                  ].map((src, i) => (
+                    <img key={i} src={src} alt="" width={22} height={22}
+                      className="h-[22px] w-[22px] rounded-md border-2 border-[#f0f1fb]"
+                      style={{ marginLeft: i === 0 ? 0 : -6 }} />
+                  ))}
                 </div>
-              ))}
+                <p className="text-[12px] leading-[1.6] text-[#222528]/50">
+                  <span className="font-medium text-[#222528]">Works with every AI tool.</span>{" "}
+                  Claude, Cursor, Windsurf — give your agent live revenue context.
+                </p>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex items-center gap-4">
+                <CTAButton href="/app">Get your first briefing</CTAButton>
+                <a href="#agent" className="text-[13px] font-medium text-[#222528]/50 transition-colors hover:text-[#222528]">
+                  See the Agent API →
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* Briefing card */}
-          <div className="overflow-hidden rounded-[13.25px] border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
-            <div className="flex items-center justify-between border-b border-[rgba(152,157,164,0.2)] bg-[#f5f7f7] px-5 py-3.5">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#222528]">
-                  <SparklesIcon className="h-3.5 w-3.5 text-white" />
-                </div>
-                <div>
-                  <span className="text-[12px] font-medium text-[#222528]">AI Briefing</span>
-                  <span className={`${mono.className} ml-2 text-[10px] uppercase tracking-[1px] text-[#222528]/40`}>Today 9:04 AM</span>
-                </div>
-              </div>
-              <span className="flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-medium text-emerald-600">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Done
-              </span>
-            </div>
-            <div className="p-5">
-              <p className="mb-4 text-[13px] font-medium text-[#222528]">Good morning, Alex. Here&apos;s what moved overnight.</p>
-              <div className="space-y-3 text-[13px] leading-[1.75] tracking-[-0.16px] text-[#222528]/70">
-                <p>Your portfolio hit <span className="rounded border border-[#222528]/20 bg-[#222528] px-1.5 py-0.5 font-mono text-[11px] font-medium text-white">$13,900 MRR</span> — up <span className="font-medium text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subscribers at an average of $12.40/mo.</p>
-                <p><span className="font-medium text-[#222528]">FormKit</span> is the one to watch — it&apos;s down 3 subs this week. Not alarming yet, but at this rate it&apos;ll be net-negative by end of month.</p>
-              </div>
-              <div className="mt-4 rounded-xl border border-[#5e6ad2]/20 bg-[#eff0fb] px-4 py-3.5">
-                <p className="text-[12px] leading-5 text-[#3d4494]">
-                  <span className="font-medium text-[#5e6ad2]">→ Action: </span>
-                  Check FormKit&apos;s last 10 churned users — a single exit-survey email could tell you exactly what to fix.
-                </p>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {[
-                  { l: "Fastest grower", v: "Scarlet DB",  s: "+14 subs",      accent: "#059669" },
-                  { l: "Needs attention", v: "FormKit",    s: "−3 subs",       accent: "#dc2626" },
-                  { l: "New MRR",         v: "+$560",      s: "across 3 products", accent: "#5e6ad2" },
-                  { l: "Churn risk",      v: "1 flagged",  s: "FormKit trend", accent: "#d97706" },
-                ].map((c) => (
-                  <div key={c.l} className="rounded-xl border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7] px-3 py-2.5">
-                    <p className={`${mono.className} text-[9px] uppercase tracking-wider text-[#222528]/40`}>{c.l}</p>
-                    <p className="mt-0.5 text-[13px] font-medium" style={{ color: c.accent }}>{c.v}</p>
-                    <p className="text-[10px] text-[#222528]/40">{c.s}</p>
+          {/* Right: card visual — no padding, flush to edges */}
+          <div className="relative flex items-end justify-center overflow-hidden bg-[#e4e6f8] px-8 pt-10">
+            <div className="w-full max-w-[440px] overflow-hidden rounded-t-[13.25px] bg-white shadow-[0px_4px_6px_#0000000f,_0px_24px_48px_#00000018]">
+              {/* Card header */}
+              <div className="flex items-center justify-between border-b border-[rgba(152,157,164,0.15)] bg-[#fafafa] px-5 py-3.5">
+                <div className="flex items-center gap-2.5">
+                  <img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=64" alt="Claude" className="h-7 w-7 rounded-lg" width={28} height={28} />
+                  <div>
+                    <span className="text-[12px] font-medium text-[#222528]">AI Briefing</span>
+                    <span className={`${mono.className} ml-2 text-[10px] uppercase tracking-[1px] text-[#222528]/35`}>Today 9:04 AM</span>
                   </div>
-                ))}
+                </div>
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-medium text-emerald-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Done
+                </span>
+              </div>
+
+              {/* Card body */}
+              <div className="p-5">
+                <p className="mb-3 text-[13px] font-medium text-[#222528]">Good morning, Alex. Here&apos;s what moved overnight.</p>
+                <div className="space-y-2.5 text-[13px] leading-[1.7] tracking-[-0.16px] text-[#222528]/65">
+                  <p>Your portfolio hit <span className="rounded bg-[#222528] px-1.5 py-0.5 font-mono text-[11px] font-medium text-white">$13,900 MRR</span> — up <span className="font-medium text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subs.</p>
+                  <p><span className="font-medium text-[#222528]">FormKit</span> is down 3 subs this week — net-negative by end of month at this pace.</p>
+                </div>
+                <div className="mt-4 rounded-xl bg-[#eff0fb] px-4 py-3">
+                  <p className="text-[12px] leading-5 text-[#3d4494]">
+                    <span className="font-medium text-[#5e6ad2]">→ Action: </span>
+                    Email FormKit&apos;s last 10 churned users — one question could tell you exactly what to fix.
+                  </p>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {[
+                    { l: "Fastest grower",  v: "Scarlet DB", s: "+14 subs",           accent: "#059669" },
+                    { l: "Needs attention", v: "FormKit",    s: "−3 subs",            accent: "#dc2626" },
+                    { l: "New MRR",         v: "+$560",      s: "across 3 products",  accent: "#5e6ad2" },
+                    { l: "Churn risk",      v: "1 flagged",  s: "FormKit trend",      accent: "#d97706" },
+                  ].map((c) => (
+                    <div key={c.l} className="rounded-xl border border-[rgba(152,157,164,0.15)] bg-[#f5f7f7] px-3 py-2.5">
+                      <p className={`${mono.className} text-[9px] uppercase tracking-wider text-[#222528]/35`}>{c.l}</p>
+                      <p className="mt-0.5 text-[13px] font-medium" style={{ color: c.accent }}>{c.v}</p>
+                      <p className="text-[10px] text-[#222528]/35">{c.s}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
