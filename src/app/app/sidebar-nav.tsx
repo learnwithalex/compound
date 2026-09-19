@@ -17,6 +17,8 @@ const NAV_MORE = [
 const NAV_BOTTOM = [
   { href: "/app/settings", label: "Settings", icon: SettingsIcon },
   { href: "/app/billing",  label: "Billing",  icon: BillingIcon },
+  { href: "/app/help",     label: "Help",     icon: HelpIcon },
+  { href: "/app/feedback", label: "Feedback", icon: FeedbackIcon },
 ];
 
 const PRODUCT_TABS = [
@@ -246,6 +248,22 @@ function TrackingIcon() {
       <polyline points="4,6 2,8 4,10" />
       <polyline points="12,6 14,8 12,10" />
       <line x1="9" y1="4" x2="7" y2="12" />
+    </svg>
+  );
+}
+function HelpIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6" />
+      <path d="M6.2 6a2 2 0 0 1 3.8.8c0 1.2-1.5 1.8-1.5 2.7" />
+      <circle cx="8" cy="11.5" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function FeedbackIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v7A1.5 1.5 0 0 1 12.5 12H5l-3 2.5V3.5z" />
     </svg>
   );
 }
