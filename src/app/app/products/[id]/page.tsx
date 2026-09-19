@@ -14,6 +14,7 @@ import {
   type ActivityItem,
 } from "@/lib/analytics";
 import { ChartCard } from "@/app/app/trend-chart";
+import { ProductOverview } from "./product-overview";
 import { CohortGrid } from "@/app/app/cohort-grid";
 import { SegmentCard, FunnelCard } from "@/app/app/report-cards";
 import { IconMrr, IconArr, IconSubs, IconTrend, IconArpa, IconLtv, IconChurn, IconQuick } from "@/app/app/stat-icons";
@@ -158,7 +159,7 @@ export default async function ProductPage({
 
 /* ============================================================ tabs */
 
-async function OverviewTab({ p, series, color, up, down, m, health, milestone }: {
+async function OverviewTab({ p, series, color, m, health, milestone }: {
   p: NonNullable<Awaited<ReturnType<typeof singleProductMetrics>>>["product"];
   series: { date: string; value: number }[];
   color: string; up: boolean; down: boolean;
@@ -168,93 +169,64 @@ async function OverviewTab({ p, series, color, up, down, m, health, milestone }:
 }) {
   return (
     <div>
-      {/* Hero stats */}
-      <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatTile label="MRR" value={fmtMrr(p.mrrCents)} icon={IconMrr} accent="#fff2a8" />
-        <StatTile label="ARR" value={fmtMrr(p.arrCents)} icon={IconArr} accent="#c9f0ff" />
-        <StatTile label="Active subs" value={p.activeSubscriptions.toLocaleString()} icon={IconSubs} accent="#ffd4e8" />
-        <StatTile
-          label="30d change"
-          value={`${up ? "+" : ""}${p.mrrChange30d.toFixed(1)}%`}
-          valueColor={up ? "#10b981" : down ? "#e3493c" : "#9a9a9a"}
-          icon={IconTrend} accent="#d4ffc9"
+      {/* Main chart card — reference-style */}
+      <div className="mb-6">
+        <ProductOverview
+          series={series}
+          color={color}
+          mrr={p.mrrCents}
+          arr={p.arrCents}
+          activeSubs={p.activeSubscriptions}
+          mrrChange30d={p.mrrChange30d}
+          arpaCents={m.arpaCents}
+          ltvCents={m.ltvCents}
+          monthlyChurnPct={m.monthlyChurnPct}
+          quickRatio={m.quickRatio}
+          newMrrCents={p.newMrrCents}
+          churnedMrrCents={p.churnedMrrCents}
+          expansionMrrCents={p.expansionMrrCents}
         />
-      </div>
-
-      {/* Unit economics */}
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatTile label="ARPA" value={fmtMrr(m.arpaCents)} sub="per active account" icon={IconArpa} accent="#fff2a8" />
-        <StatTile label="LTV" value={fmtMrr(m.ltvCents)} sub={`${m.avgLifetimeMonths.toFixed(1)} mo lifetime`} icon={IconLtv} accent="#c9f0ff" />
-        <StatTile
-          label="Monthly churn"
-          value={`${m.monthlyChurnPct.toFixed(1)}%`}
-          sub="customers lost, last 30d"
-          valueColor={m.monthlyChurnPct > 5 ? "#e3493c" : undefined}
-          icon={IconChurn} accent="#ffd4e8"
-        />
-        <StatTile
-          label="Quick ratio"
-          value={m.quickRatio === null ? "∞" : m.quickRatio.toFixed(1)}
-          sub="new MRR per $1 churned"
-          valueColor={m.quickRatio !== null && m.quickRatio < 1 ? "#e3493c" : "#10b981"}
-          icon={IconQuick} accent="#d4ffc9"
-        />
-      </div>
-
-      <ChartCard
-        className="mb-6"
-        label="Monthly recurring revenue"
-        caption={`Last 90 days · ${p.label}`}
-        series={series} color={color} height={260}
-      />
-
-      <div className="mb-6 grid grid-cols-3 gap-4">
-        <MovementTile label="New MRR" value={fmtMrr(p.newMrrCents)} color="#10b981" bg="rgba(16,185,129,0.07)" />
-        <MovementTile label="Churned MRR" value={fmtMrr(p.churnedMrrCents)} color="#e3493c" bg="rgba(227,73,60,0.07)" />
-        <MovementTile label="Expansion MRR" value={fmtMrr(p.expansionMrrCents)} color="#5e6ad2" bg="rgba(94,106,210,0.07)" />
       </div>
 
       {health && (
         <section
-          className="mb-6 overflow-hidden rounded-sm bg-white"
-          style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}
+          className="mb-6 overflow-hidden rounded-xl bg-white"
+          style={{ border: "1px solid #ebebeb" }}
         >
-          <div className="flex flex-wrap items-center gap-3 px-7 py-5" style={{ background: health.severity === "red" ? "#ffc1b6" : "#fff2a8", borderBottom: "1.5px solid #1c1c22" }}>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-white text-[16px]" style={{ border: "1.5px solid #1c1c22" }}>
-              {health.severity === "red" ? "🚨" : "⚠️"}
-            </span>
+          <div className="flex flex-wrap items-center gap-3 px-6 py-4" style={{ background: health.severity === "red" ? "rgba(227,73,60,0.06)" : "rgba(242,176,48,0.06)", borderBottom: "1px solid #f0f0f0" }}>
+            <span className="text-[16px]">{health.severity === "red" ? "🚨" : "⚠️"}</span>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-extrabold text-[#1c1c22]">−{fmtMrr(health.atRiskCents)} churned in 30d</p>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1c1c22]/60">Health signals · needs attention</p>
+              <p className="text-[13px] font-semibold text-[#1c1c22]">−{fmtMrr(health.atRiskCents)} churned in 30d</p>
+              <p className="text-[11px] text-[#8a8a8a]">Health signals · needs attention</p>
             </div>
           </div>
-          <div className="space-y-2 px-7 py-5">
+          <div className="space-y-1.5 px-6 py-4">
             {health.reasons.map((r) => (
-              <div key={r.message} className="flex items-center gap-3 rounded-sm bg-white px-4 py-3" style={{ border: "1px solid #ebebeb" }}>
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-[12px] font-bold text-white" style={{ background: r.severity === "red" ? "#e3493c" : "#f2b030", border: "1px solid #1c1c22" }}>!</span>
-                <span className="text-[13px] font-semibold text-lx-text">{r.message}</span>
+              <div key={r.message} className="flex items-center gap-3 rounded-lg px-4 py-2.5" style={{ background: "#fafafa", border: "1px solid #f0f0f0" }}>
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: r.severity === "red" ? "#e3493c" : "#f2b030" }} />
+                <span className="text-[13px] text-[#3d3d3d]">{r.message}</span>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      <section className="overflow-hidden rounded-sm bg-white" style={{ border: "1.5px solid #1c1c22", boxShadow: "3px 3px 0 #1c1c22" }}>
-        <div className="flex flex-wrap items-center gap-3 px-7 py-5" style={{ background: "#d4ffc9", borderBottom: "1.5px solid #1c1c22" }}>
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-white text-[16px]" style={{ border: "1.5px solid #1c1c22" }}>🏁</span>
+      <section className="overflow-hidden rounded-xl bg-white" style={{ border: "1px solid #ebebeb" }}>
+        <div className="flex flex-wrap items-center gap-3 px-6 py-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
+          <span className="text-[16px]">🏁</span>
           <div className="min-w-0 flex-1">
-            <p className="text-[14px] font-extrabold text-[#1c1c22]">{fmtMrr(milestone.prevCents)} → {fmtMrr(milestone.nextCents)} MRR</p>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1c1c22]/60">Next milestone · {milestone.crossed} crossed</p>
+            <p className="text-[13px] font-semibold text-[#1c1c22]">{fmtMrr(milestone.prevCents)} → {fmtMrr(milestone.nextCents)} MRR</p>
+            <p className="text-[11px] text-[#8a8a8a]">Next milestone · {milestone.crossed} crossed</p>
           </div>
-          <span className="shrink-0 rounded-sm bg-white px-2.5 py-1 text-[13px] font-extrabold tabular-nums text-[#1c1c22]" style={{ border: "1.5px solid #1c1c22" }}>
+          <span className="shrink-0 rounded-md px-2.5 py-1 text-[13px] font-semibold tabular-nums" style={{ background: "#eff0fb", color: "#5e6ad2" }}>
             {milestone.pct.toFixed(0)}%
           </span>
         </div>
-        <div className="px-7 py-5">
-          <div className="h-3.5 overflow-hidden rounded-full bg-white" style={{ border: "1.5px solid #1c1c22" }}>
-            <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(milestone.pct, 100)}%`, background: `repeating-linear-gradient(-45deg, ${color}, ${color} 8px, ${color}cc 8px, ${color}cc 16px)` }} />
+        <div className="px-6 py-4">
+          <div className="h-2 overflow-hidden rounded-full bg-[#f0f0f0]">
+            <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(milestone.pct, 100)}%`, background: color }} />
           </div>
-          <p className="mt-2 text-right text-[12px] font-medium text-lx-muted">{fmtMrr(milestone.toGoCents)} to go</p>
+          <p className="mt-2 text-right text-[12px] text-[#8a8a8a]">{fmtMrr(milestone.toGoCents)} to go</p>
         </div>
       </section>
     </div>
