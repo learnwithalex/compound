@@ -172,6 +172,7 @@ async function OverviewTab({ p, series, color, m, health, milestone }: {
       {/* Main chart card — reference-style */}
       <div className="mb-6">
         <ProductOverview
+          productName={p.label}
           series={series}
           color={color}
           mrr={p.mrrCents}
