@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { appUrl, createSessionToken, sessionHtmlRedirect } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { track } from "@/lib/track";
 
 export async function GET(req: NextRequest) {
   const base = appUrl();
@@ -59,6 +60,7 @@ export async function GET(req: NextRequest) {
     user = created;
   }
 
+  track("user.signed_in", { userId: user.id, method: "google_oauth" });
   const session = await createSessionToken(user.id);
   return sessionHtmlRedirect(session, `${base}/app`);
 }

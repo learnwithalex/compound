@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { CommandPalette, useCommandPalette } from "./command-palette";
 
-export function GlobalTopBar() {
+export function GlobalTopBar({ publicUrl }: { publicUrl: string | null }) {
   const { open, setOpen } = useCommandPalette();
 
   return (
@@ -30,6 +30,22 @@ export function GlobalTopBar() {
 
         {/* Right icons */}
         <div className="flex shrink-0 items-center gap-3">
+          {publicUrl && (
+            <a
+              href={publicUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]"
+              title="View your public revenue page"
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-4"/>
+                <path d="M10 2h4v4"/>
+                <path d="M14 2 8 8"/>
+              </svg>
+              Share
+            </a>
+          )}
           <Link href="/app/help" className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1z"/>

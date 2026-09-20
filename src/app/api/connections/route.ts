@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { userIdFromSessionOrToken } from "@/lib/auth";
+import { track } from "@/lib/track";
 import { db } from "@/db";
 import { connections } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
 
   const cleanUrl = websiteUrl?.trim() || null;
   const [conn] = await db.insert(connections).values({ userId, provider, label, apiKey, color, websiteUrl: cleanUrl }).returning();
+  track("connection.created", { userId, provider, connectionId: conn.id });
   return NextResponse.json({ id: conn.id, label: conn.label, provider: conn.provider, color: conn.color, websiteUrl: conn.websiteUrl });
 }
 
@@ -55,5 +57,6 @@ export async function DELETE(req: Request) {
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { id } = await req.json();
   await db.delete(connections).where(and(eq(connections.id, id), eq(connections.userId, userId)));
+  track("connection.deleted", { userId, connectionId: id });
   return NextResponse.json({ ok: true });
 }
