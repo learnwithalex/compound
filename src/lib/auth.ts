@@ -204,13 +204,13 @@ export async function requestLink(email: string): Promise<{ devUrl: string | nul
     return { devUrl: url };
   }
 
-  const base = process.env.ORIZON_EMAIL_API_URL?.trim() || "https://api.orizon.ng";
-  const res = await fetch(`${base}/v1/emails`, {
+  const res = await fetch("https://api.orizon.ng/v1/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM ?? "Compound <noreply@send.orizon.ng>",
-      to: clean,
+      from: process.env.EMAIL_FROM ?? "Compound <compound@send.orizon.ng>",
+      to: [clean],
+      reply_to: ["hello@usecompound.xyz"],
       subject: "Your sign-in link for Compound",
       html: magicLinkEmail(url, clean),
     }),
