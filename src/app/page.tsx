@@ -1113,7 +1113,6 @@ function SiteFooter() {
           <FooterCol title="Project" links={[
             { label: "Source on GitHub",  href: GITHUB },
             { label: "The Build Games",   href: "https://canivibecodeit.com/thebuildgames" },
-            { label: "Open demo",         href: "/api/auth/demo" },
           ]} />
         </div>
 
