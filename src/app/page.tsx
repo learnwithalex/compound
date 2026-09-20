@@ -710,7 +710,7 @@ function FeatureGrid() {
           <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
             <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Public</p>
             <p className="mb-1 text-[15px] font-medium text-[#222528]">Public revenue page</p>
-            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Share a live stats page — show what you want, hide the rest.</p>
+            <p className="mb-3 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Share a live stats page — show what you want, hide the rest.</p>
             <div className="overflow-hidden rounded-xl border border-[rgba(152,157,164,0.3)]">
               <div className="h-7 w-full rounded-t-xl" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #818cf8 100%)" }} />
               <div className="bg-[#f5f7f7] px-3.5 pb-3 pt-1">
@@ -727,6 +727,11 @@ function FeatureGrid() {
                   <span className="ml-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-medium text-emerald-600">↑ live</span>
                 </div>
               </div>
+            </div>
+            <div className={`${mono.className} mt-3 flex items-center gap-1 text-[10px] text-[#222528]/35`}>
+              <span>usecompound.xyz/u/</span>
+              <span className="rounded bg-[#5e6ad2]/10 px-1 text-[#5e6ad2]">your-slug</span>
+              <Link href="/app" className="ml-auto text-[#5e6ad2] no-underline hover:opacity-70">Set up →</Link>
             </div>
           </div>
 

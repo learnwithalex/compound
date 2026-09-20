@@ -3,6 +3,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CompoundMark } from "../compound-logo";
 
+function dispatchBrief() {
+  window.dispatchEvent(new Event("compound:brief"));
+}
+
 const NAV = [
   { href: "/app", label: "Overview" },
   { href: "/app/connect", label: "Connect" },
@@ -55,7 +59,19 @@ export function TopNav() {
           })}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-4">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          {isActive("/app") && (
+            <button
+              onClick={dispatchBrief}
+              className="flex items-center gap-1.5 rounded-sm px-3.5 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-80"
+              style={{ background: "rgba(94,106,210,0.1)", color: "#5e6ad2", border: "1px solid rgba(94,106,210,0.2)" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+                <path d="M6 0l1.2 4.8L12 6l-4.8 1.2L6 12 4.8 7.2 0 6l4.8-1.2z" />
+              </svg>
+              Get briefing
+            </button>
+          )}
           <Link
             href="/app/connect"
             className="rounded-sm px-3.5 py-1.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
@@ -63,7 +79,7 @@ export function TopNav() {
           >
             + New product
           </Link>
-          <Link href="/login" className="text-[13px] text-lx-faint transition-colors hover:text-lx-muted">
+          <Link href="/api/auth/signout" className="text-[13px] text-lx-faint transition-colors hover:text-lx-muted">
             Sign out
           </Link>
         </div>

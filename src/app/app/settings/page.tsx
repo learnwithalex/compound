@@ -27,6 +27,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [slugError, setSlugError] = useState("");
   const [testDigestState, setTestDigestState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [urlCopied, setUrlCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings").then((r) => r.json()).then((s: Settings) => {
@@ -155,9 +156,21 @@ export default function SettingsPage() {
                       style={{ border: "1px solid #ebebeb" }}
                     />
                     {publicUrl && (
-                      <a href={publicUrl} target="_blank" rel="noreferrer" className="shrink-0 text-[12px] text-[#5e6ad2] hover:opacity-80">
-                        View →
-                      </a>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a href={publicUrl} target="_blank" rel="noreferrer" className="text-[12px] text-[#5e6ad2] hover:opacity-80">
+                          View →
+                        </a>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(publicUrl).catch(() => {});
+                            setUrlCopied(true);
+                            setTimeout(() => setUrlCopied(false), 1500);
+                          }}
+                          className="text-[12px] text-lx-faint hover:text-lx-muted transition-colors"
+                        >
+                          {urlCopied ? "Copied ✓" : "Copy"}
+                        </button>
+                      </div>
                     )}
                   </div>
                   {slugError && <p className="mt-1 text-[11px] text-[#e3493c]">{slugError}</p>}
