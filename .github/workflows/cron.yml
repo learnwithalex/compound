@@ -1,0 +1,30 @@
+name: Cron jobs
+
+on:
+  schedule:
+    # Data sync — every 6 hours
+    - cron: "0 */6 * * *"
+    # Digest check — every day at 8am UTC (sends to users whose digest day matches)
+    - cron: "0 8 * * *"
+  workflow_dispatch: # allow manual runs from GitHub UI
+
+jobs:
+  sync:
+    name: Sync billing data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger sync
+        run: |
+          curl -fsS -X GET \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://usecompound.xyz/api/cron/sync
+
+  digest:
+    name: Send weekly digests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger digest
+        run: |
+          curl -fsS -X GET \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://usecompound.xyz/api/cron/digest
