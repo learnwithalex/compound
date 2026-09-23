@@ -18,10 +18,10 @@ export async function POST() {
   const brief = await generateBrief(metrics);
   const html = buildDigestHtml(brief, metrics);
 
-  const apiKey = process.env.ORIZON_EMAIL_API_KEY?.trim();
+  const apiKey = process.env.EMAIL_API_KEY?.trim();
   if (!apiKey) return NextResponse.json({ error: "email_not_configured" }, { status: 503 });
 
-  const base = process.env.ORIZON_EMAIL_API_URL?.trim() || "https://api.orizon.ng";
+  const base = process.env.EMAIL_API_URL?.trim() || "https://api.orizon.ng";
   const res = await fetch(`${base}/v1/emails`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },

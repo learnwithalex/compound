@@ -195,9 +195,9 @@ export async function requestLink(email: string): Promise<{ devUrl: string | nul
 
   const url = `${appUrl()}/api/auth/verify?token=${token}`;
 
-  const apiKey = process.env.ORIZON_EMAIL_API_KEY?.trim();
+  const apiKey = process.env.EMAIL_API_KEY?.trim();
   if (!apiKey) {
-    if (process.env.NODE_ENV === "production") throw new Error("ORIZON_EMAIL_API_KEY required");
+    if (process.env.NODE_ENV === "production") throw new Error("EMAIL_API_KEY required");
     return { devUrl: url };
   }
 

@@ -148,10 +148,10 @@ export async function sendDigest(user: { id: string; email: string }): Promise<{
   const brief = await generateBrief(metrics);
   const html = buildDigestHtml(brief, metrics);
 
-  const apiKey = process.env.ORIZON_EMAIL_API_KEY?.trim();
+  const apiKey = process.env.EMAIL_API_KEY?.trim();
   if (!apiKey) return { ok: false, error: "email_not_configured" };
 
-  const base = process.env.ORIZON_EMAIL_API_URL?.trim() || "https://api.orizon.ng";
+  const base = process.env.EMAIL_API_URL?.trim() || "https://api.orizon.ng";
   const res = await fetch(`${base}/v1/emails`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },

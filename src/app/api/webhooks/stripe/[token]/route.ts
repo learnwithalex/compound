@@ -7,9 +7,9 @@ import { appUrl } from "@/lib/auth";
 const ALERT_FROM = process.env.EMAIL_FROM ?? "Compound <noreply@send.orizon.ng>";
 
 async function sendAlertEmail(to: string, subject: string, html: string) {
-  const apiKey = process.env.ORIZON_EMAIL_API_KEY?.trim();
+  const apiKey = process.env.EMAIL_API_KEY?.trim();
   if (!apiKey) return;
-  const base = process.env.ORIZON_EMAIL_API_URL?.trim() || "https://api.orizon.ng";
+  const base = process.env.EMAIL_API_URL?.trim() || "https://api.orizon.ng";
   await fetch(`${base}/v1/emails`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },

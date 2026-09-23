@@ -13,8 +13,8 @@ export async function POST(req: Request) {
 
   const user = await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, userId) });
 
-  const apiKey = process.env.ORIZON_EMAIL_API_KEY?.trim();
-  const base = process.env.ORIZON_EMAIL_API_URL?.trim() || "https://api.orizon.ng";
+  const apiKey = process.env.EMAIL_API_KEY?.trim();
+  const base = process.env.EMAIL_API_URL?.trim() || "https://api.orizon.ng";
   const from = process.env.EMAIL_FROM ?? "Compound <noreply@send.orizon.ng>";
   const to = "support@usecompound.xyz";
 
