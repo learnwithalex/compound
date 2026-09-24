@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
+import { Analytics } from "@orizon-sdk/analytics/react";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script async src="https://usecompound.xyz/t.js?k=cmpd_950f43e3335045e2810c10b3f5659a32" />
       </head>
       <body className="min-h-screen font-sans antialiased">
+        <Analytics project="proj_compound" />
         <NextTopLoader color="#5e6ad2" height={2} showSpinner={false} />
         {children}
       </body>
