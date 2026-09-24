@@ -60,13 +60,24 @@ export function MiniHeader() {
 
   return (
     <header
-      className="flex h-[56px] shrink-0 items-center gap-2 px-4 md:px-16 lg:px-40"
+      className="flex h-[56px] shrink-0 items-center gap-2 px-3 md:px-16 lg:px-40"
       style={{ borderBottom: "1px solid #ebebeb" }}
     >
+      {/* Sidebar toggle — mobile only */}
+      <button
+        onClick={() => window.dispatchEvent(new CustomEvent("compound:sidebar-toggle"))}
+        className="flex shrink-0 items-center justify-center rounded-sm p-1.5 text-[#8a8a8a] hover:bg-[#f5f5f5] md:hidden"
+        aria-label="Toggle menu"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M2 4h12M2 8h12M2 12h12" />
+        </svg>
+      </button>
+
       {/* Workspace identity */}
       <Link href="/app" className="flex shrink-0 items-center gap-2">
         <CompoundMark size={20} theme="light" />
-        <div className="flex flex-col leading-none">
+        <div className="hidden flex-col leading-none sm:flex">
           <span className="text-[13px] font-medium text-lx-text">compound</span>
           {isPro !== null && (
             <span
@@ -83,31 +94,32 @@ export function MiniHeader() {
       </Link>
 
       {/* Breadcrumb */}
-      {segments.map((seg, i) => (
-        <span key={i} className="flex items-center gap-2">
-          <span className="text-[13px] text-[#d0d0d0]">/</span>
-          {seg.href ? (
-            <Link href={seg.href} className="text-[13px] text-lx-faint hover:text-lx-text">
-              {seg.label}
-            </Link>
-          ) : (
-            <span className="text-[13px] text-lx-faint">{seg.label}</span>
-          )}
-        </span>
-      ))}
+      <div className="hidden items-center gap-2 sm:flex">
+        {segments.map((seg, i) => (
+          <span key={i} className="flex items-center gap-2">
+            <span className="text-[13px] text-[#d0d0d0]">/</span>
+            {seg.href ? (
+              <Link href={seg.href} className="text-[13px] text-lx-faint hover:text-lx-text">
+                {seg.label}
+              </Link>
+            ) : (
+              <span className="text-[13px] text-lx-faint">{seg.label}</span>
+            )}
+          </span>
+        ))}
+      </div>
 
       {/* Actions */}
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
         {isOverview && (
           <button
             onClick={triggerBriefing}
-            className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[12px] font-semibold text-lx-muted transition-colors hover:bg-[#f5f5f5] hover:text-lx-text"
-            style={{ border: "1px solid #e0e0e0" }}
+            className="flex items-center gap-1.5 rounded-sm px-2 py-1.5 text-[12px] font-semibold text-lx-muted transition-colors hover:bg-[#f5f5f5] hover:text-lx-text sm:px-3"
           >
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor" className="shrink-0">
               <path d="M6 0l1.2 4.8L12 6l-4.8 1.2L6 12 4.8 7.2 0 6l4.8-1.2z" />
             </svg>
-            AI briefing
+            <span className="hidden sm:inline">AI briefing</span>
           </button>
         )}
 
@@ -115,10 +127,11 @@ export function MiniHeader() {
         <div className="flex overflow-hidden rounded-sm" style={{ border: "1px solid #4f5bbf" }}>
           <Link
             href="/app/connect"
-            className="px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+            className="px-2 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90 sm:px-3"
             style={{ background: "#5e6ad2" }}
           >
-            + New product
+            <span className="sm:hidden">+</span>
+            <span className="hidden sm:inline">+ New product</span>
           </Link>
           <div className="w-px" style={{ background: "rgba(255,255,255,0.25)" }} />
           <button

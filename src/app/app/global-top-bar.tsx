@@ -9,27 +9,30 @@ export function GlobalTopBar({ publicUrl }: { publicUrl: string | null }) {
     <>
       <CommandPalette open={open} onClose={() => setOpen(false)} />
       <div
-        className="flex h-[40px] w-full shrink-0 items-center gap-3 px-4 md:px-16 lg:px-40"
+        className="flex h-[40px] w-full shrink-0 items-center gap-2 px-3 sm:gap-3 md:px-16 lg:px-40"
         style={{ borderBottom: "1px solid #ebebeb", background: "#ffffff" }}
       >
         {/* Search — clickable to open palette */}
         <button
           onClick={() => setOpen(true)}
-          className="flex flex-1 items-center gap-2 text-left"
+          className="flex flex-1 items-center gap-2 overflow-hidden text-left"
         >
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#b0b0b0" strokeWidth="1.6" strokeLinecap="round">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#b0b0b0" strokeWidth="1.6" strokeLinecap="round" className="shrink-0">
             <circle cx="6.5" cy="6.5" r="4.5" />
             <path d="M10.5 10.5L14 14" />
           </svg>
-          <span className="text-[12.5px] text-[#c0c0c0]">Search workspace or use</span>
-          <kbd className="rounded px-1 py-0.5 text-[10px] text-[#b0b0b0]"
+          <span className="truncate text-[12.5px] text-[#c0c0c0]">
+            <span className="hidden sm:inline">Search workspace or use</span>
+            <span className="sm:hidden">Search</span>
+          </span>
+          <kbd className="hidden shrink-0 rounded px-1 py-0.5 text-[10px] text-[#b0b0b0] sm:inline-block"
             style={{ background: "#f5f5f5", border: "1px solid #e8e8e8" }}>
             ⌘K
           </kbd>
         </button>
 
         {/* Right icons */}
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {publicUrl && (
             <a
               href={publicUrl}
@@ -43,7 +46,7 @@ export function GlobalTopBar({ publicUrl }: { publicUrl: string | null }) {
                 <path d="M10 2h4v4"/>
                 <path d="M14 2 8 8"/>
               </svg>
-              Share
+              <span className="hidden sm:inline">Share</span>
             </a>
           )}
           <Link href="/app/help" className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
@@ -52,9 +55,9 @@ export function GlobalTopBar({ publicUrl }: { publicUrl: string | null }) {
               <path d="M8 6v3"/>
               <circle cx="8" cy="11.5" r="0.6" fill="currentColor" stroke="none"/>
             </svg>
-            Help
+            <span className="hidden sm:inline">Help</span>
           </Link>
-          <Link href="/app/feedback" className="flex items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c]">
+          <Link href="/app/feedback" className="hidden items-center gap-1.5 text-[12px] text-[#8a8a8a] transition-colors hover:text-[#5c5c5c] sm:flex">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 7A6 6 0 0 1 2.11 10.26L1 15l4.74-1.11A6 6 0 1 1 13 7z"/>
             </svg>
@@ -62,13 +65,13 @@ export function GlobalTopBar({ publicUrl }: { publicUrl: string | null }) {
           </Link>
           <a
             href="/app/billing"
-            className="flex items-center gap-1 rounded-sm px-2.5 py-1 text-[11px] font-semibold transition-colors"
+            className="flex items-center gap-1 rounded-sm px-2 py-1 text-[11px] font-semibold transition-colors sm:px-2.5"
             style={{ background: "rgba(94,106,210,0.10)", color: "#5e6ad2", border: "1px solid rgba(94,106,210,0.2)" }}
           >
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" className="shrink-0">
               <path d="M6 0l1.2 4.8L12 6l-4.8 1.2L6 12 4.8 7.2 0 6l4.8-1.2z" />
             </svg>
-            Upgrade
+            <span className="hidden sm:inline">Upgrade</span>
           </a>
         </div>
       </div>

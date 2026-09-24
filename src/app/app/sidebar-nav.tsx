@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 const NAV_MAIN = [
   { href: "/app",           label: "Overview",  icon: HomeIcon },
@@ -81,28 +81,52 @@ function NavContent() {
 }
 
 export function SidebarNav() {
-  return (
-    <aside
-      className="flex w-[200px] shrink-0 flex-col bg-white md:w-[280px] lg:w-[380px]"
-      style={{ borderRight: "1px solid #ebebeb" }}
-    >
-      <Suspense fallback={<div className="flex-1" />}>
-        <NavContent />
-      </Suspense>
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-      <div className="pb-3 pl-3 pr-3 pt-2 md:pl-16 lg:pl-40" style={{ borderTop: "1px solid #ebebeb" }}>
-        {NAV_BOTTOM.map(({ href, label, icon: Icon }) => (
-          <Item key={label} href={href} label={label} Icon={Icon} active={false} />
-        ))}
-        <button
-          onClick={() => { window.location.href = "/api/auth/signout"; }}
-          className="mb-px flex h-[34px] w-full items-center gap-[9px] rounded-sm pl-3 pr-2 text-[13px] text-[#565656] transition-colors hover:bg-[#f3f4f6] hover:text-[#111111]"
-        >
-          <span className="shrink-0 text-[#a0a0a0]"><SignOutIcon /></span>
-          <span className="flex-1 leading-none text-left">Sign out</span>
-        </button>
-      </div>
-    </aside>
+  useEffect(() => {
+    const handler = () => setOpen((v) => !v);
+    window.addEventListener("compound:sidebar-toggle", handler);
+    return () => window.removeEventListener("compound:sidebar-toggle", handler);
+  }, []);
+
+  // A new page renders behind the drawer; close it so it doesn't stay parked over the content.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  return (
+    <>
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-[240px] shrink-0 flex-col bg-white transition-transform duration-200 md:static md:z-auto md:w-[280px] md:translate-x-0 lg:w-[380px] ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        style={{ borderRight: "1px solid #ebebeb" }}
+      >
+        <Suspense fallback={<div className="flex-1" />}>
+          <NavContent />
+        </Suspense>
+
+        <div className="pb-3 pl-3 pr-3 pt-2 md:pl-16 lg:pl-40" style={{ borderTop: "1px solid #ebebeb" }}>
+          {NAV_BOTTOM.map(({ href, label, icon: Icon }) => (
+            <Item key={label} href={href} label={label} Icon={Icon} active={false} />
+          ))}
+          <button
+            onClick={() => { window.location.href = "/api/auth/signout"; }}
+            className="mb-px flex h-[34px] w-full items-center gap-[9px] rounded-sm pl-3 pr-2 text-[13px] text-[#565656] transition-colors hover:bg-[#f3f4f6] hover:text-[#111111]"
+          >
+            <span className="shrink-0 text-[#a0a0a0]"><SignOutIcon /></span>
+            <span className="flex-1 leading-none text-left">Sign out</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
 

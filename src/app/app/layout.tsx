@@ -25,7 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <SidebarNav />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="p-14 pr-40">
+          <div className="p-4 sm:p-6 md:p-10 lg:p-14 lg:pr-40">
             {children}
           </div>
         </main>
