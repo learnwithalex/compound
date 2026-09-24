@@ -67,7 +67,7 @@ export function ProductOverview({
     <div className="overflow-hidden rounded-xl bg-white" style={{ border: "1px solid #e5e7eb" }}>
 
       {/* ── filter bar ── */}
-      <div className="flex h-10 items-center justify-between border-b border-[#f0f0f0] px-4">
+      <div className="flex min-h-10 flex-wrap items-center justify-between gap-y-1.5 border-b border-[#f0f0f0] px-4 py-1.5">
         {/* Left group */}
         <div className="flex items-center gap-2">
           {/* Site/product label */}
@@ -153,12 +153,12 @@ export function ProductOverview({
       </div>
 
       {/* ── stats strip ── */}
-      <div className="flex items-start justify-between border-b border-[#f0f0f0] px-5 py-4">
+      <div className="flex flex-wrap items-start gap-x-6 gap-y-4 border-b border-[#f0f0f0] px-5 py-4 sm:justify-between sm:gap-x-4">
         {stats.map((s) => {
           const up = (s.pct ?? 0) > 0;
           const down = (s.pct ?? 0) < 0;
           return (
-            <div key={s.label} className="min-w-0">
+            <div key={s.label} className="min-w-[72px]">
               <p className="text-[11px] text-[#9ca3af]">{s.label}</p>
               <p className="mt-0.5 text-[22px] font-bold leading-tight tabular-nums text-[#111]"
                 style={{ letterSpacing: "-0.02em" }}>

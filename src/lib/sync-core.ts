@@ -1,6 +1,7 @@
 import { db } from "@/db";
-import { connections, customers, subscriptions, snapshots, revenueEvents } from "@/db/schema";
+import { connections, customers, subscriptions, snapshots, revenueEvents, userSettings, users } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
+import { sendAlertEmail, alertEmail, type AlertType } from "@/lib/alerts";
 
 // Reconstruct daily MRR snapshots from subscription start/cancel dates.
 // Only runs on the first sync for a connection (when there are ≤1 existing snapshots).
@@ -137,9 +138,24 @@ export async function persistPull(connectionId: string, pull: ProviderPull) {
   const today = new Date().toISOString().slice(0, 10);
   const now = new Date();
 
+  // Alert emails are provider-agnostic: every sync path (all providers except
+  // Stripe, which alerts from its own webhook) funnels through here, so this
+  // is the one place that needs to know who to notify and whether they opted in.
+  const conn = await db.query.connections.findFirst({ where: (c, { eq }) => eq(c.id, connectionId) });
+  const settings = conn ? await db.query.userSettings.findFirst({ where: (s, { eq }) => eq(s.userId, conn.userId) }) : null;
+  const user = conn ? await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, conn.userId) }) : null;
+  const alertJobs: Promise<unknown>[] = [];
+  function queueAlert(type: AlertType, opts: { customerEmail?: string | null; planName?: string | null; mrrCents: number; prevMrrCents?: number }) {
+    if (!conn || !user?.email) return;
+    const { subject, html } = alertEmail(type, { productLabel: conn.label, ...opts });
+    alertJobs.push(sendAlertEmail(user.email, subject, html));
+  }
+
   // 1. Upsert customers, build externalId -> internal id map
   const custIdByExternal = new Map<string, string>();
+  const custEmailByExternal = new Map<string, string | null>();
   for (const c of pull.customers) {
+    custEmailByExternal.set(c.externalId, c.email ?? null);
     const attribution = extractAttribution(c.metadata);
     const [row] = await db.insert(customers).values({
       connectionId,
@@ -170,6 +186,10 @@ export async function persistPull(connectionId: string, pull: ProviderPull) {
 
   const events: typeof revenueEvents.$inferInsert[] = [];
   const seen = new Set<string>();
+  // A brand-new connection's first sync would otherwise read every pre-existing
+  // subscriber as "new" and fire an alert per customer — suppress alerts (not events)
+  // for that pass, same as backfillHistory below skips for anything but the first sync.
+  const isFirstSync = prevSubs.length === 0;
 
   // 3. Upsert each subscription and emit the state-change event
   for (const s of pull.subscriptions) {
@@ -208,16 +228,33 @@ export async function persistPull(connectionId: string, pull: ProviderPull) {
 
     const nowPaying = MRR_STATUSES.has(s.status);
     const wasPaying = prev ? MRR_STATUSES.has(prev.status) : false;
+    const custEmail = custEmailByExternal.get(s.customerExternalId ?? "") ?? null;
 
     if (!prev && nowPaying) {
       events.push({ connectionId, externalId: s.externalId, eventType: "new", amountCents: s.mrrCents, currency: s.currency ?? "usd", occurredAt: s.startedAt ?? now });
+      if (!isFirstSync && settings?.alertNewSub) {
+        queueAlert("new", { customerEmail: custEmail, planName: s.planName, mrrCents: s.mrrCents });
+      }
     } else if (prev && !wasPaying && nowPaying) {
       events.push({ connectionId, externalId: s.externalId, eventType: "reactivation", amountCents: s.mrrCents, currency: s.currency ?? "usd", occurredAt: now });
+      if (settings?.alertNewSub) {
+        queueAlert("new", { customerEmail: custEmail, planName: s.planName, mrrCents: s.mrrCents });
+      }
     } else if (prev && wasPaying && !nowPaying) {
       events.push({ connectionId, externalId: s.externalId, eventType: "churn", amountCents: prev.mrrCents, currency: s.currency ?? "usd", occurredAt: s.canceledAt ?? now });
+      if (settings?.alertChurn) {
+        queueAlert("churn", { customerEmail: custEmail, planName: s.planName, mrrCents: prev.mrrCents });
+      }
     } else if (prev && wasPaying && nowPaying && s.mrrCents !== prev.mrrCents) {
       const delta = s.mrrCents - prev.mrrCents;
       events.push({ connectionId, externalId: s.externalId, eventType: delta > 0 ? "expansion" : "contraction", amountCents: Math.abs(delta), currency: s.currency ?? "usd", occurredAt: now });
+      if (delta > 0 && settings?.alertUpgrade) {
+        queueAlert("upgrade", { customerEmail: custEmail, planName: s.planName, mrrCents: s.mrrCents, prevMrrCents: prev.mrrCents });
+      }
+    }
+
+    if (prev && prev.status !== "past_due" && s.status === "past_due" && settings?.alertPastDue) {
+      queueAlert("past_due", { customerEmail: custEmail, planName: s.planName, mrrCents: s.mrrCents });
     }
   }
 
@@ -230,12 +267,22 @@ export async function persistPull(connectionId: string, pull: ProviderPull) {
         eq(subscriptions.connectionId, connectionId),
         inArray(subscriptions.externalId, vanished.map((v) => v.externalId)),
       ));
+    const vanishedCustIds = [...new Set(vanished.map((v) => v.customerId).filter((id): id is string => !!id))];
+    const vanishedCusts = vanishedCustIds.length
+      ? await db.query.customers.findMany({ where: (c, { inArray }) => inArray(c.id, vanishedCustIds) })
+      : [];
+    const emailByCustId = new Map(vanishedCusts.map((c) => [c.id, c.email]));
+
     for (const v of vanished) {
       events.push({ connectionId, externalId: v.externalId, eventType: "churn", amountCents: v.mrrCents, currency: v.currency, occurredAt: now });
+      if (settings?.alertChurn) {
+        queueAlert("churn", { customerEmail: v.customerId ? emailByCustId.get(v.customerId) : null, planName: v.planName, mrrCents: v.mrrCents });
+      }
     }
   }
 
   if (events.length > 0) await db.insert(revenueEvents).values(events);
+  if (alertJobs.length > 0) await Promise.allSettled(alertJobs);
 
   // 4b. On first sync, backfill historical snapshots from subscription date ranges.
   if (prevSubs.length === 0) await backfillHistory(connectionId);
