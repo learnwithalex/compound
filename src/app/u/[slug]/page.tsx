@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { db } from "@/db";
 import { portfolioMetrics } from "@/lib/metrics";
 import { fmtMrr, productIcon } from "@/lib/format";
+import { milestoneFor } from "@/lib/insights";
 import { CompoundWordmark } from "@/app/compound-logo";
+import { TrendChart } from "@/app/app/trend-chart";
 
 export const revalidate = 300;
 
@@ -55,6 +57,20 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
   const displayName = settings.displayName || ownerName(user.email ?? "");
   const initials = displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
+  // Portfolio history isn't tracked on its own — sum each product's daily
+  // snapshot by date so the chart shows one combined trend, not per-product.
+  const historyByDate = new Map<string, number>();
+  for (const p of metrics.products) {
+    for (const h of p.history) {
+      historyByDate.set(h.date, (historyByDate.get(h.date) ?? 0) + h.mrrCents);
+    }
+  }
+  const trend = [...historyByDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, value]) => ({ date, value }));
+
+  const milestone = milestoneFor(metrics.totalMrrCents);
+
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f4]">
       <header className="flex items-center justify-between px-8 py-5">
@@ -98,19 +114,27 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
           </div>
         </div>
 
-        <div className="mb-5 rounded-sm bg-white p-6" style={{ border: "1px solid #ebebeb" }}>
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a8a39b]">
-            Portfolio · {ranked.length} product{ranked.length !== 1 ? "s" : ""}
-          </p>
-
-          {settings.publicShowMrr && (
-            <p className="mt-3 text-[40px] font-bold tabular-nums text-[#1a1a1a]" style={{ letterSpacing: "-0.03em" }}>
-              {fmtMrr(metrics.totalMrrCents)}
-              <span className="ml-2 text-[16px] font-medium text-[#a8a39b]">MRR</span>
+        <div className="mb-5 overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>
+          <div className="p-6 pb-0">
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a8a39b]">
+              Portfolio · {ranked.length} product{ranked.length !== 1 ? "s" : ""}
             </p>
+
+            {settings.publicShowMrr && (
+              <p className="mt-3 text-[52px] font-bold tabular-nums leading-none text-[#1a1a1a]" style={{ letterSpacing: "-0.03em" }}>
+                {fmtMrr(metrics.totalMrrCents)}
+                <span className="ml-2 text-[16px] font-medium text-[#a8a39b]">MRR</span>
+              </p>
+            )}
+          </div>
+
+          {settings.publicShowMrr && trend.length > 1 && (
+            <div className="px-2 pt-4">
+              <TrendChart series={trend} color="#5e6ad2" height={160} animate />
+            </div>
           )}
 
-          <div className="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-sm" style={{ background: "#ebebeb" }}>
+          <div className="mt-2 grid grid-cols-3 gap-px overflow-hidden" style={{ background: "#ebebeb" }}>
             <Stat label="ARR" value={fmtMrr(metrics.totalArrCents)} />
             <Stat
               label="Net new · 30d"
@@ -119,6 +143,26 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
             />
             <Stat label="Active subs" value={metrics.totalActiveSubscriptions.toLocaleString()} />
           </div>
+
+          {settings.publicShowMrr && (
+            <div className="border-t border-[#ebebeb] px-6 py-4">
+              <div className="flex items-center gap-3">
+                <span className="text-[15px]">🏁</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12.5px] font-semibold text-[#1a1a1a]">
+                    {fmtMrr(milestone.prevCents)} → {fmtMrr(milestone.nextCents)} MRR
+                  </p>
+                  <p className="text-[10.5px] text-[#a8a39b]">{fmtMrr(milestone.toGoCents)} to go</p>
+                </div>
+                <span className="shrink-0 rounded-md px-2 py-1 text-[12px] font-bold tabular-nums" style={{ background: "#eff0fb", color: "#5e6ad2" }}>
+                  {milestone.pct.toFixed(0)}%
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-[#f0f0f0]">
+                <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(milestone.pct, 100)}%`, background: "#5e6ad2" }} />
+              </div>
+            </div>
+          )}
         </div>
 
         {settings.publicShowProducts && ranked.length > 0 && (
