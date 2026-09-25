@@ -10,7 +10,7 @@ import { Avatar } from "@/app/app/avatar";
 import { milestoneFor, radarSignals } from "@/lib/insights";
 import {
   loadSubs, coreMetrics, cohortRetention, lifecycleFunnel, topCustomers, recentActivity,
-  segmentByPlan, segmentByCountry, segmentBySource,
+  segmentByPlan, segmentByCountry, segmentBySource, totalCollectedCents,
   type ActivityItem,
 } from "@/lib/analytics";
 import { ChartCard } from "@/app/app/trend-chart";
@@ -123,6 +123,7 @@ export default async function ProductPage({
           <OverviewTab
             p={p} series={series} color={color} up={up} down={down}
             m={coreMetrics(subs)} health={health} milestone={milestone}
+            totalCollectedCents={totalCollectedCents(subs)}
           />
         )}
 
@@ -159,13 +160,14 @@ export default async function ProductPage({
 
 /* ============================================================ tabs */
 
-async function OverviewTab({ p, series, color, m, health, milestone }: {
+async function OverviewTab({ p, series, color, m, health, milestone, totalCollectedCents }: {
   p: NonNullable<Awaited<ReturnType<typeof singleProductMetrics>>>["product"];
   series: { date: string; value: number }[];
   color: string; up: boolean; down: boolean;
   m: ReturnType<typeof coreMetrics>;
   health: ReturnType<typeof radarSignals>[0];
   milestone: ReturnType<typeof milestoneFor>;
+  totalCollectedCents: number;
 }) {
   return (
     <div>
@@ -186,6 +188,7 @@ async function OverviewTab({ p, series, color, m, health, milestone }: {
           newMrrCents={p.newMrrCents}
           churnedMrrCents={p.churnedMrrCents}
           expansionMrrCents={p.expansionMrrCents}
+          totalCollectedCents={totalCollectedCents}
         />
       </div>
 

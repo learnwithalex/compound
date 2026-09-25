@@ -19,6 +19,7 @@ interface Props {
   newMrrCents: number;
   churnedMrrCents: number;
   expansionMrrCents: number;
+  totalCollectedCents: number;
 }
 
 const PERIODS = [
@@ -42,16 +43,17 @@ export function ProductOverview({
   productName, series, color,
   mrr, arr, activeSubs, mrrChange30d,
   arpaCents, ltvCents, monthlyChurnPct, quickRatio,
-  newMrrCents, churnedMrrCents, expansionMrrCents,
+  newMrrCents, churnedMrrCents, expansionMrrCents, totalCollectedCents,
 }: Props) {
   const [periodIdx, setPeriodIdx] = useState(0);
   const period = PERIODS[periodIdx];
   const slice = useMemo(() => series.slice(-period.days), [series, period.days]);
 
   const stats: { label: string; value: string; pct: number | null; dot?: string }[] = [
-    { label: "MRR",         value: fmtMrr(mrr),                                       pct: mrrChange30d },
-    { label: "ARR",         value: fmtMrr(arr),                                       pct: mrrChange30d },
-    { label: "Active subs", value: activeSubs.toLocaleString(),                        pct: null },
+    { label: "MRR",          value: fmtMrr(mrr),                                       pct: mrrChange30d },
+    { label: "ARR",          value: fmtMrr(arr),                                       pct: mrrChange30d },
+    { label: "Total billed", value: fmtMrr(totalCollectedCents),                       pct: null },
+    { label: "Active subs",  value: activeSubs.toLocaleString(),                       pct: null },
     { label: "30d change",  value: `${mrrChange30d >= 0 ? "+" : ""}${mrrChange30d.toFixed(1)}%`, pct: mrrChange30d },
     { label: "ARPA",        value: fmtMrr(arpaCents),                                 pct: null },
     { label: "LTV",         value: fmtMrr(ltvCents),                                  pct: null },

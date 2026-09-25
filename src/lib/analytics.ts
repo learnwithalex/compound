@@ -244,6 +244,18 @@ export interface TopCustomer {
   ltdCents: number;
 }
 
+/** Revenue billed to date, at a subscription's current rate.
+ *  A charge happens at signup (cycle 1) and then every ~30 days after, so a
+ *  customer 5.1 months in has been billed 6 times, not 5.1 — floor(months)+1
+ *  counts completed cycles; dividing continuous elapsed time by cycle length
+ *  undercounts by up to a full payment. */
+export function ltdCents(mrrCents: number, startedAt: Date | null, endMs = Date.now()): number {
+  if (!startedAt) return 0;
+  const months = Math.max(0, (endMs - startedAt.getTime()) / (30.44 * 864e5));
+  const cyclesBilled = Math.floor(months) + 1;
+  return Math.round(mrrCents * cyclesBilled);
+}
+
 export function topCustomers(subs: LoadedSub[], limit = 10): TopCustomer[] {
   const now = Date.now();
   return subs
@@ -261,9 +273,19 @@ export function topCustomers(subs: LoadedSub[], limit = 10): TopCustomer[] {
         source: s.utmSource,
         mrrCents: s.mrrCents,
         tenureMonths: months,
-        ltdCents: Math.round(s.mrrCents * months),
+        ltdCents: ltdCents(s.mrrCents, s.startedAt, now),
       };
     });
+}
+
+/** Total revenue billed to date across every paying subscription — the
+ *  "Gross Volume" equivalent providers like Dodo show, computed from our own
+ *  billed-cycle model rather than pulled from the provider. */
+export function totalCollectedCents(subs: LoadedSub[]): number {
+  const now = Date.now();
+  return subs
+    .filter((s) => PAYING.has(s.status))
+    .reduce((sum, s) => sum + ltdCents(s.mrrCents, s.startedAt, now), 0);
 }
 
 /* ============================================================ activity feed */

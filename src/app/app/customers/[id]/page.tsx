@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { userIdFromSession } from "@/lib/auth";
-import { loadCustomerJourney } from "@/lib/analytics";
+import { loadCustomerJourney, ltdCents } from "@/lib/analytics";
 import { fmtMrr, productIcon } from "@/lib/format";
 import { NotesSection } from "./notes-section";
 import { Avatar } from "@/app/app/avatar";
@@ -45,11 +45,8 @@ export default async function CustomerPage({
 
   const totalMrr = j.subs.filter((s) => ["active", "past_due"].includes(s.status)).reduce((s, x) => s + x.mrrCents, 0);
   const billed = j.subs.reduce((sum, s) => {
-    const start = s.startedAt ? s.startedAt.getTime() : null;
-    if (!start) return sum;
     const end = s.canceledAt ? s.canceledAt.getTime() : Date.now();
-    const months = Math.max(0, (end - start) / (30.44 * 864e5));
-    return sum + Math.round(s.mrrCents * months);
+    return sum + ltdCents(s.mrrCents, s.startedAt, end);
   }, 0);
 
   const earliest = j.subs
