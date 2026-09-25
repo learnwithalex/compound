@@ -81,37 +81,69 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
       </header>
 
       <main className="mx-auto w-full max-w-[480px] px-6 py-10">
-        {/* Profile hero */}
-        <div className="mb-5 rounded-sm bg-white overflow-hidden" style={{ border: "1px solid #ebebeb" }}>
-          <div className="relative h-[80px]" style={{ background: "linear-gradient(135deg, #5e6ad2 0%, #4a54c0 100%)" }}>
+        {/* Profile byline — no card, no banner; sits on the page like an author line */}
+        <div className="mb-8 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-3.5">
             <div
-              className="absolute left-1/2 -bottom-8 -translate-x-1/2 h-16 w-16 rounded-full flex items-center justify-center text-[20px] font-bold text-white overflow-hidden"
-              style={{ background: settings.avatarUrl ? undefined : "#5e6ad2", border: "3px solid white", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
+              className="h-12 w-12 shrink-0 rounded-full flex items-center justify-center text-[15px] font-bold text-white overflow-hidden"
+              style={{ background: settings.avatarUrl ? undefined : "#5e6ad2" }}
             >
               {settings.avatarUrl
                 ? <img src={settings.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
                 : initials}
             </div>
+            <div className="min-w-0 pt-0.5">
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <p className="text-[16px] font-extrabold text-[#1a1a1a]" style={{ letterSpacing: "-0.02em" }}>{displayName}</p>
+                {settings.xHandle && (
+                  <a
+                    href={`https://x.com/${settings.xHandle}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[12.5px] text-[#a8a39b] hover:text-[#5c5c5c] transition-colors"
+                  >
+                    @{settings.xHandle}
+                  </a>
+                )}
+              </div>
+              {settings.bio && (
+                <p className="mt-0.5 text-[13px] leading-relaxed" style={{ color: "#8a8580" }}>{settings.bio}</p>
+              )}
+            </div>
           </div>
-          <div className="pt-10 pb-6 px-6 text-center">
-            <p className="text-[16px] font-bold text-[#1a1a1a]" style={{ letterSpacing: "-0.02em" }}>{displayName}</p>
-            {settings.xHandle && (
-              <a
-                href={`https://x.com/${settings.xHandle}`}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-0.5 inline-flex items-center gap-1 text-[12px] text-[#a8a39b] hover:text-[#1a1a1a] transition-colors"
-              >
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                @{settings.xHandle}
-              </a>
-            )}
-            {settings.bio && (
-              <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "#6b6b6b" }}>{settings.bio}</p>
-            )}
-          </div>
+
+          {(settings.xHandle || settings.githubHandle) && (
+            <div className="flex shrink-0 flex-col items-stretch gap-1.5 pt-0.5">
+              {settings.xHandle && (
+                <a
+                  href={`https://x.com/${settings.xHandle}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-semibold text-white transition-opacity hover:opacity-85"
+                  style={{ background: "#0a0a0a" }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  Follow
+                </a>
+              )}
+              {settings.githubHandle && (
+                <a
+                  href={`https://github.com/${settings.githubHandle}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-semibold transition-colors hover:bg-[#f0efe9]"
+                  style={{ border: "1px solid #ddd9d0", color: "#1a1a1a" }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+                  </svg>
+                  GitHub
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="mb-5 overflow-hidden rounded-sm bg-white" style={{ border: "1px solid #ebebeb" }}>

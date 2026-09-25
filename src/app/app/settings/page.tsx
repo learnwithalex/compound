@@ -16,6 +16,7 @@ interface Settings {
   displayName: string | null;
   avatarUrl: string | null;
   xHandle: string | null;
+  githubHandle: string | null;
   bio: string | null;
 }
 
@@ -226,6 +227,7 @@ function ProfileCard({
 }) {
   const [name, setName] = useState(settings.displayName ?? "");
   const [xHandle, setXHandle] = useState(settings.xHandle ?? "");
+  const [githubHandle, setGithubHandle] = useState(settings.githubHandle ?? "");
   const [bio, setBio] = useState(settings.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(settings.avatarUrl ?? "");
   const [avatarInput, setAvatarInput] = useState("");
@@ -313,6 +315,21 @@ function ProfileCard({
           </div>
         </div>
 
+        {/* GitHub */}
+        <div className="mb-3">
+          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.1em] text-lx-faint">GitHub</label>
+          <div className="flex items-center gap-1 rounded-sm px-3 py-1.5 focus-within:ring-2 focus-within:ring-[#5e6ad2]/20" style={{ border: "1px solid #ebebeb" }}>
+            <span className="text-[13px] text-lx-faint">@</span>
+            <input
+              value={githubHandle}
+              onChange={(e) => setGithubHandle(e.target.value)}
+              onBlur={() => onSave("githubHandle", githubHandle || null)}
+              placeholder="username"
+              className="flex-1 bg-transparent text-[13px] text-lx-text focus:outline-none"
+            />
+          </div>
+        </div>
+
         {/* Bio */}
         <div className="mb-5">
           <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.1em] text-lx-faint">
@@ -350,7 +367,7 @@ function ProfileCard({
           </div>
         </div>
 
-        {saving && ["displayName", "avatarUrl", "xHandle", "bio"].includes(saving) && (
+        {saving && ["displayName", "avatarUrl", "xHandle", "githubHandle", "bio"].includes(saving) && (
           <p className="mt-3 text-center text-[11px] text-lx-faint">Saving…</p>
         )}
       </div>

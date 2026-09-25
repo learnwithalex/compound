@@ -136,6 +136,7 @@ export const userSettings = pgTable("user_settings", {
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   xHandle: text("x_handle"),
+  githubHandle: text("github_handle"),
   bio: text("bio"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

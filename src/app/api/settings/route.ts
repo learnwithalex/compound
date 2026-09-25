@@ -20,6 +20,7 @@ type SettingsPatch = {
   displayName?: string | null;
   avatarUrl?: string | null;
   xHandle?: string | null;
+  githubHandle?: string | null;
   bio?: string | null;
 };
 
@@ -60,6 +61,7 @@ export async function PATCH(req: NextRequest) {
   if ("displayName" in body) patch.displayName = body.displayName ? String(body.displayName).slice(0, 80) : null;
   if ("avatarUrl" in body) patch.avatarUrl = body.avatarUrl ? String(body.avatarUrl).slice(0, 500) : null;
   if ("xHandle" in body) patch.xHandle = body.xHandle ? String(body.xHandle).replace(/^@/, "").slice(0, 50) : null;
+  if ("githubHandle" in body) patch.githubHandle = body.githubHandle ? String(body.githubHandle).replace(/^@/, "").slice(0, 50) : null;
   if ("bio" in body) patch.bio = body.bio ? String(body.bio).slice(0, 160) : null;
 
   if ("publicSlug" in body && body.publicSlug) {
