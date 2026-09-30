@@ -133,7 +133,7 @@ export default function OgImage() {
             fontWeight: 500,
           }}
         >
-          usecompound.xyz
+          compound.apps.orizon.ng
         </div>
       </div>
     ),

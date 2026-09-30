@@ -8,15 +8,15 @@ const FAQS = [
   },
   {
     q: "Is my API key safe?",
-    a: "Yes. API keys are encrypted at rest and are never exposed in the UI after saving. We only use them to fetch your revenue data — no writes or charges are ever made.",
+    a: "Provider keys are stored in the database without application-layer encryption and are used to fetch provider data. Use a dedicated read-only key with the narrowest permissions available. Saved keys are not shown again in the UI.",
   },
   {
     q: "How often does Compound sync data?",
-    a: "Data syncs automatically every 30 seconds in the background. You can also trigger a manual sync from the Connect page.",
+    a: "Compound syncs connected providers on a schedule, and Stripe webhook events can update subscription changes sooner. You can also trigger a manual sync from the Connect page.",
   },
   {
     q: "What providers does Compound support?",
-    a: "Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack. More providers are on the roadmap.",
+    a: "Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad. More providers are on the roadmap.",
   },
   {
     q: "Can I connect multiple accounts from the same provider?",
@@ -28,7 +28,7 @@ const FAQS = [
   },
   {
     q: "How do I share my portfolio publicly?",
-    a: "Go to Settings → Public page, enable it, and set a slug. Your public page will be live at usecompound.xyz/u/your-slug.",
+    a: "Go to Settings → Public page, enable it, and set a slug. Your public page will be live at compound.apps.orizon.ng/u/your-slug. Public sharing is off by default.",
   },
   {
     q: "How do I cancel my subscription?",

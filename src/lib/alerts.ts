@@ -77,7 +77,7 @@ export function alertEmail(type: AlertType, opts: {
           <a href="${url}/app" style="display:inline-block;background:#03301D;color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:13px;font-weight:600;">View dashboard →</a>
         </td></tr>
         <tr><td style="padding-top:20px;text-align:center;">
-          <p style="margin:0;font-size:11px;color:#b0aba3;">© ${new Date().getFullYear()} Compound · <a href="https://usecompound.xyz" style="color:#b0aba3;">usecompound.xyz</a></p>
+          <p style="margin:0;font-size:11px;color:#b0aba3;">© ${new Date().getFullYear()} Compound · <a href="https://compound.apps.orizon.ng" style="color:#b0aba3;">usecompound.xyz</a></p>
         </td></tr>
       </table>
     </td></tr>

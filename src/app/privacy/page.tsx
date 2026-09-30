@@ -39,7 +39,7 @@ export default function PrivacyPage() {
             <p className="font-medium text-[#1a1a1a]">Information you provide:</p>
             <ul className="mt-2 list-disc space-y-1.5 pl-5">
               <li>Email address (used for authentication and transactional emails)</li>
-              <li>Payment provider API keys (encrypted, used solely for data sync)</li>
+              <li>Payment provider API keys (stored for provider sync; currently not encrypted at the application layer)</li>
               <li>Product names, labels, and website URLs you enter in the dashboard</li>
             </ul>
             <p className="mt-4 font-medium text-[#1a1a1a]">Information collected automatically:</p>
@@ -101,9 +101,9 @@ export default function PrivacyPage() {
 
           <Section title="5. Security">
             <p>
-              API keys are encrypted at rest using industry-standard encryption. Sessions are
-              managed via secure, HttpOnly cookies. We use HTTPS for all data in transit.
-              We perform regular security reviews, but no system is perfectly secure — if you
+              Provider API keys are stored in the database without application-layer encryption and are used to fetch provider data. Use dedicated read-only keys with the narrowest available permissions. Sessions are
+              managed via HttpOnly cookies. We use HTTPS for all data in transit. We perform
+              regular security reviews, but no system is perfectly secure — if you
               discover a vulnerability, please disclose it responsibly to{" "}
               <a href="mailto:support@usecompound.xyz" className="text-[#5e6ad2] underline underline-offset-2">
                 support@usecompound.xyz

@@ -62,8 +62,8 @@ export default function TermsPage() {
 
           <Section title="3. API Keys and Connected Accounts">
             <p>
-              Compound stores API keys you provide to enable data sync. We encrypt keys at rest
-              and never use them for any purpose beyond fetching the revenue data you have
+              Compound stores API keys you provide to enable data sync. They are not encrypted
+              at the application layer and are used to fetch the revenue data you have
               authorized. You can revoke access at any time by deleting a connection from your
               dashboard, which permanently removes the stored key.
             </p>

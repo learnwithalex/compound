@@ -29,7 +29,7 @@ async function main() {
       label: "Compound",
       apiKey: "dummy_will_not_sync",
       color: "#5e6ad2",
-      websiteUrl: "https://usecompound.xyz",
+      websiteUrl: "https://compound.apps.orizon.ng",
     }).returning();
     connId = conn.id;
     console.log("Created connection:", connId);
@@ -82,7 +82,7 @@ async function main() {
   console.log(`Inserted ${rows.length} snapshots`);
   console.log(`Final MRR: $${(mrrCents / 100).toFixed(2)}, subs: ${rows[rows.length - 1].activeSubscriptions}`);
   console.log("\nTracking snippet:");
-  console.log(`<script async src="https://usecompound.xyz/t.js?k=${token?.token}"></script>`);
+  console.log(`<script async src="https://compound.apps.orizon.ng/t.js?k=${token?.token}"></script>`);
 
   process.exit(0);
 }

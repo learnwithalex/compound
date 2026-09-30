@@ -95,6 +95,11 @@ export default async function AppPage() {
         subtitle={`Here's your portfolio across ${ranked.length} product${ranked.length === 1 ? "" : "s"}.`}
       >
         <div className="stagger min-w-0 pb-14">
+          {(metrics.currencyCodes.length > 1 || metrics.currencyCodes.some((currency) => currency !== "USD")) && (
+            <div className="mb-4 rounded-sm border border-amber-300 bg-amber-50 px-4 py-3 text-[12px] leading-5 text-amber-950">
+              Currency warning: {metrics.currencyCodes.join(", ") || "unknown"} data is shown without FX conversion and the portfolio total assumes USD. Connect accounts in one currency before relying on the combined total.
+            </div>
+          )}
           <MilestoneBanner totalMrrCents={metrics.totalMrrCents} />
           <UpgradeBanner
             dismissed={settings?.trialBannerDismissed ?? false}

@@ -48,7 +48,7 @@ function snippet(token: string) {
   w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};
 });}(window);
 </script>
-<script async src="https://usecompound.xyz/t.js?k=${token}"></script>
+<script async src="https://compound.apps.orizon.ng/t.js?k=${token}"></script>
 
 <!-- After a user logs in, call: -->
 <!-- window._cmpd.identify(user.email) -->`;
@@ -65,7 +65,7 @@ function aiPrompt(token: string) {
   w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};
 });}(window);
 </script>
-<script async src="https://usecompound.xyz/t.js?k=${token}"></script>
+<script async src="https://compound.apps.orizon.ng/t.js?k=${token}"></script>
 
 2. After a user successfully logs in or on any authenticated page, call:
    window._cmpd.identify(user.email)
@@ -392,7 +392,7 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
             $9<span className="text-[14px] font-normal text-lx-muted">/month</span>
           </p>
           <ul className="mt-2 space-y-1">
-            {["Unlimited products", "Full history & trend charts", "AI briefings", "Goals & streak", "Auto-sync every 30s"].map((f) => (
+            {["Unlimited products", "Full history & trend charts", "AI briefings", "Goals & streak", "Scheduled automatic sync"].map((f) => (
               <li key={f} className="flex items-center gap-2 text-[12px] text-lx-muted">
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="2,8 6,12 14,4" />

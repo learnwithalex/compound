@@ -9,7 +9,7 @@ interface NudgeItem {
 }
 
 function snippet(token: string) {
-  return `<script>!function(w){w._cmpd=w._cmpd||{_q:[]};['identify','track','page'].forEach(function(m){w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};})}(window);</script>\n<script async src="https://usecompound.xyz/t.js?k=${token}"></script>`;
+  return `<script>!function(w){w._cmpd=w._cmpd||{_q:[]};['identify','track','page'].forEach(function(m){w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};})}(window);</script>\n<script async src="https://compound.apps.orizon.ng/t.js?k=${token}"></script>`;
 }
 
 function ChevronIcon({ open }: { open: boolean }) {

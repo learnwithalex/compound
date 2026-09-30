@@ -254,7 +254,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
             fontFamily: "monospace",
           }}
         >
-          usecompound.xyz/u/{slug}
+          compound.apps.orizon.ng/u/{slug}
         </span>
       </div>
     </div>,

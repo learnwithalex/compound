@@ -3,14 +3,14 @@
 One dashboard for every product you've built. Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack accounts, see total MRR across your whole portfolio, and get an AI briefing that explains exactly why the numbers moved.
 
 **Built for [The Build Games](https://canivibecodeit.com/thebuildgames) — Best Replacement track.**  
-Replacing: Baremetrics ($108/mo), ChartMogul ($100+/mo), MultiMMR ($19/mo, Stripe-only).
+Positioned as a lightweight portfolio alternative. Competitor pricing varies by tracked revenue and plan; verify current pricing before comparing.
 
 ## Live demo
 
 → **[compound.apps.orizon.ng](https://compound.apps.orizon.ng)**  
-→ Click **"Open demo"** on the login page — no account needed.
+→ Open **[/demo](https://compound.apps.orizon.ng/demo)** — no account needed.
 
-The demo loads with three pre-connected products and 31 days of realistic MRR history.
+This product preview uses clearly labeled fictional sample data; it does not connect to live provider accounts.
 
 ## What it does
 
@@ -21,20 +21,19 @@ The demo loads with three pre-connected products and 31 days of realistic MRR hi
 - **Per-product cards** — MRR, active subs, 30-day trend, smooth sparklines with gridlines
 - **AI analysis** — one button → Claude writes a CFO-style briefing: what's working, what needs attention, one specific action
 - **Agent API** — bearer tokens so Claude/Cursor/scripts can fetch the portfolio over HTTP
-- **5 providers** — Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack
+- **7 provider adapters** — Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, Gumroad
 - **Daily snapshots** — MRR captured every day so you can see exactly when things moved
-- **Free** — no paywalls, no 14-day trials
+- **Hosted trial + Pro** — the hosted trial is limited; Pro is $9/month. Self-hosting is available under the MIT license.
 
-## Why it exists
+## How Compound differs
 
-If you have more than one product, every analytics tool fails you:
+Compound is aimed at founders who want one portfolio view across payment providers plus a read-only API for AI clients. It is deliberately narrower than mature subscription analytics platforms: there is no currency conversion, dunning or application-layer encryption for provider keys yet.
 
-| Tool | Price | Multi-product | AI insights |
-|---|---|---|---|
-| Baremetrics | $108/mo | ❌ one business | ❌ |
-| ChartMogul | $100+/mo | ❌ one business | ❌ |
-| MultiMMR | $19/mo | ⚠️ Stripe only | ❌ |
-| **Compound** | **Free** | **✅ 5 providers** | **✅ Claude** |
+| Tool | Focus |
+|---|---|
+| Baremetrics | Established subscription analytics and revenue-recovery features; pricing varies by scale and plan |
+| ChartMogul | Mature subscription metrics and cohort reporting; pricing scales with tracked revenue |
+| **Compound** | Portfolio view across providers, AI briefings and a read-only Agent API; see the limitations above |
 
 ## Stack
 
@@ -69,25 +68,32 @@ npm run dev
 DATABASE_URL=postgresql://...
 ANTHROPIC_API_KEY=sk-ant-...
 APP_URL=http://localhost:3000
+CRON_SECRET=<secret used by your scheduler>
 SESSION_SECRET=<32+ random chars>
-DEMO_LOGIN_ENABLED=true   # optional, enables /api/auth/demo shortcut
 ```
+
+## Security notes
+
+- Use provider-specific read-only API keys with the narrowest permissions available. The current hosted implementation stores provider keys in the database without application-layer encryption.
+- Agent API tokens are stored as SHA-256 hashes, only authorize the read-only portfolio endpoint, and can be revoked.
+- Public revenue pages are disabled by default.
+- MRR intervals are normalized to monthly values, but no currency conversion is performed; connect accounts in the same currency before interpreting a portfolio total.
 
 ## How it works
 
 ```
 User connects payment account (API key, read-only)
         ↓
-POST /api/connections — validates key, stores it
+POST /api/connections — validates key, stores it (authenticated browser session required)
         ↓
-POST /api/sync — fetches all active subscriptions,
-                 normalises billing intervals → monthly cents,
+POST /api/sync — authenticated browser session fetches active subscriptions,
+                 normalises billing intervals → monthly cents (no FX conversion; totals assume the same currency across connected accounts),
                  upserts daily snapshot per connection
         ↓
 GET  /app — reads snapshots, computes portfolio metrics,
             renders product cards + sparklines
         ↓
-POST /api/analyze — feeds metrics into Claude Haiku,
+POST /api/analyze — authenticated browser session feeds metrics into Claude Haiku,
                     returns CFO-style briefing
 ```
 

@@ -14,12 +14,12 @@ const GITHUB = "https://github.com/learnwithalex/compound";
 export const metadata = {
   title: "Compound — Revenue OS for indie hackers",
   description:
-    "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack account. One dashboard for your whole portfolio, with AI that explains why the numbers moved.",
-  alternates: { canonical: "https://usecompound.xyz" },
+    "Connect Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad. One portfolio view, with AI briefings on what changed.",
+  alternates: { canonical: "https://compound.apps.orizon.ng" },
   openGraph: {
     title: "Compound — Revenue OS for indie hackers",
-    description: "Connect every Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack account. One dashboard for your whole portfolio, with AI that explains why the numbers moved.",
-    url: "https://usecompound.xyz",
+    description: "Connect Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad. One portfolio view, with AI briefings on what changed.",
+    url: "https://compound.apps.orizon.ng",
     type: "website" as const,
   },
 };
@@ -125,7 +125,7 @@ function SiteNav() {
 <Link href="/login" className="text-sm text-[#222528]/50 transition-colors hover:text-[#222528]">
             Sign in
           </Link>
-          <CTAButton href="/app">Get started</CTAButton>
+          <CTAButton href="/demo">Try the live demo</CTAButton>
         </div>
       </nav>
     </header>
@@ -152,24 +152,24 @@ function Hero() {
             {/* Heading — Inter 700, 2 clean lines, inline accent */}
             <h1 className={`${interBlack.className} mb-6 text-[#111111]`} style={{ fontWeight: 700 }}>
               <span className="block text-[46px] leading-[1.08] tracking-[-0.02em]">
-                Connect and grow your
+                One MRR number
               </span>
               <span className="block text-[46px] leading-[1.08] tracking-[-0.02em]">
-                revenue,{" "}<span className="text-[#5e6ad2]">effortlessly.</span>
+                across every product.
               </span>
             </h1>
 
             <p className="mb-8 max-w-[400px] text-[15px] leading-[1.7] tracking-[-0.16px] text-[#222528]/55">
-              Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack.
-              One number across your whole portfolio — with AI that explains exactly why it moved.
+              Connect Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad.
+              See your subscription revenue across seven payment providers, with an AI briefing on what changed.
             </p>
 
             {/* Micro stats */}
             <div className="mb-8 flex items-center gap-4">
               {[
-                { val: "5",   label: "providers"  },
-                { val: "30s", label: "auto-sync"  },
-                { val: "$9",  label: "per month"  },
+                { val: "7",   label: "providers"  },
+                { val: "Daily", label: "snapshots"  },
+                { val: "MIT",  label: "open source"  },
               ].map((s, i) => (
                 <div key={s.label} className={`flex items-baseline gap-1.5 ${i > 0 ? "border-l border-[#222528]/10 pl-4" : ""}`}>
                   <span className={`${plex.className} text-[18px] font-semibold text-[#222528]`}>{s.val}</span>
@@ -179,7 +179,7 @@ function Hero() {
             </div>
 
             <div className="mb-4 flex items-center gap-2">
-              <CTAButton href="/app">Connect your revenue</CTAButton>
+              <CTAButton href="/demo">Explore the demo</CTAButton>
               <a href={GITHUB}
                 className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border border-[rgba(152,157,164,0.35)] bg-white px-4 text-sm font-medium text-[#222528]/70 transition-all duration-150 hover:bg-[#f5f7f7] hover:text-[#222528]">
                 <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 fill-current" aria-hidden>
@@ -211,9 +211,9 @@ function HeroFlowDiagram() {
       {/* Product inputs */}
       <div className="grid grid-cols-3 gap-2">
         {([
-          { img: "/event-organizer-icon.svg", provider: "Stripe", label: "Event Organizer", sub: "$129.8k" },
-          { img: "/betterflow-icon.png", provider: "Stripe", label: "BetterFlow", sub: "$8.4k" },
-          { img: "/obsidian-sync-icon.jpg", provider: "Lemon Squeezy", label: "Obsidian Sync", sub: "$2.3k" },
+          { img: "/event-organizer-icon.svg", provider: "Stripe", label: "Scarlet DB", sub: "$8.43k" },
+          { img: "/betterflow-icon.png", provider: "Lemon Squeezy", label: "NotePad Pro", sub: "$3.20k" },
+          { img: "/obsidian-sync-icon.jpg", provider: "Polar", label: "FormKit", sub: "$2.27k" },
         ] as const).map((p) => (
           <div key={p.label}
             className="flex flex-col items-center gap-1 rounded-2xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] px-2 py-3 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
@@ -250,7 +250,7 @@ function HeroFlowDiagram() {
         <div className="flex-1 rounded-xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] px-3 py-2.5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
           <div className={`${mono.className} mb-1.5 text-[9px] uppercase tracking-widest text-[#222528]/50`}>Brief</div>
           <div className="space-y-1 text-[11px] font-medium leading-4 text-[#222528]">
-            {["$140.5k total", "+2.1% this month", "BetterFlow leads"].map((t) => (
+            {["$13.9k total", "+8.7% this month", "Scarlet DB leads"].map((t) => (
               <div key={t} className="flex items-center gap-1.5">
                 <CheckIcon className="h-3 w-3 shrink-0 text-emerald-500" /> {t}
               </div>
@@ -277,7 +277,7 @@ function HeroFlowDiagram() {
         <div className="flex items-end justify-between px-5 py-4">
           <div>
             <div className={`${mono.className} text-[10px] uppercase tracking-[1.2px] text-[#222528]/40`}>Total MRR</div>
-            <div className={`${lora.className} text-[28px] font-medium leading-tight text-[#222528]`}>$140.5k</div>
+            <div className={`${lora.className} text-[28px] font-medium leading-tight text-[#222528]`}>$13.9k</div>
           </div>
           <div className="flex items-center gap-1 pb-1">
             {["/event-organizer-icon.svg", "/betterflow-icon.png", "/obsidian-sync-icon.jpg"].map((src, i) => (
@@ -326,20 +326,10 @@ function StatsStrip() {
               <span className="text-[16px] font-semibold tracking-tight text-[#e5a00d]">Lemon Squeezy</span>
             </div>
 
-            {/* Quote — spans 2 cols */}
-            <div className="col-span-2 flex flex-col justify-between rounded-2xl bg-white p-6">
-              <p className="text-[14px] italic leading-[1.7] text-[#222528]/60">
-                &ldquo;Finally replaced Baremetrics and ChartMogul with one tool that actually understands the indie hacker stack.&rdquo;
-              </p>
-              <p className={`${mono.className} mt-4 text-[11px] uppercase tracking-[1.2px] text-[#222528]/30`}>
-                — portfolio founder
-              </p>
-            </div>
-
-            {/* 30s stat */}
+            {/* Open source stat */}
             <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
-              <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>30s</span>
-              <span className={`${mono.className} mt-3 text-[11px] uppercase tracking-[1.6px] text-[#5e6ad2]`}>Auto-sync</span>
+              <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>MIT</span>
+              <span className={`${mono.className} mt-3 text-[11px] uppercase tracking-[1.6px] text-[#5e6ad2]`}>Open source</span>
             </div>
 
             {/* Polar */}
@@ -374,7 +364,7 @@ function StatsStrip() {
               </div>
             </div>
 
-            {/* 5 providers stat */}
+            {/* 7 providers stat */}
             <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
               <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>5</span>
               <span className={`${mono.className} mt-3 text-[11px] uppercase tracking-[1.6px] text-[#5e6ad2]`}>Providers</span>
@@ -383,28 +373,14 @@ function StatsStrip() {
             {/* Agent API feature */}
             <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
               <div>
-                {/* Stacked agent logos */}
-                <div className="mb-4 flex items-center">
-                  {[
-                    { src: "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",     alt: "Claude"   },
-                    { src: "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",    alt: "Cursor"   },
-                    { src: "https://www.google.com/s2/favicons?domain=windsurf.com&sz=64",  alt: "Windsurf" },
-                    { src: "https://www.google.com/s2/favicons?domain=openai.com&sz=64",    alt: "ChatGPT"  },
-                  ].map((a, i) => (
-                    <img
-                      key={a.alt}
-                      src={a.src}
-                      alt={a.alt}
-                      width={28}
-                      height={28}
-                      className="h-7 w-7 rounded-lg border-2 border-white object-contain shadow-sm"
-                      style={{ marginLeft: i === 0 ? 0 : -8 }}
-                    />
+                <div className="mb-4 flex flex-wrap gap-1.5">
+                  {["Claude", "Cursor", "Windsurf", "Any HTTP client"].map((name) => (
+                    <span key={name} className="rounded-full border border-[rgba(152,157,164,0.3)] bg-[#f5f7f7] px-2.5 py-1 text-[10px] font-medium text-[#222528]/60">{name}</span>
                   ))}
                 </div>
                 <p className={`${mono.className} mb-2 text-[11px] uppercase tracking-[1.2px] text-[#222528]/40`}>Agent API</p>
                 <p className="text-[13px] leading-[1.5] text-[#222528]/70">
-                  Give Claude, Cursor & Windsurf live access to your revenue.
+                  Give your AI agent read-only access to your revenue endpoint.
                 </p>
               </div>
             </div>
@@ -436,7 +412,7 @@ function PortfolioShowcase() {
             </h2>
           </div>
           <p className="hidden max-w-[260px] text-right text-[13px] leading-6 text-[#222528]/50 md:block">
-            Connect Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack — Compound unifies everything.
+            Connect Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad — Compound unifies everything.
           </p>
         </div>
 
@@ -480,7 +456,7 @@ function PortfolioShowcase() {
               </p>
             </div>
             <div className="hidden gap-8 md:flex">
-              {[{ l: "ARR", v: "$166,800" }, { l: "Net New MRR", v: "+$1,120" }, { l: "Churn MRR", v: "$240" }].map((s) => (
+              {[{ l: "ARR", v: "$166,800" }, { l: "Net New MRR", v: "+$1,112" }, { l: "Churn MRR", v: "$240" }].map((s) => (
                 <div key={s.l} className="text-right">
                   <p className={`${mono.className} mb-0.5 text-[10px] uppercase tracking-[1.2px] text-[#222528]/40`}>{s.l}</p>
                   <p className={`${lora.className} text-[22px] font-medium text-[#222528]`}>{s.v}</p>
@@ -525,7 +501,7 @@ function PortfolioShowcase() {
               Last synced 18 seconds ago
             </span>
             <span className="flex items-center gap-1.5 text-[11px] text-[#222528]/40">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Auto-sync every 30s
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Scheduled sync
             </span>
           </div>
         </div>
@@ -563,28 +539,13 @@ function AIBriefingShowcase() {
             </div>
 
             <div>
-              {/* Social proof */}
-              <div className="mb-6 flex items-start gap-3">
-                <div className="flex shrink-0 items-center">
-                  {[
-                    "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",
-                    "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",
-                    "https://www.google.com/s2/favicons?domain=windsurf.com&sz=64",
-                  ].map((src, i) => (
-                    <img key={i} src={src} alt="" width={22} height={22}
-                      className="h-[22px] w-[22px] rounded-md border-2 border-[#f0f1fb]"
-                      style={{ marginLeft: i === 0 ? 0 : -6 }} />
-                  ))}
-                </div>
-                <p className="text-[12px] leading-[1.6] text-[#222528]/50">
-                  <span className="font-medium text-[#222528]">Works with every AI tool.</span>{" "}
-                  Claude, Cursor, Windsurf — give your agent live revenue context.
-                </p>
-              </div>
+              <p className="mb-6 text-[12px] leading-[1.6] text-[#222528]/50">
+                The read-only endpoint returns JSON over HTTP, so it can be used from an AI client or a custom script.
+              </p>
 
               {/* CTAs */}
               <div className="flex items-center gap-4">
-                <CTAButton href="/app">Get your first briefing</CTAButton>
+                <CTAButton href="/demo">Explore the live demo</CTAButton>
                 <a href="#agent" className="text-[13px] font-medium text-[#222528]/50 transition-colors hover:text-[#222528]">
                   See the Agent API →
                 </a>
@@ -611,9 +572,9 @@ function AIBriefingShowcase() {
 
               {/* Card body */}
               <div className="p-5">
-                <p className="mb-3 text-[13px] font-medium text-[#222528]">Good morning, Alex. Here&apos;s what moved overnight.</p>
+                <p className="mb-3 text-[13px] font-medium text-[#222528]">Sample 30-day portfolio briefing for Alex.</p>
                 <div className="space-y-2.5 text-[13px] leading-[1.7] tracking-[-0.16px] text-[#222528]/65">
-                  <p>Your portfolio hit <span className="rounded bg-[#222528] px-1.5 py-0.5 font-mono text-[11px] font-medium text-white">$13,900 MRR</span> — up <span className="font-medium text-emerald-600">+$560 (+4.2%)</span> from yesterday. Scarlet DB added 14 new subs.</p>
+                  <p>Your sample portfolio is at <span className="rounded bg-[#222528] px-1.5 py-0.5 font-mono text-[11px] font-medium text-white">$13,900 MRR</span> — up <span className="font-medium text-emerald-600">+$1,112 (+8.7%)</span> over 30 days. Scarlet DB added 14 new subs.</p>
                   <p><span className="font-medium text-[#222528]">FormKit</span> is down 3 subs this week — net-negative by end of month at this pace.</p>
                 </div>
                 <div className="mt-4 rounded-xl bg-[#eff0fb] px-4 py-3">
@@ -626,7 +587,7 @@ function AIBriefingShowcase() {
                   {[
                     { l: "Fastest grower",  v: "Scarlet DB", s: "+14 subs",           accent: "#059669" },
                     { l: "Needs attention", v: "FormKit",    s: "−3 subs",            accent: "#dc2626" },
-                    { l: "New MRR",         v: "+$560",      s: "across 3 products",  accent: "#5e6ad2" },
+                    { l: "New MRR",         v: "+$1,112",    s: "net over 30 days",  accent: "#5e6ad2" },
                     { l: "Churn risk",      v: "1 flagged",  s: "FormKit trend",      accent: "#d97706" },
                   ].map((c) => (
                     <div key={c.l} className="rounded-xl border border-[rgba(152,157,164,0.15)] bg-[#f5f7f7] px-3 py-2.5">
@@ -682,11 +643,11 @@ function FeatureGrid() {
             </div>
           </div>
 
-          {/* Real-time alerts */}
+          {/* Email alerts */}
           <div className="group overflow-hidden rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-5 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a] transition-all hover:-translate-y-0.5">
             <p className={`${mono.className} mb-1 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Alerts</p>
-            <p className="mb-1 text-[15px] font-medium text-[#222528]">Real-time alerts</p>
-            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Email the moment a sub is created, churns, or upgrades.</p>
+            <p className="mb-1 text-[15px] font-medium text-[#222528]">Email alerts</p>
+            <p className="mb-5 text-[12px] leading-5 tracking-[-0.16px] text-[#222528]/50">Email when a sync or webhook detects a new subscription, churn, or upgrade.</p>
             <div className="space-y-2">
               {[
                 { icon: "↑", label: "New subscription", sub: "sarah@acme.com · Pro Annual", color: "#059669", bg: "#f0fdf4", border: "rgba(52,211,153,0.3)", t: "just now" },
@@ -729,7 +690,7 @@ function FeatureGrid() {
               </div>
             </div>
             <div className={`${mono.className} mt-3 flex items-center gap-1 text-[10px] text-[#222528]/35`}>
-              <span>usecompound.xyz/u/</span>
+              <span>compound.apps.orizon.ng/u/</span>
               <span className="rounded bg-[#5e6ad2]/10 px-1 text-[#5e6ad2]">your-slug</span>
               <Link href="/app" className="ml-auto text-[#5e6ad2] no-underline hover:opacity-70">Set up →</Link>
             </div>
@@ -839,7 +800,7 @@ function AgentSection() {
               <div className="mt-3 rounded-xl border border-[#31363a] bg-white/[0.04] p-4">
                 <p className={`${mono.className} text-xs leading-5 text-white/60`}>
                   <span className="text-[#28c840]">GET</span>{" "}
-                  <span className="text-[#5e6ad2]">https://usecompound.xyz/api/portfolio</span>
+                  <span className="text-[#5e6ad2]">https://compound.apps.orizon.ng/api/portfolio</span>
                 </p>
                 <p className={`${mono.className} mt-1 text-xs leading-5 text-white/40`}>
                   Authorization: Bearer{" "}
@@ -876,28 +837,19 @@ function AgentSection() {
                   <span className="text-[8px] leading-none text-[#28c840]">✓</span>
                 </span>
                 <p className={`${mono.className} text-xs leading-5 text-[#28c840]`}>
-                  Connected → usecompound.xyz
+                  Connected → compound.apps.orizon.ng
                 </p>
               </div>
               <span className="mt-1 inline-block h-[13px] w-[7px] rounded-[1px] bg-white/50" />
             </div>
 
-            {/* Agent logos */}
-            <div className="flex items-center gap-4 border-t border-[#31363a] px-5 py-3">
-              <span className={`${mono.className} text-[10px] uppercase tracking-[1.2px] text-white/35`}>Works with</span>
-              {[
-                { src: "https://www.google.com/s2/favicons?domain=claude.ai&sz=32", label: "Claude" },
-                { src: "https://www.google.com/s2/favicons?domain=cursor.com&sz=32", label: "Cursor" },
-                { src: "https://www.google.com/s2/favicons?domain=windsurf.com&sz=32", label: "Windsurf" },
-              ].map((a) => (
-                <div key={a.label} className="flex items-center gap-1.5">
-                  <img src={a.src} alt={a.label} width={14} height={14} className="h-3.5 w-3.5 rounded-sm opacity-70" />
-                  <span className={`${mono.className} text-[10px] text-white/40`}>{a.label}</span>
-                </div>
+            <div className="flex items-center gap-2 border-t border-[#31363a] px-5 py-3">
+              <span className={`${mono.className} text-[10px] uppercase tracking-[1.2px] text-white/35`}>API</span>
+              {["HTTP", "Bearer token", "JSON"].map((label) => (
+                <span key={label} className={`${mono.className} rounded bg-white/5 px-2 py-1 text-[10px] text-white/45`}>{label}</span>
               ))}
             </div>
           </div>
-
           <div>
             <p className={`${mono.className} mb-4 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Agent API</p>
             <h2 className={`${lora.className} mb-5 text-[40px] font-medium leading-[44px] tracking-[-0.576px] text-[#222528]`}>
@@ -929,13 +881,13 @@ function PricingSection() {
           Simple, honest pricing.
         </h2>
         <p className="mb-14 max-w-lg text-base leading-[21px] tracking-[-0.32px] text-[#222528]/60">
-          Try it free. Upgrade to Pro when you&apos;re ready for the full picture.
+          Explore the working demo without an account. Create an account to connect your own data.
         </p>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2">
           {/* Free */}
           <div className="rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] p-7 shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
-            <p className={`${mono.className} mb-2 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Free trial</p>
+            <p className={`${mono.className} mb-2 text-xs uppercase tracking-[1.2px] text-[#222528]/50`}>Hosted free trial</p>
             <div className="mb-1 flex items-baseline gap-1">
               <span className={`${lora.className} text-4xl font-medium tracking-tight text-[#222528]`}>Free</span>
             </div>
@@ -947,9 +899,9 @@ function PricingSection() {
                 </li>
               ))}
             </ul>
-            <Link href="/app"
+            <Link href="/demo"
               className="block rounded-md border border-[rgba(152,157,164,0.4)] py-2.5 text-center text-[13px] font-medium text-[#222528] transition-colors hover:bg-[#f5f7f7]">
-              Get started free
+              See sample portfolio
             </Link>
           </div>
 
@@ -967,7 +919,7 @@ function PricingSection() {
                 "Full history & trend charts",
                 "AI briefings & weekly digest",
                 "Goals, streaks & milestones",
-                "Auto-sync every 30s",
+                "Scheduled sync",
                 "Customer profiles & cohorts",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[13px] text-[#222528]/60">
@@ -982,12 +934,12 @@ function PricingSection() {
         {/* Always free */}
         <div className="rounded-3xl border border-[rgba(152,157,164,0.3)] bg-[#fafafa] shadow-[0px_1.7px_2.6px_#0000000a,_0px_10.4px_27.7px_#0000000a]">
           <div className="border-b border-[rgba(152,157,164,0.2)] px-6 py-4">
-            <span className="text-[13px] font-medium text-[#222528]">Included at every level — always free</span>
+            <span className="text-[13px] font-medium text-[#222528]">Self-hosting and sharing</span>
           </div>
           <div className="grid gap-6 p-6 sm:grid-cols-3">
             {[
               { label: "Public revenue page", desc: "Share your portfolio publicly at /u/[slug] with a shareable profile card." },
-              { label: "Agent API tokens",    desc: "Create tokens so Claude, Cursor, ChatGPT, or Windsurf can query your data live." },
+              { label: "Agent API tokens",    desc: "Create a revocable token so your agent can query the read-only portfolio endpoint." },
               { label: "Open source",         desc: "Full source on GitHub, MIT licensed. Self-host with your own Claude key." },
             ].map((item) => (
               <div key={item.label} className="flex items-start gap-3">
@@ -1013,11 +965,11 @@ function FAQSection() {
   const faqs = [
     {
       q: "What is Compound?",
-      a: "Compound is a revenue OS for indie hackers and portfolio founders. Connect all your payment provider accounts — Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack — and see your total MRR in one place. It also gives you per-product customer lists, AI briefings that explain why numbers moved, real-time alerts, and an Agent API so your AI tools can query your live portfolio.",
+      a: "Compound brings subscription revenue from Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad into a portfolio dashboard. It includes customer lists, AI briefings, configurable email alerts, and a read-only Agent API.",
     },
     {
-      q: "What's in the free trial vs Pro?",
-      a: "The free trial lets you connect 1 product with 30-day history and basic analytics — enough to see if Compound fits your workflow, no credit card needed. Pro ($9/mo via DodoPayments) unlocks unlimited products, full history and trend charts, AI briefings and weekly digest, goals/streaks/milestones, auto-sync every 30 seconds, and customer profiles with cohorts.",
+      q: "What is included in the hosted trial and Pro?",
+      a: "The hosted free trial lets you connect 1 product with 30-day history and basic analytics, with no credit card required. Pro is $9/mo via DodoPayments. The demo at /demo is available without signup. You can also self-host the MIT-licensed source and pay your own infrastructure and AI costs.",
     },
     {
       q: "How do the AI briefings work?",
@@ -1025,15 +977,23 @@ function FAQSection() {
     },
     {
       q: "What payment providers are supported?",
-      a: "Stripe, Lemon Squeezy, Polar, DodoPayments, and Paystack. You connect each with a read-only API key — no OAuth flow, no approval process. Compound validates the key immediately and shows you your active subscription count before you save.",
+      a: "Stripe, Lemon Squeezy, Polar, DodoPayments, Paystack, Paddle, and Gumroad. You connect each with a read-only API key — no OAuth flow, no approval process. Compound checks the key against the provider before saving it.",
+    },
+    {
+      q: "How are payment provider keys protected?",
+      a: "Provider keys are stored in the database without application-layer encryption. Use dedicated read-only keys with the narrowest permissions. Agent API tokens are stored as hashes and can be revoked; they cannot be used to read or manage provider keys.",
+    },
+    {
+      q: "Does Compound convert currencies?",
+      a: "No. Compound normalizes billing intervals to monthly values but does not convert currencies. Portfolio totals are only meaningful when connected accounts use the same currency. The sample demo uses USD throughout.",
     },
     {
       q: "Can I share my revenue publicly?",
-      a: "Yes. Compound gives every account a public page at /u/[your-slug] with a shareable profile card showing your portfolio. It's completely optional — you control whether it's visible. The public page is free at every plan level, including the free trial.",
+      a: "Yes. Compound provides an optional public page at /u/[your-slug]. Public sharing is off by default; enable it in Settings and choose which metrics and products to show.",
     },
     {
       q: "How do I connect Claude or Cursor to my data?",
-      a: "Compound has an Agent API. Go to Settings → API tokens, create a token, and configure your AI tool to use it. Claude, Cursor, ChatGPT, Windsurf, and Opencode can all query your live portfolio data through the token — MRR, product breakdown, customer info, whatever you ask for.",
+      a: "Compound has a read-only portfolio endpoint. Create a token under Settings → API tokens, then have an AI client or script send it as a bearer token to GET /api/portfolio. Tokens are stored as hashes and can be revoked. The endpoint returns portfolio metrics and product breakdowns.",
     },
   ];
 
@@ -1073,10 +1033,10 @@ function DarkCTA() {
           Your revenue, always on.
         </h2>
         <p className="max-w-md text-base leading-[21px] tracking-[-0.32px] text-white/50">
-          Connect your first account in 60 seconds. Free to start, open source, always.
+          Connect your first account in 60 seconds. Explore the demo without an account, or self-host the MIT-licensed source.
         </p>
         <div className="flex items-center gap-3 pt-2">
-          <CTAButton href="/app" variant="light">Get started free</CTAButton>
+          <CTAButton href="/demo" variant="light">Explore the demo</CTAButton>
           <a href={GITHUB}
             className="inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-md px-3 text-sm font-medium text-white/70 transition-colors duration-150 hover:text-white">
             View on GitHub
@@ -1099,7 +1059,7 @@ function SiteFooter() {
               <CompoundWordmark height={22} theme="dark" />
             </div>
             <p className="text-[12px] leading-relaxed text-white/30">
-              Revenue OS for indie hackers.<br />Free forever, open source, MIT.
+              Revenue OS for indie hackers.<br />Open source under the MIT license. Hosted plans are available.
             </p>
           </div>
 

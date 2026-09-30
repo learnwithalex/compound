@@ -17,6 +17,8 @@ export async function GET(req: Request) {
     totalMrrCents: metrics.totalMrrCents,
     totalArr: fmtMrr(metrics.totalArrCents),
     totalActiveSubscriptions: metrics.totalActiveSubscriptions,
+    currencyCodes: metrics.currencyCodes,
+    currencyWarning: metrics.currencyCodes.length > 1 || metrics.currencyCodes.some((currency) => currency !== "USD"),
     netNewMrr30d: `${metrics.netNewMrrCents >= 0 ? "+" : "-"}${fmtDollars(Math.abs(metrics.netNewMrrCents))}`,
     products: metrics.products.map((p) => ({
       name: p.label,

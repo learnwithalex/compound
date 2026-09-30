@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/app/", "/api/", "/onboard"],
       },
     ],
-    sitemap: "https://usecompound.xyz/sitemap.xml",
+    sitemap: "https://compound.apps.orizon.ng/sitemap.xml",
   };
 }

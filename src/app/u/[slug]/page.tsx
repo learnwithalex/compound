@@ -74,7 +74,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f4]">
       <header className="flex items-center justify-between px-8 py-5">
-        <a href="https://usecompound.xyz">
+        <a href="https://compound.apps.orizon.ng">
           <CompoundWordmark theme="light" height={18} />
         </a>
         <span className="text-[12px] text-[#a8a39b]">Live stats · updates every 5 min</span>
@@ -153,10 +153,17 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
             </p>
 
             {settings.publicShowMrr && (
-              <p className="mt-3 text-[52px] font-bold tabular-nums leading-none text-[#1a1a1a]" style={{ letterSpacing: "-0.03em" }}>
-                {fmtMrr(metrics.totalMrrCents)}
-                <span className="ml-2 text-[16px] font-medium text-[#a8a39b]">MRR</span>
-              </p>
+              <>
+                <p className="mt-3 text-[52px] font-bold tabular-nums leading-none text-[#1a1a1a]" style={{ letterSpacing: "-0.03em" }}>
+                  {fmtMrr(metrics.totalMrrCents)}
+                  <span className="ml-2 text-[16px] font-medium text-[#a8a39b]">MRR</span>
+                </p>
+                {(metrics.currencyCodes.length > 1 || metrics.currencyCodes.some((currency) => currency !== "USD")) && (
+                  <p className="mt-2 text-[11px] leading-5 text-amber-800">
+                    Currency totals are shown without FX conversion ({metrics.currencyCodes.join(", ") || "unknown"}).
+                  </p>
+                )}
+              </>
             )}
           </div>
 
@@ -228,7 +235,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
 
         <p className="mt-6 text-center text-[11px] text-[#c0bdb8]">
           Powered by{" "}
-          <a href="https://usecompound.xyz" className="underline underline-offset-2 hover:text-[#6b6b6b]">compound</a>
+          <a href="https://compound.apps.orizon.ng" className="underline underline-offset-2 hover:text-[#6b6b6b]">compound</a>
         </p>
       </main>
     </div>

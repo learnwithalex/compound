@@ -147,7 +147,7 @@ export default function SettingsPage() {
                 <div>
                   <label className="mb-1.5 block text-[12px] font-medium text-lx-muted">Your public URL</label>
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] text-lx-faint">usecompound.xyz/u/</span>
+                    <span className="text-[13px] text-lx-faint">compound.apps.orizon.ng/u/</span>
                     <input
                       value={slugInput}
                       onChange={(e) => setSlugInput(e.target.value)}

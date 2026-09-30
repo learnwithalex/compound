@@ -9,7 +9,7 @@ function snippet(token: string) {
   w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};
 });}(window);
 </script>
-<script async src="https://usecompound.xyz/t.js?k=${token}"></script>
+<script async src="https://compound.apps.orizon.ng/t.js?k=${token}"></script>
 
 <!-- After a user logs in, call: -->
 <!-- window._cmpd.identify(user.email) -->`;
@@ -26,7 +26,7 @@ function aiPrompt(token: string) {
   w._cmpd[m]=function(){w._cmpd._q.push([m,Array.from(arguments)])};
 });}(window);
 </script>
-<script async src="https://usecompound.xyz/t.js?k=${token}"></script>
+<script async src="https://compound.apps.orizon.ng/t.js?k=${token}"></script>
 
 2. After a user successfully logs in or on any authenticated page, call:
    window._cmpd.identify(user.email)

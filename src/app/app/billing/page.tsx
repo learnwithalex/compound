@@ -15,7 +15,7 @@ const PRO_FEATURES = [
   "Full history & trend charts",
   "AI briefings & weekly digest",
   "Goals, streaks & milestones",
-  "Auto-sync every 30s",
+  "Scheduled automatic sync",
   "Customer profiles & cohorts",
 ];
 

@@ -222,20 +222,6 @@ fetch this endpoint and use the data to answer accurately.`,
   ${url}`,
         lang: "bash",
       },
-      {
-        title: "Force a sync first (optional)",
-        description: "Refreshes all your connected payment providers before reading.",
-        copy: `curl -X POST -H "Authorization: Bearer ${token}" \\
-  ${origin}/api/sync`,
-        lang: "bash",
-      },
-      {
-        title: "Get an AI briefing as JSON",
-        description: "Returns a Claude-written CFO analysis of your current metrics.",
-        copy: `curl -X POST -H "Authorization: Bearer ${token}" \\
-  ${origin}/api/analyze`,
-        lang: "bash",
-      },
     ],
   };
 }
@@ -303,7 +289,7 @@ export default function AgentsPage() {
   }
 
   const agent = AGENTS.find((a) => a.id === selectedAgent);
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://usecompound.xyz";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://compound.apps.orizon.ng";
   const instructions = freshToken && selectedAgent ? getInstructions(selectedAgent, freshToken, origin) : null;
 
   return (
@@ -314,7 +300,7 @@ export default function AgentsPage() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-lx-faint">Agents</p>
         <h1 className="mt-1 text-[22px] font-bold tracking-tight text-lx-text" style={{ letterSpacing: "-0.025em" }}>Connect your AI agent</h1>
         <p className="mt-1 text-[13px] leading-relaxed text-lx-muted max-w-md">
-          Give your AI agent live read access to your portfolio — then let it brief you, write reports, or trigger automations.
+          Give your AI agent read-only access to portfolio metrics. It can brief you and write reports; provider changes remain in Compound.
         </p>
       </div>
 

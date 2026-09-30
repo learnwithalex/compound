@@ -2,7 +2,7 @@ import postgres from "postgres";
 
 const sql = postgres(process.env.DATABASE_URL!);
 const EMAIL_KEY = "orz_dQ7ViIo2yjLZ9jA0fpQk5vWBF93kkkwQ";
-const BASE = "https://usecompound.xyz";
+const BASE = "https://compound.apps.orizon.ng";
 
 function fmt(cents: number) {
   const n = cents / 100;

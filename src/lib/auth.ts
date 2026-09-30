@@ -38,7 +38,13 @@ export async function userIdFromSessionOrToken(req?: Request): Promise<string | 
 
 export function appUrl() {
   const configured = process.env.APP_URL?.trim();
-  return (configured || "http://localhost:3000").replace(/\/$/, "");
+  if (!configured) return "http://localhost:3000";
+  const normalized = configured.replace(/\/$/, "");
+  // The old custom domain no longer resolves. Keep auth, billing and email links
+  // on the verified Orizon URL until the production environment is updated.
+  return normalized === "https://usecompound.xyz"
+    ? "https://compound.apps.orizon.ng"
+    : normalized;
 }
 
 export async function userIdFromSession(): Promise<string | null> {
@@ -168,7 +174,7 @@ function magicLinkEmail(url: string, email: string): string {
             If you didn't request this link, you can safely ignore this email.
           </p>
           <p style="margin:0;font-size:11px;color:#b0aba3;">
-            © ${new Date().getFullYear()} Compound · <a href="https://usecompound.xyz" style="color:#b0aba3;text-decoration:underline;">usecompound.xyz</a>
+            © ${new Date().getFullYear()} Compound · <a href="https://compound.apps.orizon.ng" style="color:#b0aba3;text-decoration:underline;">usecompound.xyz</a>
           </p>
         </td></tr>
 

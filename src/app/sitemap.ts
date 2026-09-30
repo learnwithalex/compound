@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE = "https://usecompound.xyz";
+const BASE = "https://compound.apps.orizon.ng";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

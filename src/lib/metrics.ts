@@ -53,6 +53,8 @@ export interface PortfolioMetrics {
   totalArrCents: number;
   totalActiveSubscriptions: number;
   netNewMrrCents: number;
+  /** Active subscription currencies represented in the raw-cent total. */
+  currencyCodes: string[];
   products: ProductMetrics[];
 }
 
@@ -64,9 +66,10 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
   const sinceStr = daysAgo(31);
 
   const products: ProductMetrics[] = [];
+  const currencyCodes = new Set<string>();
 
   for (const conn of connections) {
-    const [snaps, pastDueSubs] = await Promise.all([
+    const [snaps, pastDueSubs, payingSubs] = await Promise.all([
       db.query.snapshots.findMany({
         where: (s, { eq, and, gte }) => and(eq(s.connectionId, conn.id), gte(s.date, sinceStr)),
         orderBy: (s, { asc }) => [asc(s.date)],
@@ -74,9 +77,14 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
       db.query.subscriptions.findMany({
         where: (s, { eq, and }) => and(eq(s.connectionId, conn.id), eq(s.status, "past_due")),
       }),
+      db.query.subscriptions.findMany({
+        where: (s, { eq, and, inArray }) => and(eq(s.connectionId, conn.id), inArray(s.status, ["active", "past_due"])),
+        columns: { currency: true },
+      }),
     ]);
 
     const pastDueMrrCents = pastDueSubs.reduce((s, x) => s + x.mrrCents, 0);
+    for (const sub of payingSubs) currencyCodes.add(sub.currency.toUpperCase());
 
     if (snaps.length === 0) {
       products.push({
@@ -126,6 +134,7 @@ export async function portfolioMetrics(userId: string): Promise<PortfolioMetrics
     totalArrCents: totalMrrCents * 12,
     totalActiveSubscriptions: products.reduce((s, p) => s + p.activeSubscriptions, 0),
     netNewMrrCents,
+    currencyCodes: [...currencyCodes].sort(),
     products,
   };
 }

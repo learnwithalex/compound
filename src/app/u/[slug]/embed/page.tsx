@@ -33,7 +33,7 @@ export default async function EmbedPage({ params }: { params: Promise<{ slug: st
               {metrics.netNewMrrCents >= 0 ? "+" : "−"}{fmtMrr(Math.abs(metrics.netNewMrrCents))} · 30d
             </p>
           </div>
-          <a href="https://usecompound.xyz" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#c0bdb8", textDecoration: "none" }}>
+          <a href="https://compound.apps.orizon.ng" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#c0bdb8", textDecoration: "none" }}>
             compound ↗
           </a>
         </div>

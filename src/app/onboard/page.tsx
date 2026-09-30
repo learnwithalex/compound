@@ -14,84 +14,21 @@ const AGENTS = [
 
 type AgentId = (typeof AGENTS)[number]["id"];
 
-const ORIGIN = "https://usecompound.xyz";
+const ORIGIN = "https://compound.apps.orizon.ng";
 
-function buildPrompt(agentId: AgentId): string {
-  const saveInstructions: Record<AgentId, string> = {
-    claude: `Save to your memory so you always have access:
-  Compound token: {the token I gave you}
-  Revenue API: GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}`,
-    cursor: `Add to my .cursorrules file:
-  # Compound revenue API
-  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}
-  Use this when I ask about MRR, subscribers, or business metrics.`,
-    windsurf: `Add to my .windsurfrules file:
-  # Compound revenue API
-  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}
-  Use this when I ask about MRR, subscribers, or business metrics.`,
-    opencode: `Add to my AGENTS.md file:
-  # Compound revenue API
-  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}
-  Use this when I ask about MRR, subscribers, or business metrics.`,
-    chatgpt: `Remember for all future conversations:
-  Compound token: {the token I gave you}
-  Revenue API: GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}`,
-    other: `Store the token and endpoint:
-  GET ${ORIGIN}/api/portfolio — Authorization: Bearer {token}`,
-  };
+function buildPrompt(_agentId: AgentId): string {
+  return `You are my revenue analysis assistant. Compound provides a read-only portfolio API at ${ORIGIN}/api/portfolio.
 
-  return `You are onboarding me to Compound — a live revenue dashboard at ${ORIGIN}. I have already signed in and created an agent token for you. Everything below is driven by API — no UI navigation needed.
-
-STEP 1 — Get my token
-Ask me: "Please paste your Compound agent token (it starts with cpd_live_…)"
-Wait for me to paste it before continuing.
-
-STEP 2 — Collect my product details
-Ask me:
-  a) Which payment provider do I use? (Stripe, Lemon Squeezy, Polar, DodoPayments, or Paystack)
-  b) What is my product called?
-  c) What is my read-only API key for that provider?
-  d) What is my product's website URL? (optional — used for the logo)
-
-STEP 3 — Connect my product via API
-Make this request with the details I gave you:
-
-  POST ${ORIGIN}/api/connections
-  Authorization: Bearer {the token I gave you}
-  Content-Type: application/json
-  {
-    "provider": "{provider from step 2a, lowercase: stripe | lemonsqueezy | polar | dodopayments | paystack}",
-    "label": "{product name from step 2b}",
-    "apiKey": "{API key from step 2c}",
-    "websiteUrl": "{URL from step 2d, omit if not given}"
-  }
-
-If the response is 200, continue. If it errors, tell me the error message exactly.
-
-STEP 4 — Sync my data
-Trigger a sync so your portfolio reflects the connection you just made:
-
-  POST ${ORIGIN}/api/sync
-  Authorization: Bearer {the token I gave you}
-
-Wait for the response before continuing.
-
-STEP 5 — Pull my live data and brief me
-Make this request:
+If I have not already provided a Compound API token, ask me for one. Then fetch the endpoint using:
 
   GET ${ORIGIN}/api/portfolio
-  Authorization: Bearer {the token I gave you}
+  Authorization: Bearer <my Compound token>
 
-Parse the JSON response and give me a CFO-style briefing:
-  - My total MRR and ARR
-  - Active subscribers
-  - 30-day trend (growing or declining, and by how much?)
-  - The one thing I should focus on this week
+Never ask me for payment provider API keys, and do not try to connect, change, or sync accounts. I manage those inside Compound. Do not save the token in long-term memory unless I explicitly ask you to.
 
-STEP 6 — Save access for future use
-${saveInstructions[agentId]}
+Use the returned data to summarize MRR, ARR, subscribers, product breakdown, and 30-day changes. If currencyWarning is true, say clearly that currencies are not converted and avoid presenting the combined total as comparable money. Do not invent missing facts.
 
-Then tell me: "You're all set. I have live access to your revenue — ask me anything about your MRR."`;
+Give me a concise CFO-style briefing and one useful action based only on the returned data.`;
 }
 
 export default function OnboardPage() {
@@ -130,10 +67,10 @@ export default function OnboardPage() {
         <div className="mb-12 max-w-xl">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#9c9894]">Agent onboarding</p>
           <h1 className="mb-4 text-[40px] font-[700] leading-[1.1] tracking-[-0.025em] text-[#1a1a1a]">
-            Your agent does<br />the setup. Via API.
+            Your agent reads<br />your revenue.
           </h1>
           <p className="text-[16px] leading-[1.7] text-[#5c5856]">
-            You do one thing: sign in and create a token. Paste it to your agent — it connects your payment provider, pulls your data, and briefs you. All via API, no UI hand-holding.
+            Connect providers in Compound first, then create a read-only agent token. Paste the prompt below into your AI client to let it read portfolio metrics. The token cannot add connections or trigger changes.
           </p>
         </div>
 
@@ -142,7 +79,7 @@ export default function OnboardPage() {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[14px] font-bold text-white">!</div>
           <div className="flex-1">
             <p className="mb-1 text-[13px] font-semibold text-[#1a1a1a]">Do this once before copying the prompt</p>
-            <p className="mb-3 text-[12px] leading-5 text-[#9c9894]">Sign in to Compound, then go to <strong className="text-[#1a1a1a]">Settings → Agents</strong> and create a token. Copy it — you&apos;ll paste it to your agent in the prompt below.</p>
+            <p className="mb-3 text-[12px] leading-5 text-[#9c9894]">Sign in and connect a payment provider from Connect. Then go to <strong className="text-[#1a1a1a]">Settings → Agents</strong> to create a read-only token. Paste it to your AI client only when it asks for it.</p>
             <div className="flex gap-3">
               <Link
                 href="/login"
@@ -242,12 +179,10 @@ export default function OnboardPage() {
                 <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c9894]">What your agent does via API</p>
                 <div className="space-y-4">
                   {[
-                    { n: "1", label: "Asks for your token", desc: "You paste it once — that's the only manual step.", api: null },
-                    { n: "2", label: "Collects provider details", desc: "Asks for your provider, product name, and read-only API key.", api: null },
-                    { n: "3", label: "Connects your product", desc: "No form, no browser — pure API call.", api: "POST /api/connections" },
-                    { n: "4", label: "Syncs your data", desc: "Pulls fresh data from your payment provider.", api: "POST /api/sync" },
-                    { n: "5", label: "Briefs you on your revenue", desc: "Parses live portfolio data and explains what moved.", api: "GET /api/portfolio" },
-                    { n: "6", label: "Saves access for later", desc: "Stores the token so it can answer revenue questions any time.", api: null },
+                    { n: "1", label: "Connects a provider", desc: "You manage provider credentials inside Compound.", api: "Connect" },
+                    { n: "2", label: "Creates a read-only token", desc: "Generate it under Settings → Agents.", api: null },
+                    { n: "3", label: "Reads portfolio metrics", desc: "The agent fetches MRR, subscribers, and product changes.", api: "GET /api/portfolio" },
+                    { n: "4", label: "Explains what moved", desc: "It uses the returned metrics to prepare a briefing.", api: null },
                   ].map((s) => (
                     <div key={s.n} className="flex gap-3">
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1a1a2e] text-[10px] font-bold text-white">
@@ -268,9 +203,9 @@ export default function OnboardPage() {
               </div>
 
               <div className="rounded-sm border border-[#e7e3db] bg-[#fafaf8] p-4">
-                <p className="mb-1 text-[12px] font-semibold text-[#1a1a1a]">Your API key stays private</p>
+                <p className="mb-1 text-[12px] font-semibold text-[#1a1a1a]">Use a dedicated read-only key</p>
                 <p className="text-[11px] leading-5 text-[#9c9894]">
-                  Compound stores your payment provider key encrypted. Your agent only gets a read-only Compound token — never your raw API keys.
+                  Compound uses your provider key for revenue sync; it is stored without application-layer encryption. Your agent token does not expose the raw key and only reads portfolio data.
                 </p>
               </div>
 
@@ -283,6 +218,7 @@ export default function OnboardPage() {
                   <img src="/dodopayments-icon.svg" alt="DodoPayments" className="h-5 w-5 rounded bg-[#1a1a1a]" width={20} height={20} />
                   <img src="/paystack-icon.png" alt="Paystack" className="h-5 w-5 rounded" width={20} height={20} />
                 </div>
+                <p className="mt-2 text-[11px] text-[#9c9894]">Also supported: Paddle and Gumroad.</p>
               </div>
             </div>
           </div>

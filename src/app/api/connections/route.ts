@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { userIdFromSessionOrToken } from "@/lib/auth";
+import { userIdFromSession } from "@/lib/auth";
 import { track } from "@/lib/track";
 import { db } from "@/db";
 import { connections } from "@/db/schema";
@@ -15,7 +15,7 @@ export const PROVIDERS = ["stripe", "lemonsqueezy", "polar", "dodopayments", "pa
 const COLORS = ["#5e6ad2", "#26c16b", "#f2b030", "#e3493c", "#06b6d4", "#a855f7", "#f97316"];
 
 export async function GET(req: Request) {
-  const userId = await userIdFromSessionOrToken(req);
+  const userId = await userIdFromSession();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const rows = await db.query.connections.findMany({
     where: (c, { eq }) => eq(c.userId, userId),
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const userId = await userIdFromSessionOrToken(req);
+  const userId = await userIdFromSession();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { provider, label, apiKey, websiteUrl } = await req.json();
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const userId = await userIdFromSessionOrToken(req);
+  const userId = await userIdFromSession();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { id } = await req.json();
   await db.delete(connections).where(and(eq(connections.id, id), eq(connections.userId, userId)));
