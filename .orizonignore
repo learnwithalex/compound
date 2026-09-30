@@ -5,5 +5,9 @@ node_modules/
 coverage/
 *.log
 .env
-.env.*.local
+.env.*
+!.env.example
 tsconfig.tsbuildinfo
+.claude/
+scripts/check-events.ts
+scripts/link-tracking-to-sub.ts
