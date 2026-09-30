@@ -366,7 +366,7 @@ function StatsStrip() {
 
             {/* 7 providers stat */}
             <div className="flex flex-col justify-between rounded-2xl bg-white p-6">
-              <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>5</span>
+              <span className={`${lora.className} text-[40px] font-medium leading-none tracking-[-2px] text-[#222528]`}>7</span>
               <span className={`${mono.className} mt-3 text-[11px] uppercase tracking-[1.6px] text-[#5e6ad2]`}>Providers</span>
             </div>
 
@@ -758,8 +758,8 @@ function FeatureGrid() {
                 </div>
               </div>
               <div className="p-3">
-                <p className="mb-1.5 text-[11px] font-medium text-[#222528]">Your week: +$1,120 net new MRR</p>
-                <p className="text-[10px] leading-4 tracking-[-0.16px] text-[#222528]/50">Scarlet DB led growth with 44 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
+                <p className="mb-1.5 text-[11px] font-medium text-[#222528]">Your week: +$1,112 net new MRR</p>
+                <p className="text-[10px] leading-4 tracking-[-0.16px] text-[#222528]/50">Scarlet DB led growth with 14 new subs. FormKit needs attention — churn outpaced new signups for the second week running.</p>
               </div>
             </div>
           </div>
