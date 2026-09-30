@@ -1,4 +1,4 @@
-/* Compound analytics tracker — embed via <script async src="https://usecompound.xyz/t.js?k=TOKEN"></script> */
+/* Compound analytics tracker — embed via <script async src="https://compound.apps.orizon.ng/t.js?k=TOKEN"></script> */
 (function () {
   var cs = document.currentScript;
   if (!cs) return;
@@ -21,8 +21,11 @@
     try { sessionStorage.setItem('_cmpd_sid', sid); } catch (e) {}
   }
 
+  var identifiedUserId = null;
+  try { identifiedUserId = sessionStorage.getItem('_cmpd_uid') || null; } catch (e) {}
+
   function ship(payload) {
-    var body = JSON.stringify(Object.assign({ token: token, sid: sid, url: location.href }, payload));
+    var body = JSON.stringify(Object.assign({ token: token, sid: sid, url: location.href, userId: identifiedUserId }, payload));
     try {
       if (navigator.sendBeacon) {
         navigator.sendBeacon(endpoint, new Blob([body], { type: 'text/plain' }));
@@ -34,7 +37,12 @@
 
   var api = {
     identify: function (uid, traits) {
-      ship({ type: 'identify', userId: String(uid || ''), props: traits || {} });
+      identifiedUserId = String(uid || '').trim() || null;
+      try {
+        if (identifiedUserId) sessionStorage.setItem('_cmpd_uid', identifiedUserId);
+        else sessionStorage.removeItem('_cmpd_uid');
+      } catch (e) {}
+      ship({ type: 'identify', userId: identifiedUserId || '', props: traits || {} });
     },
     track: function (name, props) {
       ship({ type: 'track', name: name || '', props: props || {} });
