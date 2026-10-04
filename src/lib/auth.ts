@@ -39,12 +39,7 @@ export async function userIdFromSessionOrToken(req?: Request): Promise<string | 
 export function appUrl() {
   const configured = process.env.APP_URL?.trim();
   if (!configured) return "http://localhost:3000";
-  const normalized = configured.replace(/\/$/, "");
-  // The old custom domain no longer resolves. Keep auth, billing and email links
-  // on the verified Orizon URL until the production environment is updated.
-  return normalized === "https://usecompound.xyz"
-    ? "https://compound.apps.orizon.ng"
-    : normalized;
+  return configured.replace(/\/$/, "");
 }
 
 export async function userIdFromSession(): Promise<string | null> {
